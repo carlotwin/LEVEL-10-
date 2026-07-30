@@ -123,6 +123,71 @@ export class ReiBlackBookAdapter extends Adapter {
     }
   }
 
+  /**
+   * Return the page-or-frame where `selector` is visible, else null.
+   *
+   * REI is a single-page app: a control can be seconds late, and parts of it
+   * render inside an iframe, where a page-level selector never matches no matter
+   * how long it waits. Checking the main page AND every frame is what makes the
+   * difference between "not found" and found.
+   */
+  async _frameFor(selector, timeout = this.timeout) {
+    const deadline = Date.now() + timeout;
+    // Main document first — the common case, and cheapest.
+    if (await this._present(selector, Math.min(timeout, 3000))) return this.page;
+    while (Date.now() < deadline) {
+      for (const frame of this.page.frames()) {
+        if (frame === this.page.mainFrame()) continue;
+        try {
+          await frame.waitForSelector(selector, { timeout: 500, state: 'visible' });
+          logger.info('selector_found_in_frame', { selector: selector.slice(0, 40), url: frame.url().slice(0, 80) });
+          return frame;
+        } catch {
+          /* try the next frame */
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Describe every text input on screen (main document + frames) as
+   * `placeholder|name|aria-label`. Used only when a selector could not be found,
+   * so the correct one can be written from the failure report itself.
+   */
+  async _describeInputs() {
+    const out = [];
+    for (const frame of this.page.frames()) {
+      try {
+        const found = await frame.$$eval(
+          "input:not([type='hidden']):not([type='password']), textarea",
+          (els) =>
+            els
+              .map((e) =>
+                [e.getAttribute('placeholder'), e.getAttribute('name'), e.getAttribute('aria-label'), e.getAttribute('type')]
+                  .filter(Boolean)
+                  .join('|')
+              )
+              .filter(Boolean)
+        );
+        out.push(...found);
+      } catch {
+        /* frame detached or cross-origin */
+      }
+    }
+    return [...new Set(out)].slice(0, 12);
+  }
+
+  /** Open Contacts and wait for its search box, wherever it lives. */
+  async _openContactsSearch() {
+    const { contacts } = this.sel;
+    // Clicking the nav is best-effort: "text=Contacts" can resolve to several
+    // elements, and we may already be on the page.
+    await this.page.click(contacts.navContacts).catch(() => {});
+    await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+    return this._frameFor(contacts.searchInput, this.timeout);
+  }
+
   async _text(selector) {
     try {
       const el = await this.page.$(selector);
@@ -235,26 +300,33 @@ export class ReiBlackBookAdapter extends Adapter {
     let resultsSeen = false;
 
     for (const term of this._searchTerms(query)) {
-      await this.page.click(contacts.navContacts).catch(() => {});
-      if (!(await this._present(contacts.searchInput, 4000))) continue;
+      // Full ACTION_TIMEOUT_MS, not 4s: the contact list is rendered by an SPA
+      // and was timing out while still loading, which skipped every search term
+      // and produced a bare "not found" with nothing tried.
+      const frame = await this._openContactsSearch();
+      if (!frame) continue;
       searchBoxSeen = true;
 
-      await this.page.fill(contacts.searchInput, '');
-      await this.page.fill(contacts.searchInput, term.value);
-      await this.page.keyboard.press('Enter').catch(() => {});
-      await this.page.waitForTimeout(1200);
+      await frame.fill(contacts.searchInput, '').catch(() => {});
+      await frame.fill(contacts.searchInput, term.value);
+      await frame.press(contacts.searchInput, 'Enter').catch(() => {});
+      await this.page.waitForTimeout(1500);
       searched.push(`${term.label}:"${term.value}"`);
 
       // Open the first result. Prefer a row whose text contains the term, but
       // don't require it — REI's list columns may not show what we searched on.
       const byText = contacts.resultRowByText.replace('%QUERY%', term.value);
       let opened = false;
-      if (await this._present(byText, 2500)) {
-        await this.page.click(byText).catch(() => {});
+      const textFrame = await this._frameFor(byText, 3000);
+      if (textFrame) {
+        await textFrame.click(byText).catch(() => {});
         opened = true;
-      } else if (await this._present(contacts.openContact, 2500)) {
-        await this.page.click(contacts.openContact).catch(() => {});
-        opened = true;
+      } else {
+        const linkFrame = await this._frameFor(contacts.openContact, 3000);
+        if (linkFrame) {
+          await linkFrame.click(contacts.openContact).catch(() => {});
+          opened = true;
+        }
       }
       if (!opened) continue;
       resultsSeen = true;
@@ -282,7 +354,14 @@ export class ReiBlackBookAdapter extends Adapter {
     // Say WHICH step failed — that is the difference between a selector to fix
     // and a contact REI genuinely does not have.
     let stage = 'no result matched';
-    if (!searchBoxSeen) stage = "could not find REI's Contacts search box (selectors.contacts.searchInput)";
+    if (!searchBoxSeen) {
+      // List the text inputs that DO exist (every frame) so the right selector
+      // can be written from the report alone.
+      const inputs = await this._describeInputs();
+      stage =
+        "could not find REI's Contacts search box (selectors.contacts.searchInput). " +
+        `Text inputs on screen: ${inputs.length ? inputs.join(' | ') : 'none'}`;
+    }
     else if (!resultsSeen) stage = 'the search box worked but no result row could be opened (selectors.contacts.openContact)';
     const shot = await this._diagnosticShot(`notfound-${normalizePhone(query.phone) || query.name || 'lead'}`);
     logger.warn('contact_not_found', { stage, searched, screenshot: shot });

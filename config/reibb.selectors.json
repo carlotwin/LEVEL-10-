@@ -14,7 +14,7 @@
     "tagSearchInput": "input[placeholder='Search...']",
     "tagFilterOption": "text=%TAG%",
     "tagApply": "button:has-text('Apply')",
-    "searchInput": "input[placeholder*='Search' i], input[type='search'], input[aria-label*='search' i], input[name*='search' i], .search input",
+    "searchInput": "input[placeholder*='Search By Name' i], input[placeholder*='Search by name' i], input[placeholder*='Name, Phone' i], input[placeholder*='Search' i], input[type='search'], input[aria-label*='search' i], input[name*='search' i], .search input",
     "resultRow": "table tbody tr, .list-row, [role='row']",
     "resultRowByText": "text=%QUERY%",
     "openContact": "table tbody tr td a, .list-row a, [role='row'] a"
