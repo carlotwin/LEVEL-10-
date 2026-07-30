@@ -206,44 +206,61 @@ export class ReiBlackBookAdapter extends Adapter {
   }
 
   async getSmsStatus() {
-    const enabled = await this._present(this.sel.sms.smsEnabledMarker, 2000);
+    const marker = this.sel.sms.optInSuccessMarker;
+    const enabled = marker ? await this._present(marker, 1500) : false;
     return { smsEnabled: enabled, optedIn: enabled };
+  }
+
+  // Open the contact's Chat tab (this app texts from the contact record -> Chat).
+  async openChatTab() {
+    const { chat } = this.sel;
+    if (chat.chatTab && (await this._present(chat.chatTab, 4000))) {
+      await this.page.click(chat.chatTab);
+      await this.page.waitForTimeout(600);
+      return true;
+    }
+    return false;
   }
 
   // ---------------------------------------------------------------------------
   // Interface: actions
   // ---------------------------------------------------------------------------
   async optInPhone() {
+    // Only used when REQUIRE_OPTIN=true. This account's app has no native opt-in
+    // step, so selectors are blank until captured — fail closed if so.
     const { sms } = this.sel;
-    if (await this._present(sms.smsEnabledMarker, 1500)) {
+    if (!sms.optInButton) {
+      return { status: 'failed', smsEnabled: false, reason: 'No Opt-In control configured (capture via codegen or set REQUIRE_OPTIN=false)' };
+    }
+    if (sms.optInSuccessMarker && (await this._present(sms.optInSuccessMarker, 1500))) {
       return { status: 'opted_in', smsEnabled: true };
     }
     if (!(await this._present(sms.optInButton, 3000))) {
-      return { status: 'failed', smsEnabled: false, reason: 'Opt-In control not found' };
+      return { status: 'failed', smsEnabled: false, reason: 'Opt-In control not found on screen' };
     }
     await this.page.click(sms.optInButton);
-    if (await this._present(sms.optInConfirm, 2000)) await this.page.click(sms.optInConfirm);
-    const ok = await this._present(sms.optInSuccessMarker, this.timeout);
+    if (sms.optInConfirm && (await this._present(sms.optInConfirm, 2000))) await this.page.click(sms.optInConfirm);
+    const ok = sms.optInSuccessMarker ? await this._present(sms.optInSuccessMarker, this.timeout) : true;
     return ok
       ? { status: 'opted_in', smsEnabled: true }
       : { status: 'failed', smsEnabled: false, reason: 'SMS did not become enabled after opt-in' };
   }
 
   async getProfitDialNumbers() {
+    // Only used when REQUIRE_PROFITDIAL=true. Blank until captured via codegen.
     const { chat } = this.sel;
-    if (await this._present(chat.openChat, 3000)) await this.page.click(chat.openChat);
-    if (!(await this._present(chat.profitDialSelect, 3000))) return [];
+    await this.openChatTab();
+    if (!chat.profitDialSelect || !(await this._present(chat.profitDialSelect, 3000))) return [];
     await this.page.click(chat.profitDialSelect);
     const nums = await this._allText(chat.profitDialOptions);
-    // Close the dropdown without choosing.
     await this.page.keyboard.press('Escape').catch(() => {});
     return nums;
   }
 
   async selectProfitDial(contactId, number) {
     const { chat } = this.sel;
-    if (!(await this._present(chat.profitDialSelect, 3000))) {
-      return { selected: false, readback: '', reason: 'ProfitDial selector not found' };
+    if (!chat.profitDialSelect || !(await this._present(chat.profitDialSelect, 3000))) {
+      return { selected: false, readback: '', reason: 'No ProfitDial from-number selector configured' };
     }
     await this.page.click(chat.profitDialSelect);
     const optSel = `${chat.profitDialOptions}:has-text(${JSON.stringify(number)})`;
@@ -252,40 +269,59 @@ export class ReiBlackBookAdapter extends Adapter {
       return { selected: false, readback: '', reason: 'Requested ProfitDial number not in selector' };
     }
     await this.page.click(optSel);
-    // Read back the value actually shown as selected (digit-for-digit check in sop).
-    const readback = await this._text(chat.profitDialSelectedValue);
+    const readback = chat.profitDialSelectedValue ? await this._text(chat.profitDialSelectedValue) : '';
     return { selected: true, readback };
   }
 
   async enterMessage(contactId, text) {
     const { chat } = this.sel;
-    if (!(await this._present(chat.messageInput, 3000))) return { entered: false };
-    await this.page.fill(chat.messageInput, text);
-    return { entered: true };
+    await this.openChatTab();
+    // The reply box is TinyMCE, usually inside an iframe. Type real keystrokes
+    // (pressSequentially) or the Send button won't enable.
+    if (chat.editorFrame) {
+      for (const fsel of chat.editorFrame.split(',').map((s) => s.trim()).filter(Boolean)) {
+        if (await this._present(fsel, 1500)) {
+          const body = this.page.frameLocator(fsel).locator('body');
+          await body.click();
+          await body.pressSequentially(text, { delay: 15 });
+          return { entered: true };
+        }
+      }
+    }
+    // Fallback: contenteditable / textarea directly on the page.
+    if (await this._present(chat.messageInput, 3000)) {
+      const el = this.page.locator(chat.messageInput).first();
+      await el.click();
+      await el.pressSequentially(text, { delay: 15 });
+      return { entered: true };
+    }
+    return { entered: false };
   }
 
   async sendMessage() {
-    // Reaching here means env.liveSendGate already allowed it (ALLOW_LIVE_SEND=true).
+    // Reaching here means env.liveSendGate already allowed it.
     const { chat } = this.sel;
     if (!(await this._present(chat.sendButton, 3000))) return { sent: false, reason: 'Send button not found' };
     await this.page.click(chat.sendButton);
-    await this.page.waitForTimeout(800);
+    await this.page.waitForTimeout(1000);
     return { sent: true };
   }
 
   async verifyMessageSent(contactId, text) {
+    // This app confirms by re-reading the thread for the exact text just sent.
     const { chat } = this.sel;
-    const last = await this._text(chat.lastOutboundMessage);
-    if (!last) return { verified: false, reason: 'No outbound message found in thread' };
-    // Compare on a normalized, trimmed basis.
-    const norm = (s) => s.replace(/\s+/g, ' ').trim();
-    if (text && norm(last) !== norm(text)) {
-      return { verified: false, reason: 'Last outbound message does not match the sent text' };
+    const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+    const hay = norm((await this._allText(chat.threadArea)).join(' '));
+    if (!hay) return { verified: false, reason: 'Could not read the conversation thread' };
+    if (text && !hay.includes(norm(text))) {
+      return { verified: false, reason: 'Sent text not found in the thread after sending' };
     }
     return { verified: true };
   }
 
   async readDeliveryStatus() {
+    // This app does not expose a delivery-status element; report pending.
+    if (!this.sel.chat.deliveryStatus) return { delivery: 'pending' };
     const status = (await this._text(this.sel.chat.deliveryStatus)).toLowerCase();
     if (status.includes('deliver')) return { delivery: 'delivered' };
     if (status.includes('fail') || status.includes('undeliver')) return { delivery: 'failed' };

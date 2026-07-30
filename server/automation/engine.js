@@ -46,6 +46,8 @@ export class Engine extends EventEmitter {
       textStates: env.TEXT_STATES,
       campaignBatch: env.CAMPAIGN_BATCH,
       maxSends: env.MAX_SENDS_PER_RUN,
+      requireOptIn: env.REQUIRE_OPTIN,
+      requireProfitDial: env.REQUIRE_PROFITDIAL,
     };
   }
 
@@ -226,23 +228,34 @@ export class Engine extends EventEmitter {
           `Watch-only check: assigned ProfitDial ${wMatch.profitDial || '—'} (${availTxt}). No changes made, nothing sent.`, contact);
       }
 
-      // STEP 4 — Opt in the phone.
-      const optIn = await this.adapter.optInPhone(facts.contactId);
-      base.L10_OptInStatus = optIn.status;
-      const optCheck = sop.checkOptIn(optIn);
-      if (!optCheck.ok) return this._finish(base, optCheck.disposition, optCheck.reason, contact);
+      // STEP 4 — Opt in the phone (SOP). Can be turned off (REQUIRE_OPTIN=false)
+      // to match apps/accounts where numbers are already opt-in / auto-handled.
+      if (this.config.requireOptIn) {
+        const optIn = await this.adapter.optInPhone(facts.contactId);
+        base.L10_OptInStatus = optIn.status;
+        const optCheck = sop.checkOptIn(optIn);
+        if (!optCheck.ok) return this._finish(base, optCheck.disposition, optCheck.reason, contact);
+      } else {
+        base.L10_OptInStatus = 'skipped';
+      }
 
       // STEP 5/6 — ProfitDial: match source-of-truth, verify availability + readback.
-      const match = matchProfitDial({ contactId: facts.contactId, address: facts.address, phone }, this.pdIndex);
-      const availableNumbers = await this.adapter.getProfitDialNumbers(facts.contactId);
-      let selectedReadback = '';
-      if (match.status === 'ok') {
-        const sel = await this.adapter.selectProfitDial(facts.contactId, match.profitDial);
-        selectedReadback = sel.readback || '';
-        base.L10_ProfitDial = match.profitDial;
+      // Can be turned off (REQUIRE_PROFITDIAL=false) when REI sends from a fixed
+      // number and no from-number pick exists. Default ON per SOP requirement #5.
+      if (this.config.requireProfitDial) {
+        const match = matchProfitDial({ contactId: facts.contactId, address: facts.address, phone }, this.pdIndex);
+        const availableNumbers = await this.adapter.getProfitDialNumbers(facts.contactId);
+        let selectedReadback = '';
+        if (match.status === 'ok') {
+          const sel = await this.adapter.selectProfitDial(facts.contactId, match.profitDial);
+          selectedReadback = sel.readback || '';
+          base.L10_ProfitDial = match.profitDial;
+        }
+        const pdCheck = sop.checkProfitDial({ match, availableNumbers, selectedReadback });
+        if (!pdCheck.ok) return this._finish(base, pdCheck.disposition, pdCheck.reason, contact);
+      } else {
+        base.L10_ProfitDial = '(REI default number)';
       }
-      const pdCheck = sop.checkProfitDial({ match, availableNumbers, selectedReadback });
-      if (!pdCheck.ok) return this._finish(base, pdCheck.disposition, pdCheck.reason, contact);
 
       // STEP 7 — Select the approved template (controlled balanced allocation).
       const usage = this.ledger.templateUsage(this.config.campaignBatch);

@@ -1,11 +1,11 @@
 {
-  "_README": "REI BlackBook selectors. The 'contacts' section is mapped from real screenshots of the account (Contacts list + Tags filter + search). The 'sms'/'chat' sections are still BEST-GUESS placeholders — they need a screenshot of the open SMS conversation (click the chat bubble on a row) showing the Opt-In control, the ProfitDial 'from number' selector, the message box, and Send. The live adapter fails closed if any required element is not found, so wrong selectors never cause a mis-send. Verify with HEADLESS=false + SLOWMO_MS before any live use.",
+  "_README": "REI BlackBook selectors. Most are CONFIRMED/VERIFY from the account's own automation (build 58f8bd4). This app's native send flow = open contact -> Chat tab -> type (TinyMCE iframe) -> Send Text; it does NOT natively do a separate Opt-In or ProfitDial from-number pick, so those keys are blank until captured via `npx playwright codegen`. The engine fails closed: if REQUIRE_OPTIN / REQUIRE_PROFITDIAL are on and their selectors are missing, the contact goes to Needs Review (never sent without them).",
 
   "login": {
-    "emailInput": "input[type=email], input[name=email]",
-    "passwordInput": "input[type=password], input[name=password]",
-    "submitButton": "button[type=submit], button:has-text('Sign In'), button:has-text('Log In')",
-    "loggedInMarker": "text=Property Address"
+    "emailInput": "input[type='email'], input[name='email'], input[name='username'], input[type='text']",
+    "passwordInput": "input[type='password'], input[name='password']",
+    "submitButton": "button[type='submit'], button:has-text('Log In'), button:has-text('Login'), button:has-text('Sign In'), input[type='submit']",
+    "loggedInMarker": "text=Contacts"
   },
 
   "contacts": {
@@ -14,39 +14,38 @@
     "tagSearchInput": "input[placeholder='Search...']",
     "tagFilterOption": "text=%TAG%",
     "tagApply": "button:has-text('Apply')",
-    "searchInput": "input[placeholder*='Search By Name' i], input[placeholder*='Search' i]",
-    "resultRow": "tr, [role=row]",
+    "searchInput": "input[placeholder*='Search' i], input[type='search'], input[aria-label*='search' i], input[name*='search' i], .search input",
+    "resultRow": "table tbody tr, .list-row, [role='row']",
     "resultRowByText": "text=%QUERY%",
-    "rowChatIcon": "[aria-label*='SMS' i], [aria-label*='message' i], [title*='SMS' i], [title*='text' i]",
-    "openContact": "text=%QUERY%"
+    "openContact": "table tbody tr td a, .list-row a, [role='row'] a"
   },
 
   "contact": {
-    "nameField": "h1, h2, [data-testid=contact-name]",
-    "addressField": "text=/Property Address/",
-    "stateField": "[data-testid=contact-state]",
-    "phoneRows": "[data-testid=contact-phone]",
-    "tagChips": "text=Level 10 Properties",
-    "notesField": "[data-testid=contact-notes]",
-    "chatMessages": "[data-testid=chat-message]"
+    "nameField": "h1, h2",
+    "addressField": "",
+    "stateField": "",
+    "phoneRows": "a[href^='tel:']",
+    "tagChips": ".tag-item, .tag, [class*='tag-'], [class*='Tag'] .badge, .badge, .chip, .label, .pill, [class*='chip'], [class*='pill'], [class*='badge']",
+    "notesField": "",
+    "chatMessages": ".activity-item, [class*='activity']"
   },
 
   "sms": {
-    "smsEnabledMarker": "text=/Opted[\\s-]?In/i, [data-testid=sms-enabled]",
-    "optInButton": "button:has-text('Opt In'), text=Opt In",
-    "optInConfirm": "button:has-text('Confirm'), button:has-text('Yes')",
-    "optInSuccessMarker": "text=/Opted[\\s-]?In/i"
+    "optInButton": "",
+    "optInConfirm": "",
+    "optInSuccessMarker": ""
   },
 
   "chat": {
-    "openChat": "[aria-label*='SMS' i], [title*='SMS' i]",
-    "profitDialSelect": "[data-testid=profitdial-select], select[name*='from' i]",
-    "profitDialOptions": "[data-testid=profitdial-option], option",
-    "profitDialSelectedValue": "[data-testid=profitdial-selected]",
-    "messageInput": "textarea, [contenteditable=true], [data-testid=message-input]",
-    "sendButton": "button:has-text('Send')",
-    "lastOutboundMessage": "[data-testid=message-outbound]:last-of-type",
-    "deliveryStatus": "[data-testid=delivery-status]:last-of-type",
-    "lastInboundMessage": "[data-testid=message-inbound]:last-of-type"
+    "chatTab": "[role='tab']:has-text('Chat'), text=Chat",
+    "editorFrame": "iframe.tox-edit-area__iframe, iframe[id*='tiny' i], iframe[title*='Rich Text' i]",
+    "profitDialSelect": "",
+    "profitDialOptions": "",
+    "profitDialSelectedValue": "",
+    "messageInput": "body#tinymce[contenteditable='true'], .mce-content-body[contenteditable='true'], [data-mce-placeholder*='Write Your Reply' i], [aria-placeholder*='Write Your Reply' i], textarea[placeholder*='Write Your Reply' i], [contenteditable='true'], div[role='textbox']",
+    "sendButton": "[aria-label='Send Text' i], [title='Send Text' i], button:has-text('Send Text'), [data-testid*='send' i], [aria-label*='send' i], button[title*='send' i], button:has(svg[class*='send' i]), button:has(svg[class*='paper' i])",
+    "threadArea": ".timeline, .activity-feed, .activity-history, .chat-thread, [class*='conversation'], [class*='activity']",
+    "deliveryStatus": "",
+    "lastInboundMessage": ".activity-item:first-child, [class*='activity']:first-child, .chat-message:last-child"
   }
 }

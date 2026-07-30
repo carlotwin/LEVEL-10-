@@ -31,6 +31,8 @@ export const env = Object.freeze({
   SANDBOX: readBool('SANDBOX', true), // defaults to sandbox
   ALLOW_LIVE_SEND: readBool('ALLOW_LIVE_SEND', false), // defaults off
   WATCH_ONLY: readBool('WATCH_ONLY', false), // navigate + read + match, never send
+  REQUIRE_OPTIN: readBool('REQUIRE_OPTIN', true), // SOP Step 4; off = REI app skips it
+  REQUIRE_PROFITDIAL: readBool('REQUIRE_PROFITDIAL', true), // SOP Step 5/6; off = REI sends from default number
   HEADLESS: readBool('HEADLESS', false),
   MAX_SENDS_PER_RUN: readInt('MAX_SENDS_PER_RUN', 10),
   PORT: readInt('PORT', 3000),
