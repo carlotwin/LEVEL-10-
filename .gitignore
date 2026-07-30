@@ -3,8 +3,10 @@ node_modules/
 
 # Runtime data — NEVER commit. Holds uploaded PII (real homeowner
 # names/phones/addresses), job state, ledger, logs.
-data/
-uploads/
+# NOTE: anchored with a leading slash so ONLY the root runtime dir is ignored,
+# not the source folder server/data/.
+/data/
+/uploads/
 *.log
 
 # Real source-of-truth spreadsheets (PII). Sandbox seed uses synthetic data.
