@@ -188,11 +188,11 @@ export class Engine extends EventEmitter {
       // Integrity re-check before doing anything irreversible.
       assertMessageIntegrity();
 
-      // STEP 3 — Locate contact.
+      // STEP 3 — Open one contact (locate it in the filtered Level 10 list).
       const found = await this.adapter.findContact({ contactId: contact.contactId, phone: (contact.phones || [])[0] });
       if (!found.found) return this._finish(base, DISPOSITION.LEAD_NOT_FOUND, 'Contact not found in REI BlackBook', contact);
 
-      // STEP 4 — Gather facts.
+      // Gather facts from the opened contact (tags, phones, notes, chat history).
       const facts = await this.adapter.readContactFacts(found.contactId);
 
       // GATE 1 — Eligibility (tag, state, suppression, phone).
@@ -205,7 +205,7 @@ export class Engine extends EventEmitter {
       const dup = sop.checkAlreadyProcessed(ledgerHit);
       if (!dup.ok) return this._finish(base, dup.disposition, dup.reason, contact);
 
-      // STEP 4/7 — Opt in the phone.
+      // STEP 4 — Opt in the phone.
       const optIn = await this.adapter.optInPhone(facts.contactId);
       base.L10_OptInStatus = optIn.status;
       const optCheck = sop.checkOptIn(optIn);
@@ -223,7 +223,7 @@ export class Engine extends EventEmitter {
       const pdCheck = sop.checkProfitDial({ match, availableNumbers, selectedReadback });
       if (!pdCheck.ok) return this._finish(base, pdCheck.disposition, pdCheck.reason, contact);
 
-      // STEP 12 — Controlled balanced template allocation.
+      // STEP 7 — Select the approved template (controlled balanced allocation).
       const usage = this.ledger.templateUsage(this.config.campaignBatch);
       const lastId = this.ledger.lastTemplateId(this.config.campaignBatch);
       const { template } = allocateTemplate({

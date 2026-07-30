@@ -99,7 +99,7 @@ export function checkAlreadyProcessed(ledgerHit) {
 }
 
 // -----------------------------------------------------------------------------
-// GATE 3 — Opt-in result (SOP Step 4 / Step 7).
+// GATE 3 — Opt-in result (SOP Step 4 — Opt In the Phone Number).
 // -----------------------------------------------------------------------------
 export function checkOptIn(optInResult) {
   if (!optInResult) return block(DISPOSITION.OPT_IN_FAILED, 'No opt-in result returned');
