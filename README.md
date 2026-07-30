@@ -48,9 +48,11 @@ never turn it on:
 
 1. `SANDBOX=false` **and** a working live adapter (the skeleton refuses to run).
 2. `ALLOW_LIVE_SEND=true` (checked at the moment of send).
-3. **No placeholder template enabled** — placeholders are sandbox-only and block
-   live sending until Cherry's approved copy is installed.
+3. **No placeholder template enabled** — placeholders are sandbox-only. ✅ Now
+   satisfied: the six approved templates (`L10-1` … `L10-6`) are installed.
 4. **Message integrity checksum** validated at startup and before every send.
+   Pinned to the approved copy — edit any wording without re-running
+   `node scripts/regen-checksum.js` and the app refuses to start or send.
 
 Plus per-contact fail-closed gates: Level 10 tag, allowed state, suppression
 scan (STOP / opt-out / do-not-contact / not-interested), single valid phone,
@@ -91,13 +93,26 @@ The live adapter and ingestion are **already built**. To actually text, all of
 the following are required, and each defaults to off:
 
 1. Verify `config/reibb.selectors.json` against your REI BlackBook account with
-   `HEADLESS=false` and `SLOWMO_MS` set (the placeholders WILL be wrong).
+   `HEADLESS=false` and `SLOWMO_MS` set. Login / contacts / Chat tab / TinyMCE
+   reply box / Send Text / tag chips are confirmed from the account; **opt-in and
+   ProfitDial from-number selectors do not exist in this app** — capture them
+   with `npx playwright codegen`, or set `REQUIRE_OPTIN=false` /
+   `REQUIRE_PROFITDIAL=false` if REI handles those itself.
 2. Set `REIBB_LOGIN_URL`, `REIBB_EMAIL`, `REIBB_PASSWORD` in `.env`.
-3. Install Cherry's 5–10 approved templates in `server/automation/message.js`
-   (`placeholder: false`), run `node scripts/regen-checksum.js`, and pin the new
-   `EXPECTED_CHECKSUM`.
+3. ✅ Done — the six approved templates are installed (`placeholder: false`) and
+   `EXPECTED_CHECKSUM` is pinned to them.
 4. Set `SANDBOX=false` and `ALLOW_LIVE_SEND=true`. Start with a small
    `MAX_SENDS_PER_RUN`.
+
+### Approved templates
+
+`L10-1` … `L10-6`, all six enabled, rotated by controlled balanced allocation
+(least-used first, no immediate repeats, deterministic per contact for audits).
+Merge fields: `{{first_name}}` and `{{property_address}}`. The address comes from
+the sheet's **Full Address** column (source of truth); the REI screen value is
+only a fallback. A blank on either field is an `Invalid Merge Field` block — a
+text is never sent with a hole in it. Every template ends with
+"Reply STOP to opt out." (enforced by a test).
 
 Miss any one and the app runs read-only/sandboxed or refuses — it never texts by
 accident.

@@ -98,5 +98,6 @@ export const EXPORT_COLUMNS = Object.freeze([
   'L10_ProcessedAt',
 ]);
 
-// Merge fields the templates are allowed to reference.
-export const ALLOWED_MERGE_FIELDS = Object.freeze(['first_name']);
+// Merge fields the templates are allowed to reference. Anything else in a
+// template body is an INVALID_MERGE_FIELD block (fail closed — never sent).
+export const ALLOWED_MERGE_FIELDS = Object.freeze(['first_name', 'property_address']);

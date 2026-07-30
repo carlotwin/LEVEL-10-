@@ -270,9 +270,20 @@ export class Engine extends EventEmitter {
 
       // Requirement #3 — placeholder can never be used in live mode. In sandbox
       // it is allowed but flagged. The final send gate enforces the live block.
+      // Merge values: the SHEET is the source of truth for the property address
+      // ("Full Address"), because this account's REI contact screen has no
+      // mapped address field. The scraped value is only a fallback. Same for the
+      // first name. A blank on either side fails closed below — we never send a
+      // text with an empty merge field.
+      const mergeFacts = {
+        ...facts,
+        firstName: facts.firstName || contact.firstName || '',
+        propertyAddress: contact.address || facts.address || '',
+      };
+
       let rendered;
       try {
-        rendered = renderTemplate(template, facts);
+        rendered = renderTemplate(template, mergeFacts);
       } catch (e) {
         if (e.code === 'INVALID_MERGE_FIELD') return this._finish(base, DISPOSITION.INVALID_MERGE_FIELD, e.message, contact);
         throw e;
