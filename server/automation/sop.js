@@ -34,6 +34,21 @@ export function digitsOnly(raw) {
   return String(raw ?? '').replace(/\D/g, '');
 }
 
+// Our own approved templates end with "Reply STOP to opt out." The REI chat
+// thread the adapter reads back contains BOTH directions, so on a later campaign
+// batch that instruction line would trip the opt-out scan and mark every contact
+// we already texted as Opted Out — a silent, campaign-wide false positive.
+//
+// Only this outbound INSTRUCTION wording is removed before the scan. It is
+// boilerplate we wrote, never something a homeowner types. A real reply ("STOP",
+// "stop texting me", "unsubscribe") is untouched and still blocks, including
+// when it appears in the same message as the instruction.
+const OWN_OPT_OUT_INSTRUCTION = /\breply\s+stop\s+to\s+opt\s?-?\s?out\b\.?/gi;
+
+export function stripOwnOptOutInstruction(text) {
+  return String(text ?? '').replace(OWN_OPT_OUT_INSTRUCTION, ' ');
+}
+
 // -----------------------------------------------------------------------------
 // GATE 1 — Located + tagged + in-state + contactable (no side effects needed).
 // Runs before ANY action (we never opt-in a do-not-contact lead).
@@ -56,13 +71,9 @@ export function checkEligibility(facts, config) {
   }
 
   // 3d. Suppression scan over tags + notes + chat history (fail-closed).
-  const haystack = [
-    ...(facts.tags || []),
-    facts.notes || '',
-    ...(facts.chatHistory || []),
-  ]
-    .join(' \n ')
-    .toLowerCase();
+  const haystack = stripOwnOptOutInstruction(
+    [...(facts.tags || []), facts.notes || '', ...(facts.chatHistory || [])].join(' \n ').toLowerCase()
+  );
 
   if (facts.optOut || OPT_OUT_REGEX.test(haystack)) {
     return block(DISPOSITION.OPTED_OUT, 'Contact previously opted out / STOP found in history');

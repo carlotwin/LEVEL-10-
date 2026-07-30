@@ -116,3 +116,45 @@ test('reply classification', () => {
   assert.equal(sop.classifyReply('STOP'), REPLY_CLASS.OPT_OUT);
   assert.equal(sop.classifyReply(''), REPLY_CLASS.NONE);
 });
+
+// --- outbound opt-out instruction must not suppress the contact ------------
+test('our own "Reply STOP to opt out." in the thread does not mark the contact opted out', () => {
+  const facts = {
+    found: true,
+    tags: ['Level 10 Properties'],
+    state: 'CA',
+    notes: '',
+    chatHistory: [
+      "Hi Maria, it's Juan with Twin Home Buyer. We sent a few postcards about 100 Alpha St, Oakland, CA 94601 but never connected. Should I keep following up, or have your plans changed? Reply STOP to opt out.",
+    ],
+    phones: ['510-555-0100'],
+  };
+  const r = sop.checkEligibility(facts, { level10Tag: 'Level 10 Properties', textStates: ['CA'] });
+  assert.equal(r.ok, true, r.reason);
+});
+
+test('a real STOP reply still blocks, even alongside our instruction line', () => {
+  const base = {
+    found: true,
+    tags: ['Level 10 Properties'],
+    state: 'CA',
+    notes: '',
+    phones: ['510-555-0100'],
+  };
+  const cfg = { level10Tag: 'Level 10 Properties', textStates: ['CA'] };
+
+  const bare = sop.checkEligibility({ ...base, chatHistory: ['STOP'] }, cfg);
+  assert.equal(bare.ok, false);
+  assert.equal(bare.disposition, DISPOSITION.OPTED_OUT);
+
+  const both = sop.checkEligibility(
+    { ...base, chatHistory: ['... Reply STOP to opt out.', 'stop texting me'] },
+    cfg
+  );
+  assert.equal(both.ok, false);
+  assert.equal(both.disposition, DISPOSITION.OPTED_OUT);
+
+  const unsub = sop.checkEligibility({ ...base, chatHistory: ['Reply STOP to opt out.', 'unsubscribe'] }, cfg);
+  assert.equal(unsub.ok, false);
+  assert.equal(unsub.disposition, DISPOSITION.OPTED_OUT);
+});
