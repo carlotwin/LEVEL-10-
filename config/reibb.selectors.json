@@ -1,47 +1,50 @@
 {
-  "_README": "Externalized REI BlackBook selectors. THESE ARE PLACEHOLDERS and MUST be verified against your live account with HEADLESS=false + SLOWMO before any live use. Each key maps a SOP action to an on-screen element. Prefer stable text/role selectors over brittle CSS. The live adapter fails closed (routes to Needs Review) whenever a required element is not found, so wrong selectors never cause a mis-send.",
+  "_README": "REI BlackBook selectors. The 'contacts' section is mapped from real screenshots of the account (Contacts list + Tags filter + search). The 'sms'/'chat' sections are still BEST-GUESS placeholders — they need a screenshot of the open SMS conversation (click the chat bubble on a row) showing the Opt-In control, the ProfitDial 'from number' selector, the message box, and Send. The live adapter fails closed if any required element is not found, so wrong selectors never cause a mis-send. Verify with HEADLESS=false + SLOWMO_MS before any live use.",
 
   "login": {
     "emailInput": "input[type=email], input[name=email]",
     "passwordInput": "input[type=password], input[name=password]",
-    "submitButton": "button[type=submit]",
-    "loggedInMarker": "text=Contacts"
+    "submitButton": "button[type=submit], button:has-text('Sign In'), button:has-text('Log In')",
+    "loggedInMarker": "text=Property Address"
   },
 
   "contacts": {
     "navContacts": "text=Contacts",
-    "tagFilterOpen": "[data-testid=tag-filter], text=Filter",
+    "tagFilterOpen": "button:has-text('Tags'), text=Tags",
+    "tagSearchInput": "input[placeholder='Search...']",
     "tagFilterOption": "text=%TAG%",
-    "searchInput": "input[placeholder*=Search i], input[type=search]",
-    "resultRow": "[data-testid=contact-row]",
+    "tagApply": "button:has-text('Apply')",
+    "searchInput": "input[placeholder*='Search By Name' i], input[placeholder*='Search' i]",
+    "resultRow": "tr, [role=row]",
     "resultRowByText": "text=%QUERY%",
-    "openContact": "[data-testid=contact-row] a"
+    "rowChatIcon": "[aria-label*='SMS' i], [aria-label*='message' i], [title*='SMS' i], [title*='text' i]",
+    "openContact": "text=%QUERY%"
   },
 
   "contact": {
-    "nameField": "[data-testid=contact-name]",
-    "addressField": "[data-testid=contact-address]",
+    "nameField": "h1, h2, [data-testid=contact-name]",
+    "addressField": "text=/Property Address/",
     "stateField": "[data-testid=contact-state]",
     "phoneRows": "[data-testid=contact-phone]",
-    "tagChips": "[data-testid=tag-chip]",
+    "tagChips": "text=Level 10 Properties",
     "notesField": "[data-testid=contact-notes]",
     "chatMessages": "[data-testid=chat-message]"
   },
 
   "sms": {
-    "smsEnabledMarker": "[data-testid=sms-enabled]",
-    "optInButton": "text=Opt In",
-    "optInConfirm": "text=Confirm",
-    "optInSuccessMarker": "[data-testid=sms-enabled]"
+    "smsEnabledMarker": "text=/Opted[\\s-]?In/i, [data-testid=sms-enabled]",
+    "optInButton": "button:has-text('Opt In'), text=Opt In",
+    "optInConfirm": "button:has-text('Confirm'), button:has-text('Yes')",
+    "optInSuccessMarker": "text=/Opted[\\s-]?In/i"
   },
 
   "chat": {
-    "openChat": "text=Chat",
-    "profitDialSelect": "[data-testid=profitdial-select]",
-    "profitDialOptions": "[data-testid=profitdial-option]",
+    "openChat": "[aria-label*='SMS' i], [title*='SMS' i]",
+    "profitDialSelect": "[data-testid=profitdial-select], select[name*='from' i]",
+    "profitDialOptions": "[data-testid=profitdial-option], option",
     "profitDialSelectedValue": "[data-testid=profitdial-selected]",
-    "messageInput": "[data-testid=message-input], textarea",
-    "sendButton": "[data-testid=send-button], button:has-text('Send')",
+    "messageInput": "textarea, [contenteditable=true], [data-testid=message-input]",
+    "sendButton": "button:has-text('Send')",
     "lastOutboundMessage": "[data-testid=message-outbound]:last-of-type",
     "deliveryStatus": "[data-testid=delivery-status]:last-of-type",
     "lastInboundMessage": "[data-testid=message-inbound]:last-of-type"

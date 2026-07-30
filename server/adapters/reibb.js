@@ -142,17 +142,27 @@ export class ReiBlackBookAdapter extends Adapter {
   // ---------------------------------------------------------------------------
   // Interface: locate / read
   // ---------------------------------------------------------------------------
-  async listContacts() {
-    // Navigate to Contacts and apply the Level 10 tag filter (SOP Step 2).
+  async applyLevel10Filter() {
+    // SOP Step 2 — Tags filter: open "Tags", search the tag, check it, Apply.
     const { contacts } = this.sel;
-    await this.page.click(contacts.navContacts);
-    await this._present(contacts.tagFilterOpen);
+    if (!(await this._present(contacts.tagFilterOpen, 5000))) return false;
     await this.page.click(contacts.tagFilterOpen);
-    await this.page.click(contacts.tagFilterOption.replace('%TAG%', env.LEVEL10_TAG));
-    await this.page.waitForTimeout(500);
-    // Return row identifiers as visible handles (the engine iterates the uploaded
-    // list; enumerating the whole CRM is optional and account-specific).
-    const rows = await this._allText(contacts.resultRow);
+    if (await this._present(contacts.tagSearchInput, 3000)) {
+      await this.page.fill(contacts.tagSearchInput, env.LEVEL10_TAG);
+      await this.page.waitForTimeout(400);
+    }
+    const opt = contacts.tagFilterOption.replace('%TAG%', env.LEVEL10_TAG);
+    if (await this._present(opt, 3000)) await this.page.click(opt);
+    if (await this._present(contacts.tagApply, 3000)) await this.page.click(contacts.tagApply);
+    await this.page.waitForTimeout(800);
+    return true;
+  }
+
+  async listContacts() {
+    // The engine iterates the uploaded Level 10 sheet as the worklist, so this
+    // just applies the tag filter as a verification step (SOP Step 2).
+    await this.applyLevel10Filter();
+    const rows = await this._allText(this.sel.contacts.resultRow);
     return rows;
   }
 
