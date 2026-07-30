@@ -211,6 +211,21 @@ export class Engine extends EventEmitter {
       const dup = sop.checkAlreadyProcessed(ledgerHit);
       if (!dup.ok) return this._finish(base, dup.disposition, dup.reason, contact);
 
+      // WATCH-ONLY: verify the bot navigates + reads + matches correctly WITHOUT
+      // changing anything (no opt-in, no ProfitDial selection, no send). Safe
+      // first live check. Reads the assigned number from the sheet and whether
+      // it is available in REI, then reports and stops.
+      if (env.WATCH_ONLY) {
+        const wMatch = matchProfitDial({ contactId: facts.contactId, address: facts.address, phone }, this.pdIndex);
+        const wAvail = await this.adapter.getProfitDialNumbers(facts.contactId);
+        base.L10_ProfitDial = wMatch.profitDial || '';
+        const availTxt = wMatch.profitDial
+          ? (wAvail.map((n) => n.replace(/\D/g, '')).includes(String(wMatch.profitDial).replace(/\D/g, '')) ? 'available in REI' : 'NOT in REI')
+          : `no single match (${wMatch.status})`;
+        return this._finish(base, DISPOSITION.NEEDS_REVIEW,
+          `Watch-only check: assigned ProfitDial ${wMatch.profitDial || '—'} (${availTxt}). No changes made, nothing sent.`, contact);
+      }
+
       // STEP 4 — Opt in the phone.
       const optIn = await this.adapter.optInPhone(facts.contactId);
       base.L10_OptInStatus = optIn.status;
@@ -228,14 +243,6 @@ export class Engine extends EventEmitter {
       }
       const pdCheck = sop.checkProfitDial({ match, availableNumbers, selectedReadback });
       if (!pdCheck.ok) return this._finish(base, pdCheck.disposition, pdCheck.reason, contact);
-
-      // WATCH-ONLY mode: verify the bot navigates/reads/matches correctly WITHOUT
-      // changing anything (no opt-in performed above? — opt-in already ran; in
-      // watch mode we stop here before sending). Used to confirm live behavior.
-      if (env.WATCH_ONLY) {
-        base.L10_ProfitDial = match.profitDial || '';
-        return this._finish(base, DISPOSITION.NEEDS_REVIEW, 'Watch-only: verified up to ProfitDial (no message sent)', contact);
-      }
 
       // STEP 7 — Select the approved template (controlled balanced allocation).
       const usage = this.ledger.templateUsage(this.config.campaignBatch);
