@@ -41,6 +41,30 @@ npm test             # pure SOP rules, template allocation, ProfitDial matcher
 
 ---
 
+## First live check — watch it read 20 real leads (cannot text)
+
+```bash
+cp .env.example .env   # fill in REIBB_LOGIN_URL / REIBB_EMAIL / REIBB_PASSWORD
+npm run watch:20       # visible browser, read-only, first 20 leads
+```
+
+Then open the dashboard, upload the Level 10 `.xlsx` (`With Contacts` tab) with
+the limit set to **20**, and press **Start**. The bot logs in, filters the
+`Level 10 Properties` tag, opens each contact, reads name/phone/tags, and matches
+the assigned **ProfitDial** number from your sheet — reporting whether that
+number is available in REI. Every row comes back **Needs Review** with
+"No changes made, nothing sent." That is the expected result.
+
+`npm run watch:20` forces `ALLOW_LIVE_SEND=false` into the environment *before*
+the app boots, and `loadenv.js` never overwrites an existing variable — so this
+entry point cannot send even if your `.env` says otherwise. Going live is a
+separate, deliberate step (below).
+
+Read the results table for: right 20 people, right phone, right ProfitDial,
+"available in REI". If any of that is wrong, fix it before sending anything.
+
+---
+
 ## Safety — the four independent gates (nothing sends by accident)
 
 Real texting requires **all** of these, independently. Changing one variable can
