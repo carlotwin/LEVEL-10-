@@ -173,7 +173,10 @@ export class Engine extends EventEmitter {
     const base = {
       contactId: contact.contactId,
       scenario: contact.scenario || '',
+      name: contact.name || '',
+      reiUrl: contact.reiUrl || '',
       phone: (contact.phones || [])[0] || '',
+      message: '',
       L10_Disposition: DISPOSITION.ERROR,
       L10_Reason: '',
       L10_TemplateId: '',
@@ -195,6 +198,8 @@ export class Engine extends EventEmitter {
 
       // Gather facts from the opened contact (tags, phones, notes, chat history).
       const facts = await this.adapter.readContactFacts(found.contactId);
+      if (facts.name) base.name = facts.name;
+      if (facts.reiUrl) base.reiUrl = facts.reiUrl; // clickable link to the REI contact
 
       // GATE 1 — Eligibility (tag, state, suppression, phone).
       const elig = sop.checkEligibility(facts, this.config);
@@ -224,6 +229,14 @@ export class Engine extends EventEmitter {
       const pdCheck = sop.checkProfitDial({ match, availableNumbers, selectedReadback });
       if (!pdCheck.ok) return this._finish(base, pdCheck.disposition, pdCheck.reason, contact);
 
+      // WATCH-ONLY mode: verify the bot navigates/reads/matches correctly WITHOUT
+      // changing anything (no opt-in performed above? — opt-in already ran; in
+      // watch mode we stop here before sending). Used to confirm live behavior.
+      if (env.WATCH_ONLY) {
+        base.L10_ProfitDial = match.profitDial || '';
+        return this._finish(base, DISPOSITION.NEEDS_REVIEW, 'Watch-only: verified up to ProfitDial (no message sent)', contact);
+      }
+
       // STEP 7 — Select the approved template (controlled balanced allocation).
       const usage = this.ledger.templateUsage(this.config.campaignBatch);
       const lastId = this.ledger.lastTemplateId(this.config.campaignBatch);
@@ -246,6 +259,7 @@ export class Engine extends EventEmitter {
       }
       const msgCheck = sop.checkRenderedMessage(rendered, template);
       if (!msgCheck.ok) return this._finish(base, msgCheck.disposition, msgCheck.reason, contact);
+      base.message = rendered; // the exact text that was sent / prepared
 
       // GATE — irreversible-send gate (env). Sandbox = simulated; live blocked.
       const gate = liveSendGate({ placeholderEnabled: anyPlaceholderEnabled() });

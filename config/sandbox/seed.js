@@ -31,6 +31,8 @@ function c(contactId, scenario, over = {}) {
     firstName: over.firstName ?? 'Pat',
     lastName: over.lastName ?? 'Sample',
     name: over.name ?? `${over.firstName ?? 'Pat'} ${over.lastName ?? 'Sample'}`,
+    // Demo link (test mode). In Live, the real per-contact URL is captured from REI.
+    reiUrl: over.reiUrl ?? `https://app.reiblackbook.com/contacts/${contactId}`,
     address: over.address ?? `${contactId} Test St, Oakland, CA 94601`,
     state: over.state ?? 'CA',
     tags: over.tags ?? [L10],

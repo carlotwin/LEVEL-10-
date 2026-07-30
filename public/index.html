@@ -56,6 +56,7 @@
         <div class="card-head">
           <h2>Results at a glance</h2>
           <div class="exports">
+            <button id="btnPrint" class="btn small primary">Print daily report</button>
             <a id="exportXlsx" class="btn small" href="/api/export?format=xlsx">Export Excel</a>
             <a id="exportCsv" class="btn small ghost" href="/api/export?format=csv">Export CSV</a>
           </div>
@@ -79,7 +80,7 @@
         <div class="card-head"><h2>Leads</h2><span id="reviewCount" class="muted small"></span></div>
         <div class="table-wrap tall">
           <table class="tbl" id="resultsTable">
-            <thead><tr><th>Contact</th><th>Phone</th><th>Outcome</th><th>Message</th><th>Reply</th><th>Notes</th></tr></thead>
+            <thead><tr><th></th><th>Name</th><th>Phone</th><th>Outcome</th><th>Message</th><th>Reply</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>

@@ -66,6 +66,8 @@ function renderStatus(s) {
   setControls(s.status, s.total > 0);
 }
 
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
 function renderResults(results) {
   const tb = $('resultsTable').querySelector('tbody');
   if (!results.length) {
@@ -73,17 +75,38 @@ function renderResults(results) {
     $('reviewCount').textContent = '';
     return;
   }
-  tb.innerHTML = results.map((r) => {
+  tb.innerHTML = results.map((r, i) => {
     const o = outcome(r.L10_Disposition);
-    return `<tr>
-      <td>${r.contactId}</td>
-      <td>${r.phone || ''}</td>
+    const nameText = esc(r.name || r.contactId);
+    const nameCell = r.reiUrl
+      ? `<a class="rei" href="${esc(r.reiUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${nameText} ↗</a>`
+      : nameText;
+    const reply = r.L10_ReplyClass && r.L10_ReplyClass !== 'none' ? r.L10_ReplyClass : '';
+    const detail = `
+      <tr class="detail" id="d${i}" style="display:none"><td></td><td colspan="5">
+        ${r.message ? `<div class="msg">${esc(r.message)}</div>` : '<div class="small muted">No message prepared for this lead.</div>'}
+        <div class="small"><b>ProfitDial:</b> ${esc(r.L10_ProfitDial || '—')} &nbsp;·&nbsp; <b>Opt-in:</b> ${esc(r.L10_OptInStatus || '—')} &nbsp;·&nbsp; <b>Delivery:</b> ${esc(r.delivery || '—')}</div>
+        <div class="small muted" style="margin-top:4px"><b>Notes:</b> ${esc(r.L10_Reason || '')}</div>
+      </td></tr>`;
+    return `<tr class="lead-row" data-i="${i}">
+      <td><span class="chev">▸</span></td>
+      <td>${nameCell}</td>
+      <td>${esc(r.phone || '')}</td>
       <td><span class="tag ${o.cls}">${o.label}</span></td>
-      <td>${msgName(r.L10_TemplateId)}</td>
-      <td>${r.L10_ReplyClass && r.L10_ReplyClass !== 'none' ? r.L10_ReplyClass : ''}</td>
-      <td class="note-cell">${r.L10_Reason || ''}</td>
-    </tr>`;
+      <td>${esc(msgName(r.L10_TemplateId))}</td>
+      <td>${esc(reply)}</td>
+    </tr>${detail}`;
   }).join('');
+
+  tb.querySelectorAll('.lead-row').forEach((row) => {
+    row.onclick = () => {
+      const i = row.getAttribute('data-i');
+      const d = document.getElementById('d' + i);
+      const open = d.style.display !== 'none';
+      d.style.display = open ? 'none' : '';
+      row.classList.toggle('open', !open);
+    };
+  });
   const review = results.filter((r) => outcome(r.L10_Disposition).cls === 'warn').length;
   $('reviewCount').textContent = review ? `${review} need review` : '';
 }
@@ -146,6 +169,44 @@ $('btnGoogleSheet').onclick = async () => {
   const r = await api('/api/ingest/googlesheet', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
   $('loadInfo').textContent = r.ok ? `ProfitDial sheet loaded (${r.rowCount} rows).` : (r.error || 'Error');
 };
+// ---- printable daily report ----
+$('btnPrint').onclick = async () => {
+  const [k, cfg, state] = await Promise.all([api('/api/kpi'), api('/api/config'), api('/api/state')]);
+  const date = new Date().toLocaleString();
+  const modeTxt = cfg.sandbox ? 'Test Mode (no messages sent)' : 'Live';
+  const kv = (l, v) => `<tr><td>${l}</td><td style="text-align:right"><b>${v}</b></td></tr>`;
+  const trow = (t) => `<tr><td>${msgName(t.id)}</td><td>${t.sent}</td><td>${t.delivered} (${t.deliveryRate}%)</td><td>${t.replies} (${t.responseRate}%)</td><td>${t.positive}</td><td>${t.optOut}</td></tr>`;
+  const issues = Object.entries(k.dataIssues.breakdown || {}).map(([d, n]) => `${d}: ${n}`).join('<br>') || 'None';
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Level 10 Daily Report</title>
+    <style>
+      body{font:14px/1.5 Arial,sans-serif;color:#111;margin:32px;}
+      h1{font-size:20px;margin:0 0 2px} h2{font-size:15px;margin:22px 0 8px;border-bottom:1px solid #ccc;padding-bottom:4px}
+      .sub{color:#666;font-size:13px;margin-bottom:6px}
+      table{border-collapse:collapse;width:100%;font-size:13px} td,th{border:1px solid #ddd;padding:7px 10px;text-align:left}
+      th{background:#f3f4f6} .half{max-width:380px}
+      @media print{button{display:none}}
+    </style></head><body>
+    <h1>Twin Home Buyer — Level 10 SMS Outreach</h1>
+    <div class="sub">Daily KPI Report · ${date} · ${modeTxt} · Campaign: ${esc(cfg.campaignBatch)}</div>
+    <h2>Production</h2>
+    <table class="half">${kv('Total assigned', k.production.assigned)}${kv('Processed', k.production.processed)}${kv('Numbers opted in', k.production.optedIn)}${kv('SMS ' + (cfg.sandbox ? 'ready to send' : 'sent'), k.production.smsSent)}</table>
+    <h2>Delivery</h2>
+    <table class="half">${kv('Delivered', k.delivery.delivered)}${kv('Failed', k.delivery.failed)}${kv('Delivery rate', k.delivery.deliveryRate + '%')}</table>
+    <h2>Engagement</h2>
+    <table class="half">${kv('Total replies', k.engagement.replies)}${kv('Positive', k.engagement.positive)}${kv('Negative', k.engagement.negative)}${kv('Opt-outs', k.engagement.optOuts)}${kv('Response rate', k.engagement.responseRate + '%')}</table>
+    <h2>Template Performance</h2>
+    <table><tr><th>Message</th><th>Sent</th><th>Delivered</th><th>Replies</th><th>Positive</th><th>Opt-outs</th></tr>${k.templatePerformance.map(trow).join('') || '<tr><td colspan=6>No messages yet</td></tr>'}</table>
+    <div class="sub" style="margin-top:6px">Best performing: <b>${k.bestTemplate ? msgName(k.bestTemplate) : '—'}</b></div>
+    <h2>Data Issues (${k.dataIssues.total})</h2>
+    <div>${issues}</div>
+    <p style="margin-top:24px"><button onclick="window.print()">Print</button></p>
+    </body></html>`;
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => w.print(), 400);
+};
+
 $('btnStart').onclick = async () => { const r = await api('/api/start', { method: 'POST' }); if (!r.ok) alert('Cannot start: ' + r.error); };
 $('btnPause').onclick = () => api('/api/pause', { method: 'POST' });
 $('btnResume').onclick = () => api('/api/resume', { method: 'POST' });

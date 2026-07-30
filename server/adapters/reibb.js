@@ -181,6 +181,7 @@ export class ReiBlackBookAdapter extends Adapter {
     return {
       found: true,
       contactId,
+      reiUrl: this.page.url(), // direct link to this contact for the dashboard
       name: await this._text(c.nameField),
       firstName: (await this._text(c.nameField)).split(/\s+/)[0] || '',
       lastName: (await this._text(c.nameField)).split(/\s+/).slice(1).join(' '),
