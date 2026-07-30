@@ -15,6 +15,7 @@ import { buildKpi } from './data/kpi.js';
 import { templatePoolSummary, anyPlaceholderEnabled, EXPECTED_CHECKSUM } from './automation/message.js';
 import { analyzeSheet } from './automation/profitdial.js';
 import { importContacts, readTabFromFile, exportResults } from './data/spreadsheet.js';
+import { fetchGoogleSheetRows, parseSheetUrl } from './data/googleSheet.js';
 import { logger } from './logger.js';
 import { uploadsDir } from './data/paths.js';
 import { CONTACTS, PROFITDIAL_ROWS, PD_COLS } from '../config/sandbox/seed.js';
@@ -115,6 +116,28 @@ app.post('/api/upload/profitdial', upload.single('file'), (req, res) => {
     res.status(400).json({ ok: false, error: e.message });
   } finally {
     if (req.file) fs.unlink(req.file.path, () => {});
+  }
+});
+
+// ---- Ingest ProfitDial from a Google Sheet (link-shared or token) ----
+app.post('/api/ingest/googlesheet', async (req, res) => {
+  try {
+    let { sheetId, gid, url, token } = req.body || {};
+    if (url && !sheetId) ({ sheetId, gid } = parseSheetUrl(url));
+    if (gid == null || gid === '') gid = req.body?.gid ?? '';
+    const { rows, sourceUrl } = await fetchGoogleSheetRows({ sheetId, gid, token });
+    const cols = {
+      profitDial: env.PD_COL_PROFITDIAL,
+      address: env.PD_COL_ADDRESS,
+      phone: env.PD_COL_PHONE,
+      name: env.PD_COL_NAME,
+      contactId: env.PD_COL_CONTACT_ID,
+    };
+    const analysis = analyzeSheet(rows, cols);
+    engine._uploadedPd = { rows, cols };
+    res.json({ ok: true, sourceUrl, rowCount: rows.length, analysis });
+  } catch (e) {
+    res.status(e.code === 'SHEET_PRIVATE' ? 403 : 400).json({ ok: false, error: e.message, code: e.code });
   }
 });
 

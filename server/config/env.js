@@ -71,12 +71,18 @@ export function adapterMode() {
  */
 export function runnableReason() {
   if (env.SANDBOX) return null; // sandbox is always runnable
-  // SANDBOX=false: live mode. The live adapter is a non-functional skeleton.
-  return (
-    'SANDBOX=false requires a working live adapter, but server/adapters/reibb.js ' +
-    'is a non-functional skeleton (LIVE_ADAPTER_NOT_IMPLEMENTED). Live mode is ' +
-    'refused. Keep SANDBOX=true until the Playwright REI BlackBook adapter is built.'
-  );
+  // SANDBOX=false: live mode. The Playwright adapter exists, but it needs REI
+  // BlackBook credentials/URL configured before it can log in. Until then, live
+  // mode is refused. (Note: running live still cannot SEND unless the separate
+  // liveSendGate passes — ALLOW_LIVE_SEND=true and no placeholder templates.)
+  if (!env.REIBB_LOGIN_URL) {
+    return (
+      'SANDBOX=false but REIBB_LOGIN_URL (and REIBB_EMAIL/REIBB_PASSWORD) are not ' +
+      'configured. Set them in .env, verify config/reibb.selectors.json against ' +
+      'your account, then retry. Keep SANDBOX=true until you are ready.'
+    );
+  }
+  return null;
 }
 
 export function assertRunnable() {
@@ -114,7 +120,7 @@ export function liveSendGate({ placeholderEnabled } = {}) {
   if (!env.ALLOW_LIVE_SEND) {
     return { allowed: false, simulated: false, reason: 'ALLOW_LIVE_SEND is not "true" — irreversible send blocked' };
   }
-  // The live adapter does not exist in this build.
+  // Live mode must be runnable (credentials configured).
   const runBlock = runnableReason();
   if (runBlock) {
     return { allowed: false, simulated: false, reason: runBlock };

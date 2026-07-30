@@ -50,6 +50,7 @@ main { max-width: 1200px; margin: 0 auto; padding: 18px; display: grid; gap: 16p
 .btn.danger { background: var(--danger); border-color: var(--danger); }
 .uploader { display: inline-flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
 .uploader input { color: var(--ink); }
+.txt { flex: 1; min-width: 260px; background: var(--panel2); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; }
 .muted { color: var(--muted); font-size: 12px; }
 .status-chip { padding: 4px 10px; border-radius: 6px; background: var(--panel2); font-weight: 700; }
 .status-chip.running { background: #1d4ed8; }

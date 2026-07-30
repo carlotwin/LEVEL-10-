@@ -1,0 +1,49 @@
+{
+  "_README": "Externalized REI BlackBook selectors. THESE ARE PLACEHOLDERS and MUST be verified against your live account with HEADLESS=false + SLOWMO before any live use. Each key maps a SOP action to an on-screen element. Prefer stable text/role selectors over brittle CSS. The live adapter fails closed (routes to Needs Review) whenever a required element is not found, so wrong selectors never cause a mis-send.",
+
+  "login": {
+    "emailInput": "input[type=email], input[name=email]",
+    "passwordInput": "input[type=password], input[name=password]",
+    "submitButton": "button[type=submit]",
+    "loggedInMarker": "text=Contacts"
+  },
+
+  "contacts": {
+    "navContacts": "text=Contacts",
+    "tagFilterOpen": "[data-testid=tag-filter], text=Filter",
+    "tagFilterOption": "text=%TAG%",
+    "searchInput": "input[placeholder*=Search i], input[type=search]",
+    "resultRow": "[data-testid=contact-row]",
+    "resultRowByText": "text=%QUERY%",
+    "openContact": "[data-testid=contact-row] a"
+  },
+
+  "contact": {
+    "nameField": "[data-testid=contact-name]",
+    "addressField": "[data-testid=contact-address]",
+    "stateField": "[data-testid=contact-state]",
+    "phoneRows": "[data-testid=contact-phone]",
+    "tagChips": "[data-testid=tag-chip]",
+    "notesField": "[data-testid=contact-notes]",
+    "chatMessages": "[data-testid=chat-message]"
+  },
+
+  "sms": {
+    "smsEnabledMarker": "[data-testid=sms-enabled]",
+    "optInButton": "text=Opt In",
+    "optInConfirm": "text=Confirm",
+    "optInSuccessMarker": "[data-testid=sms-enabled]"
+  },
+
+  "chat": {
+    "openChat": "text=Chat",
+    "profitDialSelect": "[data-testid=profitdial-select]",
+    "profitDialOptions": "[data-testid=profitdial-option]",
+    "profitDialSelectedValue": "[data-testid=profitdial-selected]",
+    "messageInput": "[data-testid=message-input], textarea",
+    "sendButton": "[data-testid=send-button], button:has-text('Send')",
+    "lastOutboundMessage": "[data-testid=message-outbound]:last-of-type",
+    "deliveryStatus": "[data-testid=delivery-status]:last-of-type",
+    "lastInboundMessage": "[data-testid=message-inbound]:last-of-type"
+  }
+}

@@ -9,9 +9,10 @@ filter the `Level 10 Properties` tag, opt-in the phone, match the assigned
 controlled-rotation** template, verify it landed, and report **daily KPIs** with
 a **per-template performance** table.
 
-> **This is the SANDBOX build.** No real REI BlackBook, no carrier is ever
-> contacted. The live sending path stays behind independent hard guards and the
-> live adapter is a non-functional skeleton. See **Safety** below.
+> **Texting is OFF by default.** The full app is built — including the live
+> Playwright REI BlackBook adapter and Google Sheet ingestion — but it runs in
+> SANDBOX mode (no carrier contacted) until *you* set `SANDBOX=false` +
+> `ALLOW_LIVE_SEND=true` and install real templates. See **Safety** below.
 
 ---
 
@@ -76,16 +77,30 @@ directory and **never committed** (it contains real homeowner PII).
 
 ---
 
-## Going live later (not part of this build)
+## ProfitDial from Google Sheets
 
-1. Implement `server/adapters/reibb.js` (Playwright) against the shared
-   interface in `server/adapters/adapter-interface.js`. The engine needs no
-   changes.
-2. Install Cherry's 5–10 approved templates in `server/automation/message.js`
+Paste the sheet URL in the dashboard ("Ingest Google Sheet") or POST to
+`/api/ingest/googlesheet`. Works when the sheet is shared *Anyone with the link
+(Viewer)* or when you supply an OAuth token. A **private** sheet returns a clear
+error (no columns are ever invented) — share it, enable the Google Drive
+connector and upload an export, or pass a token.
+
+## Going live later (you flip these — texting is off until then)
+
+The live adapter and ingestion are **already built**. To actually text, all of
+the following are required, and each defaults to off:
+
+1. Verify `config/reibb.selectors.json` against your REI BlackBook account with
+   `HEADLESS=false` and `SLOWMO_MS` set (the placeholders WILL be wrong).
+2. Set `REIBB_LOGIN_URL`, `REIBB_EMAIL`, `REIBB_PASSWORD` in `.env`.
+3. Install Cherry's 5–10 approved templates in `server/automation/message.js`
    (`placeholder: false`), run `node scripts/regen-checksum.js`, and pin the new
    `EXPECTED_CHECKSUM`.
-3. Set `SANDBOX=false` and `ALLOW_LIVE_SEND=true`. Start with a small
+4. Set `SANDBOX=false` and `ALLOW_LIVE_SEND=true`. Start with a small
    `MAX_SENDS_PER_RUN`.
+
+Miss any one and the app runs read-only/sandboxed or refuses — it never texts by
+accident.
 
 ---
 
@@ -105,13 +120,15 @@ server/
   adapters/
     adapter-interface.js    shared contract (sandbox + live)
     sandbox.js              in-memory REI simulation (all scenarios)
-    reibb.js                LIVE skeleton — throws LIVE_ADAPTER_NOT_IMPLEMENTED
+    reibb.js                LIVE Playwright REI BlackBook adapter
     factory.js              mode-safe adapter construction
   data/
     store.js                resume-safe job state
     spreadsheet.js          CSV/XLSX import + export
+    googleSheet.js          Google Sheet CSV ingestion (ProfitDial source)
     sentLedger.js           campaign duplicate ledger
     kpi.js                  daily + per-template KPI report
+config/reibb.selectors.json externalized live selectors (verify per account)
 config/sandbox/seed.js      synthetic contacts + ProfitDial rows (26 scenarios)
 test/                       node:test suites for the pure core
 ```

@@ -133,6 +133,28 @@ $('pdFile').onchange = async (e) => {
     box.innerHTML = '<b style="color:#fca5a5">Error:</b> ' + r.error;
   }
 };
+$('btnGoogleSheet').onclick = async () => {
+  const url = $('gsUrl').value.trim();
+  if (!url) return alert('Paste a Google Sheet URL first.');
+  const r = await api('/api/ingest/googlesheet', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url }),
+  });
+  const box = $('sheetAnalysis');
+  box.classList.remove('hidden');
+  if (r.ok) {
+    const a = r.analysis;
+    box.innerHTML = `<b>Google Sheet ingested (${r.rowCount} rows).</b><table>
+      <tr><td>Blank ProfitDial</td><td>${a.blankProfitDial}</td></tr>
+      <tr><td>Distinct ProfitDial numbers</td><td>${a.distinctProfitDialNumbers}</td></tr>
+      <tr><td>Duplicate phones</td><td>${a.duplicatePhones}</td></tr>
+      <tr><td>Contacts w/ multiple assignments</td><td>${a.contactsWithMultipleAssignments}</td></tr>
+      <tr><td>Contact ID column</td><td>${a.contactIdAvailable ? 'yes' : 'no'}</td></tr></table>`;
+  } else {
+    box.innerHTML = `<b style="color:#fca5a5">${r.code || 'Error'}:</b> ${r.error}`;
+  }
+};
 $('contactFile').onchange = async (e) => {
   const fd = new FormData();
   fd.append('file', e.target.files[0]);
