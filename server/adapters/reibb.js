@@ -209,14 +209,35 @@ export class ReiBlackBookAdapter extends Adapter {
     return [...raw, ...hrefs].map((p) => normalizePhone(p)).filter(Boolean);
   }
 
+  /**
+   * Save a screenshot of the current page for diagnosis. A lookup that fails
+   * without saying why is unfixable; a picture of the screen the bot was looking
+   * at usually settles it in seconds (wrong page, a modal, a changed layout).
+   */
+  async _diagnosticShot(label) {
+    try {
+      const dir = path.join(dataDir(), 'diagnostics');
+      fs.mkdirSync(dir, { recursive: true });
+      const safe = String(label).replace(/[^a-zA-Z0-9_-]+/g, '-').slice(0, 60);
+      const file = path.join(dir, `${safe}.png`);
+      await this.page.screenshot({ path: file, fullPage: false });
+      return file;
+    } catch {
+      return '';
+    }
+  }
+
   async findContact(query) {
     const { contacts } = this.sel;
     const wantPhone = normalizePhone(query.phone);
     const searched = [];
+    let searchBoxSeen = false;
+    let resultsSeen = false;
 
     for (const term of this._searchTerms(query)) {
       await this.page.click(contacts.navContacts).catch(() => {});
       if (!(await this._present(contacts.searchInput, 4000))) continue;
+      searchBoxSeen = true;
 
       await this.page.fill(contacts.searchInput, '');
       await this.page.fill(contacts.searchInput, term.value);
@@ -236,6 +257,7 @@ export class ReiBlackBookAdapter extends Adapter {
         opened = true;
       }
       if (!opened) continue;
+      resultsSeen = true;
       await this.page.waitForTimeout(900);
 
       // VERIFY we opened the right person. Without this a loose search match
@@ -257,7 +279,14 @@ export class ReiBlackBookAdapter extends Adapter {
       searched.push(`opened-but-phone-mismatch(found ${phones.join('/') || 'none'}, wanted ${wantPhone})`);
     }
 
-    return { found: false, searched };
+    // Say WHICH step failed — that is the difference between a selector to fix
+    // and a contact REI genuinely does not have.
+    let stage = 'no result matched';
+    if (!searchBoxSeen) stage = "could not find REI's Contacts search box (selectors.contacts.searchInput)";
+    else if (!resultsSeen) stage = 'the search box worked but no result row could be opened (selectors.contacts.openContact)';
+    const shot = await this._diagnosticShot(`notfound-${normalizePhone(query.phone) || query.name || 'lead'}`);
+    logger.warn('contact_not_found', { stage, searched, screenshot: shot });
+    return { found: false, searched, stage, screenshot: shot, searchBoxSeen, resultsSeen };
   }
 
   async readContactFacts(contactId) {

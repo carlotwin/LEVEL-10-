@@ -76,8 +76,30 @@ app.get('/api/config', (req, res) => {
     checksum: EXPECTED_CHECKSUM.slice(0, 16),
     templates: templatePoolSummary(),
     liveReady: !env.SANDBOX ? false : null,
+    build: buildId(),
+    gates: {
+      requireLevel10Tag: env.REQUIRE_LEVEL10_TAG,
+      requireOptIn: env.REQUIRE_OPTIN,
+      requireProfitDial: env.REQUIRE_PROFITDIAL,
+    },
   });
 });
+
+// Which commit is actually running. Printed at boot and served on /api/config so
+// "did the pull take effect / did the server restart?" is answerable at a glance
+// instead of inferred from behaviour.
+function buildId() {
+  try {
+    const head = fs.readFileSync(path.join(__dirname, '..', '.git', 'HEAD'), 'utf8').trim();
+    const ref = head.startsWith('ref:') ? head.slice(4).trim() : '';
+    const sha = ref
+      ? fs.readFileSync(path.join(__dirname, '..', '.git', ref), 'utf8').trim()
+      : head;
+    return sha.slice(0, 7);
+  } catch {
+    return 'unknown';
+  }
+}
 
 // The confirmed column mapping for the Level 10 "With Contacts" sheet.
 function pdColsFromEnv() {
@@ -323,11 +345,15 @@ app.get('/', (req, res) => res.sendFile(path.join(PUBLIC, 'index.html')));
 const PORT = env.PORT;
 app.listen(PORT, () => {
   const mode = env.SANDBOX ? 'SANDBOX (no carrier contacted)' : 'LIVE';
-  logger.info('server_start', { port: PORT, mode });
+  logger.info('server_start', { port: PORT, mode, build: buildId() });
   // eslint-disable-next-line no-console
   console.log(`\n  Level 10 SMS Outreach — ${mode}`);
   console.log(`  Dashboard: http://localhost:${PORT}`);
-  console.log(`  ALLOW_LIVE_SEND=${env.ALLOW_LIVE_SEND} | MAX_SENDS_PER_RUN=${env.MAX_SENDS_PER_RUN}\n`);
+  console.log(`  ALLOW_LIVE_SEND=${env.ALLOW_LIVE_SEND} | MAX_SENDS_PER_RUN=${env.MAX_SENDS_PER_RUN}`);
+  console.log(
+    `  Gates: tag=${env.REQUIRE_LEVEL10_TAG} optIn=${env.REQUIRE_OPTIN} profitDial=${env.REQUIRE_PROFITDIAL} watchOnly=${env.WATCH_ONLY}`
+  );
+  console.log(`  Build: ${buildId()}\n`);
 });
 
 export { app };

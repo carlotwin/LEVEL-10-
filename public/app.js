@@ -55,6 +55,13 @@ async function loadConfig() {
     note.className = 'note live';
     note.textContent = 'Live — approved messages WILL be sent to real homeowners.';
   }
+  // Which build + which gates are active. Without this, "did my pull take
+  // effect?" can only be guessed at from behaviour.
+  const g = cfg.gates || {};
+  const onOff = (v) => (v ? 'on' : 'off');
+  note.textContent +=
+    `  ·  build ${cfg.build || '?'}  ·  tag check ${onOff(g.requireLevel10Tag)}` +
+    `, opt-in ${onOff(g.requireOptIn)}, ProfitDial ${onOff(g.requireProfitDial)}`;
 }
 
 // ---- controls state ----

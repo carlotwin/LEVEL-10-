@@ -213,12 +213,11 @@ export class Engine extends EventEmitter {
           env.SANDBOX && contact.syntheticId
             ? 'Not in the sandbox test data — this lead is from your real sheet, so run the live watch (npm run watch:20) to look it up in REI'
             : 'Contact not found in REI BlackBook';
-        return this._finish(
-          base,
-          DISPOSITION.LEAD_NOT_FOUND,
-          tried ? `${where}. Searched: ${tried}` : where,
-          contact
-        );
+        const parts = [where];
+        if (found.stage) parts.push(`Stage: ${found.stage}`);
+        parts.push(tried ? `Searched: ${tried}` : 'Searched: nothing (no search was performed)');
+        if (found.screenshot) parts.push(`Screenshot: ${found.screenshot}`);
+        return this._finish(base, DISPOSITION.LEAD_NOT_FOUND, parts.join(' · '), contact);
       }
 
       // Gather facts from the opened contact (tags, phones, notes, chat history).
