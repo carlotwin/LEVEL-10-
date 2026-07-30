@@ -1,0 +1,19 @@
+{
+  "name": "level-10-sms-outreach",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Twin Home Buyer — Level 10 SMS Outreach Campaign automation (SANDBOX build). Fail-closed SOP pipeline over REI BlackBook with controlled template allocation, ProfitDial source-of-truth matching, campaign duplicate ledger, and daily KPI reporting.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "xlsx": "^0.18.5"
+  }
+}

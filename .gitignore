@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Runtime data — NEVER commit. Holds uploaded PII (real homeowner
+# names/phones/addresses), job state, ledger, logs.
+data/
+uploads/
+*.log
+
+# Real source-of-truth spreadsheets (PII). Sandbox seed uses synthetic data.
+*Level_10_Properties_with_Contacts*
+*.xlsx
+*.xls
+# Allow synthetic sandbox seed spreadsheets to be committed if desired
+!config/sandbox/*.xlsx
+
+# OS / editor
+.DS_Store
+*.swp
+.env
+.env.local

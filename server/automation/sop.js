@@ -1,0 +1,206 @@
+// =============================================================================
+// PURE SOP RULES ENGINE.
+//
+// No browser, no network, no env reads. Facts in -> decision out. Every
+// function here is deterministic and unit-testable. The engine (engine.js)
+// gathers facts via an adapter and calls these predicates in SOP order,
+// performing the (side-effecting) actions between gates.
+//
+// Design rule (from Revival AI): each check can only ADD a block. A check
+// returns { ok: true } to allow continuing, or { ok: false, disposition,
+// reason } to stop. Uncertainty always resolves to a block — fail closed.
+// =============================================================================
+import {
+  DISPOSITION,
+  REPLY_CLASS,
+  OPT_OUT_REGEX,
+  BLOCKING_PHRASES,
+  POSITIVE_WORDS,
+  NEGATIVE_WORDS,
+} from './constants.js';
+
+const pass = () => ({ ok: true });
+const block = (disposition, reason) => ({ ok: false, disposition, reason });
+
+// -----------------------------------------------------------------------------
+// Normalization helpers (shared with the ProfitDial matcher).
+// -----------------------------------------------------------------------------
+export function normalizePhone(raw) {
+  const d = String(raw ?? '').replace(/\D/g, '');
+  return d.length >= 10 ? d.slice(-10) : d;
+}
+
+export function digitsOnly(raw) {
+  return String(raw ?? '').replace(/\D/g, '');
+}
+
+// -----------------------------------------------------------------------------
+// GATE 1 — Located + tagged + in-state + contactable (no side effects needed).
+// Runs before ANY action (we never opt-in a do-not-contact lead).
+// -----------------------------------------------------------------------------
+export function checkEligibility(facts, config) {
+  // 3a. Located in REI?
+  if (!facts.found) return block(DISPOSITION.LEAD_NOT_FOUND, 'Contact not found in REI BlackBook');
+
+  // 3b. Level 10 tag present? Derive from the tags array; `hasLevel10Tag` may be
+  //     passed explicitly (tests) and takes precedence when defined.
+  const wantTag = String(config.level10Tag || '').toLowerCase();
+  const derivedTag = (facts.tags || []).some((t) => String(t).toLowerCase() === wantTag);
+  const hasTag = facts.hasLevel10Tag ?? derivedTag;
+  if (!hasTag) return block(DISPOSITION.MISSING_TAG, `Contact is missing the "${config.level10Tag}" tag`);
+
+  // 3c. Geographic filter.
+  const st = String(facts.state ?? '').trim().toUpperCase();
+  if (st && config.textStates.length && !config.textStates.includes(st)) {
+    return block(DISPOSITION.OUT_OF_STATE, `Property state ${st} is outside allowed states`);
+  }
+
+  // 3d. Suppression scan over tags + notes + chat history (fail-closed).
+  const haystack = [
+    ...(facts.tags || []),
+    facts.notes || '',
+    ...(facts.chatHistory || []),
+  ]
+    .join(' \n ')
+    .toLowerCase();
+
+  if (facts.optOut || OPT_OUT_REGEX.test(haystack)) {
+    return block(DISPOSITION.OPTED_OUT, 'Contact previously opted out / STOP found in history');
+  }
+  const hit = BLOCKING_PHRASES.find((p) => haystack.includes(p));
+  if (hit) {
+    // "sold"/"listed" and DNC-style phrases are all hard blocks here.
+    if (['do not contact', 'do not text', 'do not automate', 'dnc', 'attorney', 'lawsuit', 'harass'].includes(hit)) {
+      return block(DISPOSITION.DO_NOT_CONTACT, `Blocking note found: "${hit}"`);
+    }
+    return block(DISPOSITION.NEEDS_REVIEW, `Blocking phrase found: "${hit}"`);
+  }
+
+  // 3e. Phone validity + single number (SOP requires one clear number).
+  const phones = (facts.phones || []).map(normalizePhone).filter(Boolean);
+  const uniquePhones = [...new Set(phones)];
+  if (uniquePhones.length === 0) return block(DISPOSITION.INVALID_PHONE, 'No usable phone number on contact');
+  if (uniquePhones.some((p) => p.length !== 10)) {
+    return block(DISPOSITION.INVALID_PHONE, 'Phone number is not a valid 10-digit US number');
+  }
+  if (uniquePhones.length > 1) {
+    return block(DISPOSITION.MULTIPLE_PHONES, `Contact has ${uniquePhones.length} distinct phone numbers — needs review`);
+  }
+
+  return pass();
+}
+
+// -----------------------------------------------------------------------------
+// GATE 2 — Ledger (already processed for THIS campaign batch).
+// -----------------------------------------------------------------------------
+export function checkAlreadyProcessed(ledgerHit) {
+  if (ledgerHit) return block(DISPOSITION.ALREADY_PROCESSED, 'Already processed for this campaign batch (ledger hit)');
+  return pass();
+}
+
+// -----------------------------------------------------------------------------
+// GATE 3 — Opt-in result (SOP Step 4 / Step 7).
+// -----------------------------------------------------------------------------
+export function checkOptIn(optInResult) {
+  if (!optInResult) return block(DISPOSITION.OPT_IN_FAILED, 'No opt-in result returned');
+  if (optInResult.status === 'opted_in' && optInResult.smsEnabled === true) return pass();
+  return block(DISPOSITION.OPT_IN_FAILED, optInResult.reason || 'Phone could not be opted in / not SMS-enabled');
+}
+
+// -----------------------------------------------------------------------------
+// GATE 4 — ProfitDial matching + availability + readback (requirement #5).
+// `match` comes from profitdial.js (pure). `availableInRei` and `readback`
+// come from the adapter (facts about the live/sandbox screen).
+// -----------------------------------------------------------------------------
+export function checkProfitDial({ match, availableNumbers, selectedReadback }) {
+  if (!match) return block(DISPOSITION.NEEDS_REVIEW, 'No ProfitDial match result');
+
+  switch (match.status) {
+    case 'ok':
+      break; // continue to availability/readback checks
+    case 'not_found':
+      return block(DISPOSITION.NEEDS_REVIEW, 'Contact not found in ProfitDial spreadsheet');
+    case 'multiple_records':
+      return block(DISPOSITION.NEEDS_REVIEW, `Contact matches ${match.recordCount} spreadsheet rows — ambiguous`);
+    case 'missing':
+      return block(DISPOSITION.MISSING_PROFITDIAL, 'Matched row has no assigned ProfitDial number');
+    case 'multiple_assignments':
+      return block(DISPOSITION.MULTIPLE_PROFITDIAL, 'Contact has multiple distinct ProfitDial assignments');
+    case 'conflict':
+      return block(DISPOSITION.SHEET_CONFLICT, match.reason || 'Spreadsheet record conflicts with REI contact');
+    default:
+      return block(DISPOSITION.NEEDS_REVIEW, `Unknown ProfitDial match status: ${match.status}`);
+  }
+
+  const assigned = digitsOnly(match.profitDial);
+  if (assigned.length < 10) return block(DISPOSITION.MISSING_PROFITDIAL, 'Assigned ProfitDial is not a valid number');
+
+  // Must be available in REI's selector.
+  const avail = (availableNumbers || []).map(digitsOnly);
+  if (!avail.includes(assigned)) {
+    return block(DISPOSITION.PROFITDIAL_UNAVAILABLE, 'Assigned ProfitDial number is not available in REI BlackBook');
+  }
+
+  // Digit-for-digit readback of what is actually selected on screen.
+  const readback = digitsOnly(selectedReadback);
+  if (!readback) return block(DISPOSITION.PROFITDIAL_MISMATCH, 'Could not read back the selected ProfitDial number');
+  if (readback !== assigned) {
+    return block(DISPOSITION.PROFITDIAL_MISMATCH, `Readback ${readback} != assigned ${assigned}`);
+  }
+
+  return pass();
+}
+
+// -----------------------------------------------------------------------------
+// GATE 5 — Template / merge fields (rendered body must be valid & non-empty).
+// -----------------------------------------------------------------------------
+export function checkRenderedMessage(rendered, template) {
+  if (!template) return block(DISPOSITION.NEEDS_REVIEW, 'No template allocated');
+  if (!rendered || !rendered.trim()) return block(DISPOSITION.INVALID_MERGE_FIELD, 'Rendered message is empty');
+  if (/\{\{.*?\}\}/.test(rendered)) return block(DISPOSITION.INVALID_MERGE_FIELD, 'Unfilled merge field remains in message');
+  return pass();
+}
+
+// -----------------------------------------------------------------------------
+// GATE 6 — Send verification (message actually appears in the thread).
+// -----------------------------------------------------------------------------
+export function checkSendVerification(verifyResult) {
+  if (verifyResult && verifyResult.verified === true) return pass();
+  return block(DISPOSITION.SEND_VERIFY_FAILED, (verifyResult && verifyResult.reason) || 'Message not verified in thread');
+}
+
+// -----------------------------------------------------------------------------
+// Reply classification (SOP Step 9 / KPI engagement).
+// -----------------------------------------------------------------------------
+export function classifyReply(text) {
+  const t = String(text ?? '').trim().toLowerCase();
+  if (!t) return REPLY_CLASS.NONE;
+  if (OPT_OUT_REGEX.test(t)) return REPLY_CLASS.OPT_OUT;
+  if (NEGATIVE_WORDS.some((w) => t.includes(w))) return REPLY_CLASS.NEGATIVE;
+  if (POSITIVE_WORDS.some((w) => t.includes(w))) return REPLY_CLASS.POSITIVE;
+  return REPLY_CLASS.UNCLEAR;
+}
+
+/**
+ * Convenience composition used by tests: walk gates 1–5 in order given a fully
+ * populated facts object. Returns the first block, or { ok:true } if all pass.
+ * (The engine calls the individual gates so it can perform actions in between,
+ * but this proves the ordering is coherent.)
+ */
+export function evaluateThroughReadback(facts, config) {
+  const e = checkEligibility(facts, config);
+  if (!e.ok) return e;
+  const a = checkAlreadyProcessed(facts.ledgerHit);
+  if (!a.ok) return a;
+  const o = checkOptIn(facts.optInResult);
+  if (!o.ok) return o;
+  const p = checkProfitDial({
+    match: facts.profitDialMatch,
+    availableNumbers: facts.availableNumbers,
+    selectedReadback: facts.selectedReadback,
+  });
+  if (!p.ok) return p;
+  const m = checkRenderedMessage(facts.renderedMessage, facts.template);
+  if (!m.ok) return m;
+  return pass();
+}
