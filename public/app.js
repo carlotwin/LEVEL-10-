@@ -43,9 +43,17 @@ async function loadConfig() {
   if (cfg.sandbox) {
     note.className = 'note';
     note.textContent = 'Test Mode — every lead is checked and prepared, but no text messages are actually sent.';
+  } else if (cfg.watchOnly) {
+    note.className = 'note';
+    note.textContent = 'Live · Watch only — the bot logs into REI and checks each lead, but does NOT opt-in or send. Nothing is changed.';
+    $('modePill').textContent = 'Live · Watch';
+  } else if (!cfg.allowLiveSend) {
+    note.className = 'note';
+    note.textContent = 'Live — connected to REI, but sending is OFF. It will prepare each lead and stop before sending.';
+    $('modePill').textContent = 'Live · No send';
   } else {
     note.className = 'note live';
-    note.textContent = 'Live — approved messages will be sent to real homeowners.';
+    note.textContent = 'Live — approved messages WILL be sent to real homeowners.';
   }
 }
 
@@ -149,25 +157,25 @@ function connectSSE() {
 }
 
 // ---- actions ----
+const leadLimit = () => parseInt($('limit').value || '0', 10) || 0;
 $('btnLoadSample').onclick = async () => {
   const r = await api('/api/sandbox/load', { method: 'POST' });
   $('loadInfo').textContent = r.ok ? `Loaded ${r.scenarios} sample leads. Click Start.` : 'Error: ' + r.error;
 };
-$('contactFile').onchange = async (e) => {
-  const fd = new FormData(); fd.append('file', e.target.files[0]);
-  const r = await api('/api/upload/contacts', { method: 'POST', body: fd });
-  $('loadInfo').textContent = r.ok ? `Loaded ${r.count} leads. Click Start.` : 'Error: ' + r.error;
-};
 $('pdFile').onchange = async (e) => {
-  const fd = new FormData(); fd.append('file', e.target.files[0]);
-  const r = await api('/api/upload/profitdial', { method: 'POST', body: fd });
-  $('loadInfo').textContent = r.ok ? `ProfitDial sheet loaded (${r.analysis.totalRows} rows).` : 'Error: ' + r.error;
+  const fd = new FormData(); fd.append('file', e.target.files[0]); fd.append('limit', leadLimit());
+  const r = await api(`/api/upload/profitdial?limit=${leadLimit()}`, { method: 'POST', body: fd });
+  $('loadInfo').textContent = r.ok
+    ? `Loaded ${r.leadCount} of ${r.totalRows} leads from your sheet (${r.analysis.blankProfitDial} missing ProfitDial). Click Start.`
+    : 'Error: ' + r.error;
 };
 $('btnGoogleSheet').onclick = async () => {
   const url = $('gsUrl').value.trim();
-  if (!url) return alert('Paste a Google Sheet link first.');
-  const r = await api('/api/ingest/googlesheet', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
-  $('loadInfo').textContent = r.ok ? `ProfitDial sheet loaded (${r.rowCount} rows).` : (r.error || 'Error');
+  if (!url) return alert('Paste your Google Sheet link first.');
+  const r = await api('/api/ingest/googlesheet', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url, limit: leadLimit() }) });
+  $('loadInfo').textContent = r.ok
+    ? `Loaded ${r.leadCount} of ${r.rowCount} leads from your sheet. Click Start.`
+    : (r.error || 'Error');
 };
 // ---- printable daily report ----
 $('btnPrint').onclick = async () => {

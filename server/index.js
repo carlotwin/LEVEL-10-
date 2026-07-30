@@ -60,6 +60,7 @@ app.get('/api/config', (req, res) => {
   res.json({
     mode: env.SANDBOX ? 'sandbox' : 'live',
     sandbox: env.SANDBOX,
+    watchOnly: env.WATCH_ONLY,
     allowLiveSend: env.ALLOW_LIVE_SEND,
     maxSendsPerRun: env.MAX_SENDS_PER_RUN,
     campaignBatch: env.CAMPAIGN_BATCH,
@@ -71,6 +72,55 @@ app.get('/api/config', (req, res) => {
     liveReady: !env.SANDBOX ? false : null,
   });
 });
+
+// The confirmed column mapping for the Level 10 "With Contacts" sheet.
+function pdColsFromEnv() {
+  return {
+    profitDial: env.PD_COL_PROFITDIAL,
+    address: env.PD_COL_ADDRESS,
+    phone: env.PD_COL_PHONE,
+    name: env.PD_COL_NAME,
+    contactId: env.PD_COL_CONTACT_ID,
+  };
+}
+
+// Turn ProfitDial spreadsheet rows into the lead worklist. ONE sheet is both the
+// list of Level 10 homeowners AND the source of their ProfitDial numbers.
+function buildLeadsFromRows(rows, cols) {
+  return rows.map((r, i) => {
+    const name = (cols.name && r[cols.name]) || r['Owner'] || '';
+    const contactId = (cols.contactId && r[cols.contactId]) || `L10-${i + 1}`;
+    return {
+      contactId: String(contactId),
+      name: String(name),
+      firstName: String(r['FIrst Name'] || r['First Name'] || name).split(/\s+/)[0] || '',
+      address: cols.address ? String(r[cols.address] || '') : '',
+      phones: [cols.phone ? String(r[cols.phone] || '') : ''].filter(Boolean),
+      reiUrl: '',
+      scenario: '',
+    };
+  });
+}
+
+// Load a job from a single Level 10 sheet (leads + ProfitDial together).
+function loadLevel10FromRows(rows, cols, { source, tab, limit }) {
+  const analysis = analyzeSheet(rows, cols);
+  let leads = buildLeadsFromRows(rows, cols);
+  let originals = rows;
+  if (limit && limit > 0) {
+    leads = leads.slice(0, limit);
+    originals = rows.slice(0, limit);
+  }
+  lastOriginalRows = originals;
+  const state = engine.loadJob({
+    contacts: leads,
+    profitDialRows: rows,
+    profitDialCols: cols,
+    source,
+    tab,
+  });
+  return { state, analysis, leadCount: leads.length, totalRows: rows.length };
+}
 
 // ---- Load sandbox scenarios (built-in synthetic data) ----
 app.post('/api/sandbox/load', (req, res) => {
@@ -97,21 +147,15 @@ app.post('/api/sandbox/load', (req, res) => {
   }
 });
 
-// ---- Upload a real ProfitDial spreadsheet (optional) ----
+// ---- Load the Level 10 sheet (leads + ProfitDial) from an uploaded file ----
 app.post('/api/upload/profitdial', upload.single('file'), (req, res) => {
   try {
-    const { rows } = readTabFromFile(req.file.path, env.PD_SHEET_TAB);
-    const cols = {
-      profitDial: env.PD_COL_PROFITDIAL,
-      address: env.PD_COL_ADDRESS,
-      phone: env.PD_COL_PHONE,
-      name: env.PD_COL_NAME,
-      contactId: env.PD_COL_CONTACT_ID,
-    };
-    const analysis = analyzeSheet(rows, cols);
-    // Stash for a subsequent contact upload / job load.
+    const { rows, tab } = readTabFromFile(req.file.path, env.PD_SHEET_TAB);
+    const cols = pdColsFromEnv();
     engine._uploadedPd = { rows, cols };
-    res.json({ ok: true, tab: env.PD_SHEET_TAB, analysis });
+    const limit = parseInt(req.query.limit ?? req.body?.limit ?? '0', 10) || 0;
+    const r = loadLevel10FromRows(rows, cols, { source: req.file.originalname, tab, limit });
+    res.json({ ok: true, tab: env.PD_SHEET_TAB, ...r });
   } catch (e) {
     res.status(400).json({ ok: false, error: e.message });
   } finally {
@@ -119,23 +163,18 @@ app.post('/api/upload/profitdial', upload.single('file'), (req, res) => {
   }
 });
 
-// ---- Ingest ProfitDial from a Google Sheet (link-shared or token) ----
+// ---- Load the Level 10 sheet from a Google Sheet link (leads + ProfitDial) ----
 app.post('/api/ingest/googlesheet', async (req, res) => {
   try {
-    let { sheetId, gid, url, token } = req.body || {};
+    let { sheetId, gid, url, token, limit } = req.body || {};
     if (url && !sheetId) ({ sheetId, gid } = parseSheetUrl(url));
     if (gid == null || gid === '') gid = req.body?.gid ?? '';
     const { rows, sourceUrl } = await fetchGoogleSheetRows({ sheetId, gid, token });
-    const cols = {
-      profitDial: env.PD_COL_PROFITDIAL,
-      address: env.PD_COL_ADDRESS,
-      phone: env.PD_COL_PHONE,
-      name: env.PD_COL_NAME,
-      contactId: env.PD_COL_CONTACT_ID,
-    };
-    const analysis = analyzeSheet(rows, cols);
+    const cols = pdColsFromEnv();
     engine._uploadedPd = { rows, cols };
-    res.json({ ok: true, sourceUrl, rowCount: rows.length, analysis });
+    const lim = parseInt(limit ?? '0', 10) || 0;
+    const r = loadLevel10FromRows(rows, cols, { source: sourceUrl, tab: env.PD_SHEET_TAB, limit: lim });
+    res.json({ ok: true, sourceUrl, rowCount: rows.length, ...r });
   } catch (e) {
     res.status(e.code === 'SHEET_PRIVATE' ? 403 : 400).json({ ok: false, error: e.message, code: e.code });
   }
