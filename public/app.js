@@ -162,20 +162,45 @@ $('btnLoadSample').onclick = async () => {
   const r = await api('/api/sandbox/load', { method: 'POST' });
   $('loadInfo').textContent = r.ok ? `Loaded ${r.scenarios} sample leads. Click Start.` : 'Error: ' + r.error;
 };
+// Plain-language summary of how the file was actually read, so a renamed column
+// or an unexpected tab is visible instead of silently producing empty leads.
+function describeLoad(r) {
+  const d = r.detected;
+  const lines = [`Loaded ${r.leadCount} of ${r.totalRows} leads.`];
+  if (d) {
+    lines.push(`Tab "${d.tab}", headers on row ${d.headerRow}.`);
+    const label = { profitDial: 'ProfitDial', address: 'Address', phone: 'Phone', name: 'Name', firstName: 'First name' };
+    const used = Object.keys(label)
+      .filter((k) => d.cols[k])
+      .map((k) => `${label[k]} = "${d.cols[k]}"`)
+      .join(' · ');
+    if (used) lines.push(`Using: ${used}`);
+    const missing = (d.missing || []).map((k) => label[k] || k);
+    if (missing.length) lines.push(`NOT FOUND: ${missing.join(', ')} — those leads will be held for review.`);
+  }
+  lines.push(`${r.withPhone} with a phone, ${r.withAddress} with an address, ${r.analysis.blankProfitDial} missing a ProfitDial number.`);
+  if (r.sample && r.sample.length) {
+    lines.push(`First row reads as: ${r.sample[0].name || '(no name)'} — ${r.sample[0].address || '(no address)'} — ${r.sample[0].phone || '(no phone)'}`);
+  }
+  lines.push('If that looks right, click Start.');
+  return lines.join('\n');
+}
+
 $('pdFile').onchange = async (e) => {
-  const fd = new FormData(); fd.append('file', e.target.files[0]); fd.append('limit', leadLimit());
+  const file = e.target.files[0];
+  if (!file) return;
+  $('loadInfo').textContent = `Reading ${file.name}…`;
+  const fd = new FormData(); fd.append('file', file); fd.append('limit', leadLimit());
   const r = await api(`/api/upload/profitdial?limit=${leadLimit()}`, { method: 'POST', body: fd });
-  $('loadInfo').textContent = r.ok
-    ? `Loaded ${r.leadCount} of ${r.totalRows} leads from your sheet (${r.analysis.blankProfitDial} missing ProfitDial). Click Start.`
-    : 'Error: ' + r.error;
+  $('loadInfo').textContent = r.ok ? describeLoad(r) : 'Could not read that file: ' + r.error;
+  // Allow re-picking the SAME file after changing the limit (no change event fires otherwise).
+  e.target.value = '';
 };
 $('btnGoogleSheet').onclick = async () => {
   const url = $('gsUrl').value.trim();
   if (!url) return alert('Paste your Google Sheet link first.');
   const r = await api('/api/ingest/googlesheet', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url, limit: leadLimit() }) });
-  $('loadInfo').textContent = r.ok
-    ? `Loaded ${r.leadCount} of ${r.rowCount} leads from your sheet. Click Start.`
-    : (r.error || 'Error');
+  $('loadInfo').textContent = r.ok ? describeLoad(r) : (r.error || 'Error');
 };
 // ---- printable daily report ----
 $('btnPrint').onclick = async () => {

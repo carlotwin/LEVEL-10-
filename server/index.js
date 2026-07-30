@@ -14,7 +14,13 @@ import { Engine } from './automation/engine.js';
 import { buildKpi } from './data/kpi.js';
 import { templatePoolSummary, anyPlaceholderEnabled, EXPECTED_CHECKSUM } from './automation/message.js';
 import { analyzeSheet } from './automation/profitdial.js';
-import { importContacts, readTabFromFile, exportResults } from './data/spreadsheet.js';
+import {
+  importContacts,
+  readTabFromFile,
+  exportResults,
+  loadLevel10File,
+  detectColumnsForRows,
+} from './data/spreadsheet.js';
 import { fetchGoogleSheetRows, parseSheetUrl } from './data/googleSheet.js';
 import { logger } from './logger.js';
 import { uploadsDir } from './data/paths.js';
@@ -87,15 +93,19 @@ function pdColsFromEnv() {
 // Turn ProfitDial spreadsheet rows into the lead worklist. ONE sheet is both the
 // list of Level 10 homeowners AND the source of their ProfitDial numbers.
 function buildLeadsFromRows(rows, cols) {
+  const val = (r, col) => (col ? String(r[col] ?? '').trim() : '');
   return rows.map((r, i) => {
-    const name = (cols.name && r[cols.name]) || r['Owner'] || '';
-    const contactId = (cols.contactId && r[cols.contactId]) || `L10-${i + 1}`;
+    const name = val(r, cols.name) || String(r['Owner'] ?? '').trim();
+    const contactId = val(r, cols.contactId) || `L10-${i + 1}`;
+    // First name from its own column when the sheet has one, else the first
+    // word of the owner/primary name.
+    const first = val(r, cols.firstName) || name;
     return {
       contactId: String(contactId),
       name: String(name),
-      firstName: String(r['FIrst Name'] || r['First Name'] || name).split(/\s+/)[0] || '',
-      address: cols.address ? String(r[cols.address] || '') : '',
-      phones: [cols.phone ? String(r[cols.phone] || '') : ''].filter(Boolean),
+      firstName: first.split(/\s+/)[0] || '',
+      address: val(r, cols.address),
+      phones: [val(r, cols.phone)].filter(Boolean),
       reiUrl: '',
       scenario: '',
     };
@@ -103,7 +113,9 @@ function buildLeadsFromRows(rows, cols) {
 }
 
 // Load a job from a single Level 10 sheet (leads + ProfitDial together).
-function loadLevel10FromRows(rows, cols, { source, tab, limit }) {
+// `detected` describes how the sheet was read (tab, header row, column mapping)
+// so the dashboard can show it instead of failing silently on a renamed column.
+function loadLevel10FromRows(rows, cols, { source, tab, limit, detected = null }) {
   const analysis = analyzeSheet(rows, cols);
   let leads = buildLeadsFromRows(rows, cols);
   let originals = rows;
@@ -119,7 +131,18 @@ function loadLevel10FromRows(rows, cols, { source, tab, limit }) {
     source,
     tab,
   });
-  return { state, analysis, leadCount: leads.length, totalRows: rows.length };
+  const withPhone = leads.filter((l) => l.phones.length > 0).length;
+  const withAddress = leads.filter((l) => l.address).length;
+  return {
+    state,
+    analysis,
+    leadCount: leads.length,
+    totalRows: rows.length,
+    withPhone,
+    withAddress,
+    detected,
+    sample: leads.slice(0, 3).map((l) => ({ name: l.name, address: l.address, phone: l.phones[0] || '' })),
+  };
 }
 
 // ---- Load sandbox scenarios (built-in synthetic data) ----
@@ -150,12 +173,35 @@ app.post('/api/sandbox/load', (req, res) => {
 // ---- Load the Level 10 sheet (leads + ProfitDial) from an uploaded file ----
 app.post('/api/upload/profitdial', upload.single('file'), (req, res) => {
   try {
-    const { rows, tab } = readTabFromFile(req.file.path, env.PD_SHEET_TAB);
-    const cols = pdColsFromEnv();
+    // Tolerant load: finds the tab, the header row, and the columns by alias.
+    // Never invents a column — anything it could not find comes back in
+    // `detected.missing` so the dashboard can say so plainly.
+    const found = loadLevel10File(req.file.path, {
+      preferredTab: env.PD_SHEET_TAB,
+      preferredCols: pdColsFromEnv(),
+    });
+    const { rows, tab, cols } = found;
+    if (!rows.length) {
+      throw new Error(`No data rows found. Tabs in this file: ${found.tabs.join(', ')}`);
+    }
+    if (!cols.phone && !cols.address) {
+      throw new Error(
+        `Could not find a phone or address column on tab "${tab}". ` +
+          `Columns seen: ${Object.keys(rows[0]).join(', ')}`
+      );
+    }
     engine._uploadedPd = { rows, cols };
     const limit = parseInt(req.query.limit ?? req.body?.limit ?? '0', 10) || 0;
-    const r = loadLevel10FromRows(rows, cols, { source: req.file.originalname, tab, limit });
-    res.json({ ok: true, tab: env.PD_SHEET_TAB, ...r });
+    const detected = {
+      tab,
+      tabs: found.tabs,
+      headerRow: found.headerRow,
+      cols,
+      how: found.how,
+      missing: found.missing,
+    };
+    const r = loadLevel10FromRows(rows, cols, { source: req.file.originalname, tab, limit, detected });
+    res.json({ ok: true, tab, ...r });
   } catch (e) {
     res.status(400).json({ ok: false, error: e.message });
   } finally {
@@ -170,10 +216,14 @@ app.post('/api/ingest/googlesheet', async (req, res) => {
     if (url && !sheetId) ({ sheetId, gid } = parseSheetUrl(url));
     if (gid == null || gid === '') gid = req.body?.gid ?? '';
     const { rows, sourceUrl } = await fetchGoogleSheetRows({ sheetId, gid, token });
-    const cols = pdColsFromEnv();
+    // Same tolerant column detection as the upload path (the CSV export is
+    // already parsed into rows here, so only the columns need mapping).
+    const det = detectColumnsForRows(rows, pdColsFromEnv());
+    const cols = det.cols;
     engine._uploadedPd = { rows, cols };
     const lim = parseInt(limit ?? '0', 10) || 0;
-    const r = loadLevel10FromRows(rows, cols, { source: sourceUrl, tab: env.PD_SHEET_TAB, limit: lim });
+    const detected = { tab: env.PD_SHEET_TAB, tabs: [], headerRow: 1, cols, how: det.how, missing: det.missing };
+    const r = loadLevel10FromRows(rows, cols, { source: sourceUrl, tab: env.PD_SHEET_TAB, limit: lim, detected });
     res.json({ ok: true, sourceUrl, rowCount: rows.length, ...r });
   } catch (e) {
     res.status(e.code === 'SHEET_PRIVATE' ? 403 : 400).json({ ok: false, error: e.message, code: e.code });
