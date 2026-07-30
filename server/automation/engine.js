@@ -173,6 +173,7 @@ export class Engine extends EventEmitter {
     const base = {
       contactId: contact.contactId,
       scenario: contact.scenario || '',
+      phone: (contact.phones || [])[0] || '',
       L10_Disposition: DISPOSITION.ERROR,
       L10_Reason: '',
       L10_TemplateId: '',

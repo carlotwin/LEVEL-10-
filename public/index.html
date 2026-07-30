@@ -3,89 +3,86 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Level 10 SMS Outreach — Sandbox</title>
+    <title>Level 10 SMS Outreach</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="topbar">
       <div class="brand">
-        <span class="logo">TWIN&nbsp;HOME&nbsp;BUYER</span>
-        <span class="sub">Level 10 SMS Outreach — Campaign Console</span>
+        <div class="logo">Twin Home Buyer</div>
+        <div class="sub">Level 10 SMS Outreach</div>
       </div>
-      <div id="modeBadge" class="badge badge-sandbox">SANDBOX</div>
+      <div id="modePill" class="pill-mode">Test Mode</div>
     </header>
 
-    <div id="safetyBanner" class="safety"></div>
+    <div id="note" class="note"></div>
 
     <main>
-      <section class="panel">
-        <h2>1 · Load data</h2>
-        <div class="row">
-          <button id="btnLoadSandbox" class="btn primary">Load Sandbox Scenarios</button>
-          <label class="uploader">
-            ProfitDial sheet (.xlsx)
-            <input type="file" id="pdFile" accept=".xlsx,.xls,.csv" />
-          </label>
-          <label class="uploader">
-            Contact list (.csv/.xlsx)
-            <input type="file" id="contactFile" accept=".csv,.xlsx,.xls" />
-          </label>
+      <!-- Step 1: data + run -->
+      <section class="card">
+        <div class="card-head">
+          <h2>Campaign</h2>
+          <span id="runStatus" class="status">idle</span>
         </div>
-        <div class="row">
-          <input type="text" id="gsUrl" class="txt" placeholder="Google Sheet URL (link-shared) for ProfitDial" />
-          <button id="btnGoogleSheet" class="btn">Ingest Google Sheet</button>
+
+        <div class="run-row">
+          <button id="btnStart" class="btn primary" disabled>Start</button>
+          <button id="btnPause" class="btn" disabled>Pause</button>
+          <button id="btnResume" class="btn" disabled>Resume</button>
+          <button id="btnStop" class="btn ghost" disabled>Stop</button>
         </div>
-        <div id="loadInfo" class="muted"></div>
-        <div id="sheetAnalysis" class="analysis hidden"></div>
+        <div class="progress-wrap">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+        <div id="progressText" class="muted small"></div>
+
+        <details class="data">
+          <summary>Load leads &amp; ProfitDial data</summary>
+          <div class="data-body">
+            <button id="btnLoadSample" class="btn">Load sample leads</button>
+            <label class="file">Upload leads (.csv/.xlsx)<input type="file" id="contactFile" accept=".csv,.xlsx,.xls" /></label>
+            <label class="file">ProfitDial sheet (.xlsx)<input type="file" id="pdFile" accept=".xlsx,.xls,.csv" /></label>
+            <div class="gs">
+              <input type="text" id="gsUrl" class="txt" placeholder="…or paste a Google Sheet link for ProfitDial" />
+              <button id="btnGoogleSheet" class="btn">Load</button>
+            </div>
+            <div id="loadInfo" class="muted small"></div>
+          </div>
+        </details>
       </section>
 
-      <section class="panel">
-        <h2>2 · Run</h2>
-        <div class="row controls">
-          <button id="btnStart" class="btn go" disabled>▶ Start</button>
-          <button id="btnPause" class="btn" disabled>⏸ Pause</button>
-          <button id="btnResume" class="btn" disabled>⏵ Resume</button>
-          <button id="btnStop" class="btn danger" disabled>⏹ Stop</button>
-          <span id="runStatus" class="status-chip">idle</span>
-          <span id="progress" class="muted"></span>
+      <!-- Step 2: the numbers that matter -->
+      <section class="card">
+        <div class="card-head">
+          <h2>Results at a glance</h2>
+          <div class="exports">
+            <a id="exportXlsx" class="btn small" href="/api/export?format=xlsx">Export Excel</a>
+            <a id="exportCsv" class="btn small ghost" href="/api/export?format=csv">Export CSV</a>
+          </div>
         </div>
+        <div id="kpi" class="kpi"></div>
       </section>
 
-      <section class="panel">
-        <h2>3 · Daily KPI Report</h2>
-        <div id="kpiCards" class="cards"></div>
-        <h3>Template Performance</h3>
+      <!-- Step 3: template performance -->
+      <section class="card">
+        <div class="card-head"><h2>Which message works best</h2><span id="bestTemplate" class="best"></span></div>
         <div class="table-wrap">
-          <table id="templateTable" class="tbl">
-            <thead>
-              <tr><th>Template</th><th>Sent</th><th>Delivered</th><th>Deliv %</th><th>Replies</th><th>Resp %</th><th>Positive</th><th>Pos %</th><th>Opt-Out</th></tr>
-            </thead>
+          <table class="tbl" id="templateTable">
+            <thead><tr><th>Message</th><th>Sent</th><th>Delivered</th><th>Replies</th><th>Positive</th><th>Opt-outs</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
-        <div id="bestTemplate" class="muted"></div>
-        <div id="dataIssues" class="issues"></div>
-        <div class="row">
-          <a id="exportXlsx" class="btn" href="/api/export?format=xlsx">⬇ Export XLSX</a>
-          <a id="exportCsv" class="btn" href="/api/export?format=csv">⬇ Export CSV</a>
-        </div>
       </section>
 
-      <section class="panel">
-        <h2>4 · Live results</h2>
+      <!-- Step 4: per-lead outcomes -->
+      <section class="card">
+        <div class="card-head"><h2>Leads</h2><span id="reviewCount" class="muted small"></span></div>
         <div class="table-wrap tall">
-          <table id="resultsTable" class="tbl">
-            <thead>
-              <tr><th>#</th><th>Contact</th><th>Scenario</th><th>Disposition</th><th>Template</th><th>ProfitDial</th><th>Opt-In</th><th>Delivery</th><th>Reply</th><th>Reason</th></tr>
-            </thead>
+          <table class="tbl" id="resultsTable">
+            <thead><tr><th>Contact</th><th>Phone</th><th>Outcome</th><th>Message</th><th>Reply</th><th>Notes</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
-      </section>
-
-      <section class="panel">
-        <h2>Approved template pool</h2>
-        <div id="templatePool" class="pool"></div>
       </section>
     </main>
 

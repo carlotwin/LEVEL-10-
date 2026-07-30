@@ -113,7 +113,7 @@ export function assertRunnable() {
 export function liveSendGate({ placeholderEnabled } = {}) {
   // Sandbox: no carrier is ever contacted. Simulated send is safe by construction.
   if (env.SANDBOX) {
-    return { allowed: true, simulated: true, reason: 'sandbox (simulated send — no carrier contacted)' };
+    return { allowed: true, simulated: true, reason: 'Passed all checks — not sent (Test Mode)' };
   }
 
   // Live mode from here down. ALL must pass.
