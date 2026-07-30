@@ -22,6 +22,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Adapter } from './adapter-interface.js';
+import { digitsOnly, normalizePhone } from '../automation/sop.js';
 import { env } from '../config/env.js';
 import { dataDir } from '../data/paths.js';
 import { logger } from '../logger.js';
@@ -166,24 +167,97 @@ export class ReiBlackBookAdapter extends Adapter {
     return rows;
   }
 
+  /**
+   * Search terms to try, in order. The sheet's phone is the strongest key, and
+   * REI's search box is picky about formatting, so every plausible rendering of
+   * the same number is tried before falling back to name, then address.
+   *
+   * A synthetic row id ("L10-7") is never searched — it means nothing to REI and
+   * would only produce a wrong-contact match.
+   */
+  _searchTerms(query) {
+    const terms = [];
+    const push = (label, value) => {
+      const v = String(value ?? '').trim();
+      if (v && !terms.some((t) => t.value === v)) terms.push({ label, value: v });
+    };
+
+    const digits = digitsOnly(query.phone);
+    const ten = digits.length >= 10 ? digits.slice(-10) : '';
+    if (ten) {
+      push('phone', `${ten.slice(0, 3)}-${ten.slice(3, 6)}-${ten.slice(6)}`);
+      push('phone', ten);
+      push('phone', `(${ten.slice(0, 3)}) ${ten.slice(3, 6)}-${ten.slice(6)}`);
+      push('phone', `${ten.slice(0, 3)}.${ten.slice(3, 6)}.${ten.slice(6)}`);
+    }
+    push('phone-as-given', query.phone);
+    push('name', query.name);
+    // Street portion only — REI rarely matches the full "city, ST zip" string.
+    const street = String(query.address ?? '').split(',')[0];
+    push('address', street);
+    push('address-full', query.address);
+    if (query.contactId && !query.syntheticId) push('contact-id', query.contactId);
+    return terms;
+  }
+
+  /** Phones on the currently open contact, normalized to last-10. */
+  async _openContactPhones() {
+    const raw = await this._allText(this.sel.contact.phoneRows);
+    const hrefs = await this.page
+      .$$eval("a[href^='tel:']", (els) => els.map((e) => e.getAttribute('href') || ''))
+      .catch(() => []);
+    return [...raw, ...hrefs].map((p) => normalizePhone(p)).filter(Boolean);
+  }
+
   async findContact(query) {
     const { contacts } = this.sel;
-    await this.page.click(contacts.navContacts);
-    // Ordered search fallbacks: address -> phone -> name.
-    const terms = [query.address, query.phone, query.name, query.contactId].filter(Boolean);
-    for (const term of terms) {
+    const wantPhone = normalizePhone(query.phone);
+    const searched = [];
+
+    for (const term of this._searchTerms(query)) {
+      await this.page.click(contacts.navContacts).catch(() => {});
       if (!(await this._present(contacts.searchInput, 4000))) continue;
-      await this.page.fill(contacts.searchInput, String(term));
-      await this.page.waitForTimeout(800);
-      const rowSel = contacts.resultRowByText.replace('%QUERY%', String(term));
-      if (await this._present(rowSel, 4000)) {
-        await this.page.click(rowSel);
-        await this.page.waitForTimeout(500);
-        const id = query.contactId || (await this._text(this.sel.contact.nameField)) || String(term);
-        return { found: true, contactId: id, matchedBy: term };
+
+      await this.page.fill(contacts.searchInput, '');
+      await this.page.fill(contacts.searchInput, term.value);
+      await this.page.keyboard.press('Enter').catch(() => {});
+      await this.page.waitForTimeout(1200);
+      searched.push(`${term.label}:"${term.value}"`);
+
+      // Open the first result. Prefer a row whose text contains the term, but
+      // don't require it — REI's list columns may not show what we searched on.
+      const byText = contacts.resultRowByText.replace('%QUERY%', term.value);
+      let opened = false;
+      if (await this._present(byText, 2500)) {
+        await this.page.click(byText).catch(() => {});
+        opened = true;
+      } else if (await this._present(contacts.openContact, 2500)) {
+        await this.page.click(contacts.openContact).catch(() => {});
+        opened = true;
       }
+      if (!opened) continue;
+      await this.page.waitForTimeout(900);
+
+      // VERIFY we opened the right person. Without this a loose search match
+      // could text a different homeowner — the one failure this app must never
+      // have. No phone on the sheet to check against => treat as unverified.
+      const phones = await this._openContactPhones();
+      if (!wantPhone) {
+        return { found: true, contactId: query.contactId || (await this._text(this.sel.contact.nameField)), matchedBy: term.label, searched, phoneVerified: false };
+      }
+      if (phones.includes(wantPhone)) {
+        return {
+          found: true,
+          contactId: query.contactId || (await this._text(this.sel.contact.nameField)) || term.value,
+          matchedBy: term.label,
+          searched,
+          phoneVerified: true,
+        };
+      }
+      searched.push(`opened-but-phone-mismatch(found ${phones.join('/') || 'none'}, wanted ${wantPhone})`);
     }
-    return { found: false };
+
+    return { found: false, searched };
   }
 
   async readContactFacts(contactId) {

@@ -36,17 +36,24 @@ export class SandboxAdapter extends Adapter {
   }
 
   async findContact(query) {
-    // Accept {contactId} directly, else match by phone/address.
+    // Accept {contactId} directly. A miss must FALL THROUGH to phone matching:
+    // leads loaded from a real sheet carry synthetic row ids ("L10-7") that are
+    // not in the sandbox, and returning early made every such lead "Not found".
     if (query?.contactId) {
       const c = this._get(query.contactId);
-      return c ? { found: c.found !== false, contactId: c.contactId } : { found: false };
+      if (c) return { found: c.found !== false, contactId: c.contactId, matchedBy: 'contact-id' };
     }
     for (const c of this.contacts.values()) {
       if (query?.phone && c.phones.some((p) => digitsOnly(p) === digitsOnly(query.phone))) {
-        return { found: c.found !== false, contactId: c.contactId };
+        return { found: c.found !== false, contactId: c.contactId, matchedBy: 'phone' };
       }
     }
-    return { found: false };
+    return {
+      found: false,
+      searched: [query?.contactId ? `contact-id:"${query.contactId}"` : '', query?.phone ? `phone:"${query.phone}"` : '']
+        .filter(Boolean),
+      sandboxMiss: true,
+    };
   }
 
   async readContactFacts(contactId) {

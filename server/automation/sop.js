@@ -59,10 +59,17 @@ export function checkEligibility(facts, config) {
 
   // 3b. Level 10 tag present? Derive from the tags array; `hasLevel10Tag` may be
   //     passed explicitly (tests) and takes precedence when defined.
+  //     `requireLevel10Tag: false` trusts the uploaded sheet as the Level 10
+  //     list instead of re-reading the tag chips off the contact screen. Use it
+  //     only when the sheet WAS the tag-filtered export; with no sheet, the tag
+  //     is the only thing establishing eligibility, so it defaults to required.
+  const requireTag = config.requireLevel10Tag !== false;
   const wantTag = String(config.level10Tag || '').toLowerCase();
   const derivedTag = (facts.tags || []).some((t) => String(t).toLowerCase() === wantTag);
   const hasTag = facts.hasLevel10Tag ?? derivedTag;
-  if (!hasTag) return block(DISPOSITION.MISSING_TAG, `Contact is missing the "${config.level10Tag}" tag`);
+  if (requireTag && !hasTag) {
+    return block(DISPOSITION.MISSING_TAG, `Contact is missing the "${config.level10Tag}" tag`);
+  }
 
   // 3c. Geographic filter.
   const st = String(facts.state ?? '').trim().toUpperCase();

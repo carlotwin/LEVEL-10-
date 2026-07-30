@@ -33,6 +33,10 @@ export const env = Object.freeze({
   WATCH_ONLY: readBool('WATCH_ONLY', false), // navigate + read + match, never send
   REQUIRE_OPTIN: readBool('REQUIRE_OPTIN', true), // SOP Step 4; off = REI app skips it
   REQUIRE_PROFITDIAL: readBool('REQUIRE_PROFITDIAL', true), // SOP Step 5/6; off = REI sends from default number
+  // SOP Step 2. Off = trust the uploaded sheet as the Level 10 list instead of
+  // re-reading the tag chips on each contact. Only valid when the sheet IS the
+  // tag-filtered export; defaults ON so a missing tag still blocks.
+  REQUIRE_LEVEL10_TAG: readBool('REQUIRE_LEVEL10_TAG', true),
   HEADLESS: readBool('HEADLESS', false),
   MAX_SENDS_PER_RUN: readInt('MAX_SENDS_PER_RUN', 10),
   PORT: readInt('PORT', 3000),

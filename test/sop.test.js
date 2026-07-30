@@ -158,3 +158,27 @@ test('a real STOP reply still blocks, even alongside our instruction line', () =
   assert.equal(unsub.ok, false);
   assert.equal(unsub.disposition, DISPOSITION.OPTED_OUT);
 });
+
+// --- the sheet as the Level 10 list ---------------------------------------
+test('requireLevel10Tag:false trusts the sheet when REI shows no tag chips', () => {
+  const facts = { ...okFacts(), hasLevel10Tag: false, tags: [] };
+  // Default (required) still blocks — the tag is the SOP gate.
+  const strict = sop.checkEligibility(facts, config);
+  assert.equal(strict.ok, false);
+  assert.equal(strict.disposition, DISPOSITION.MISSING_TAG);
+  // Off: the uploaded sheet IS the tag-filtered list, so the lead continues.
+  const relaxed = sop.checkEligibility(facts, { ...config, requireLevel10Tag: false });
+  assert.equal(relaxed.ok, true, relaxed.reason);
+});
+
+test('turning the tag check off does not weaken any other gate', () => {
+  const cfg = { ...config, requireLevel10Tag: false };
+  const optedOut = sop.checkEligibility({ ...okFacts(), tags: [], chatHistory: ['STOP'] }, cfg);
+  assert.equal(optedOut.disposition, DISPOSITION.OPTED_OUT);
+  const dnc = sop.checkEligibility({ ...okFacts(), tags: [], notes: 'do not contact' }, cfg);
+  assert.equal(dnc.disposition, DISPOSITION.DO_NOT_CONTACT);
+  const badPhone = sop.checkEligibility({ ...okFacts(), tags: [], phones: ['555'] }, cfg);
+  assert.equal(badPhone.disposition, DISPOSITION.INVALID_PHONE);
+  const outState = sop.checkEligibility({ ...okFacts(), tags: [], state: 'TX' }, cfg);
+  assert.equal(outState.disposition, DISPOSITION.OUT_OF_STATE);
+});

@@ -114,3 +114,32 @@ test('the lead tab is chosen over an unrelated first tab', () => {
   assert.equal(r.tab, 'Data');
   assert.deepEqual(r.missing, []);
 });
+
+// --- search-term construction for the live REI lookup ----------------------
+test('live search tries every phone format, then name, then street — never a synthetic id', async () => {
+  const { ReiBlackBookAdapter } = await import('../server/adapters/reibb.js');
+  const a = new ReiBlackBookAdapter();
+  const terms = a._searchTerms({
+    contactId: 'L10-7',
+    syntheticId: true,
+    phone: '916-607-2808',
+    name: 'TONY LAM',
+    address: '2700 Humboldt Ave, Oakland, CA 94602',
+  });
+  const values = terms.map((t) => t.value);
+  assert.ok(values.includes('916-607-2808'), 'dashed');
+  assert.ok(values.includes('9166072808'), 'digits only');
+  assert.ok(values.includes('(916) 607-2808'), 'parenthesized');
+  assert.ok(values.includes('TONY LAM'), 'name');
+  assert.ok(values.includes('2700 Humboldt Ave'), 'street only');
+  assert.equal(values.includes('L10-7'), false, 'a synthetic row id is never searched in REI');
+  // Phone first — it is the strongest key we have from the sheet.
+  assert.equal(terms[0].label, 'phone');
+});
+
+test('a real contact id from the sheet IS searched', async () => {
+  const { ReiBlackBookAdapter } = await import('../server/adapters/reibb.js');
+  const a = new ReiBlackBookAdapter();
+  const values = a._searchTerms({ contactId: 'REI-9931', syntheticId: false, phone: '510-206-1922' }).map((t) => t.value);
+  assert.ok(values.includes('REI-9931'));
+});

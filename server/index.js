@@ -96,12 +96,16 @@ function buildLeadsFromRows(rows, cols) {
   const val = (r, col) => (col ? String(r[col] ?? '').trim() : '');
   return rows.map((r, i) => {
     const name = val(r, cols.name) || String(r['Owner'] ?? '').trim();
-    const contactId = val(r, cols.contactId) || `L10-${i + 1}`;
+    const realId = val(r, cols.contactId);
+    // No Contact ID column in the Level 10 sheet, so rows get a synthetic id for
+    // the ledger. It is flagged so nobody ever SEARCHES REI for "L10-7".
+    const contactId = realId || `L10-${i + 1}`;
     // First name from its own column when the sheet has one, else the first
     // word of the owner/primary name.
     const first = val(r, cols.firstName) || name;
     return {
       contactId: String(contactId),
+      syntheticId: !realId,
       name: String(name),
       firstName: first.split(/\s+/)[0] || '',
       address: val(r, cols.address),

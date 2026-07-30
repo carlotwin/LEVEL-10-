@@ -48,6 +48,7 @@ export class Engine extends EventEmitter {
       maxSends: env.MAX_SENDS_PER_RUN,
       requireOptIn: env.REQUIRE_OPTIN,
       requireProfitDial: env.REQUIRE_PROFITDIAL,
+      requireLevel10Tag: env.REQUIRE_LEVEL10_TAG,
     };
   }
 
@@ -194,12 +195,32 @@ export class Engine extends EventEmitter {
       // Integrity re-check before doing anything irreversible.
       assertMessageIntegrity();
 
-      // STEP 3 — Open one contact (locate it in the filtered Level 10 list).
-      const found = await this.adapter.findContact({ contactId: contact.contactId, phone: (contact.phones || [])[0] });
-      if (!found.found) return this._finish(base, DISPOSITION.LEAD_NOT_FOUND, 'Contact not found in REI BlackBook', contact);
+      // STEP 3 — Open one contact. The sheet is the search key: phone first
+      // (strongest), then name, then street. Everything we know is handed over so
+      // the adapter can fall back instead of failing on one format.
+      const found = await this.adapter.findContact({
+        contactId: contact.contactId,
+        syntheticId: Boolean(contact.syntheticId),
+        phone: (contact.phones || [])[0],
+        name: contact.name,
+        address: contact.address,
+      });
+      if (!found.found) {
+        const tried = (found.searched || []).join(' → ');
+        const where = env.SANDBOX
+          ? 'Not in the sandbox test data — these leads are from your real sheet, so run the live watch to look them up in REI'
+          : 'Not found in REI BlackBook';
+        return this._finish(
+          base,
+          DISPOSITION.LEAD_NOT_FOUND,
+          tried ? `${where}. Searched: ${tried}` : where,
+          contact
+        );
+      }
 
       // Gather facts from the opened contact (tags, phones, notes, chat history).
       const facts = await this.adapter.readContactFacts(found.contactId);
+      base.L10_Reason = found.matchedBy ? `Matched by ${found.matchedBy}` : '';
       if (facts.name) base.name = facts.name;
       if (facts.reiUrl) base.reiUrl = facts.reiUrl; // clickable link to the REI contact
 
@@ -207,9 +228,11 @@ export class Engine extends EventEmitter {
       const elig = sop.checkEligibility(facts, this.config);
       if (!elig.ok) return this._finish(base, elig.disposition, elig.reason, contact);
 
-      // GATE 2 — Campaign duplicate ledger.
+      // GATE 2 — Campaign duplicate ledger. Keyed on the SHEET's contact id, which
+      // is what _finish() records — the id scraped off the screen can differ run
+      // to run, which would let the same lead through twice.
       const phone = (facts.phones || [])[0] || '';
-      const ledgerHit = this.ledger.has(this.config.campaignBatch, facts.contactId, phone);
+      const ledgerHit = this.ledger.has(this.config.campaignBatch, contact.contactId, phone);
       const dup = sop.checkAlreadyProcessed(ledgerHit);
       if (!dup.ok) return this._finish(base, dup.disposition, dup.reason, contact);
 

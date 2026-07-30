@@ -128,6 +128,37 @@ the following are required, and each defaults to off:
 4. Set `SANDBOX=false` and `ALLOW_LIVE_SEND=true`. Start with a small
    `MAX_SENDS_PER_RUN`.
 
+### Finding the lead in REI
+
+The sheet is the search key. The live adapter searches Contacts by **phone in
+every plausible format** (`916-607-2808`, `9166072808`, `(916) 607-2808`,
+`916.607.2808`), then the **name**, then the **street** portion of the address.
+A synthetic row id (`L10-7`, generated because the sheet has no Contact ID
+column) is never searched — it means nothing to REI.
+
+After opening a result, the contact's `tel:` numbers are compared against the
+sheet's phone. **A mismatch is not accepted** — it moves on to the next search
+term rather than risk texting a different homeowner. When no term produces a
+verified match, the row reports `Lead Not Found` *and lists every term it tried*,
+so a lookup failure is diagnosable instead of a dead end.
+
+### When the sheet is the source of truth
+
+Three SOP steps re-verify in REI what the sheet already says. Each can be turned
+off — all default ON (fail closed), and turning any off is a deliberate,
+documented choice, not a side effect:
+
+| Setting | ON (default) | OFF |
+|---|---|---|
+| `REQUIRE_LEVEL10_TAG` | Re-reads the tag chips on each contact | Trusts the uploaded sheet as the Level 10 list |
+| `REQUIRE_OPTIN` | Runs SOP Step 4 opt-in (needs selectors) | Assumes numbers are already opt-in |
+| `REQUIRE_PROFITDIAL` | Selects the assigned number + digit-for-digit readback | REI sends from **its own default number** |
+
+Turning `REQUIRE_PROFITDIAL` off does **not** make REI send from the sheet's
+assigned number — this app has no from-number picker, so the text goes out from
+whatever number REI uses by default. The result row records
+`(REI default number)` rather than claiming the assigned one was used.
+
 ### Approved templates
 
 `L10-1` … `L10-6`, all six enabled, rotated by controlled balanced allocation
