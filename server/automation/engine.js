@@ -207,9 +207,12 @@ export class Engine extends EventEmitter {
       });
       if (!found.found) {
         const tried = (found.searched || []).join(' → ');
-        const where = env.SANDBOX
-          ? 'Not in the sandbox test data — these leads are from your real sheet, so run the live watch to look them up in REI'
-          : 'Not found in REI BlackBook';
+        // In sandbox, a lead loaded from the real sheet simply isn't in the test
+        // data — say so, rather than implying REI doesn't have the contact.
+        const where =
+          env.SANDBOX && contact.syntheticId
+            ? 'Not in the sandbox test data — this lead is from your real sheet, so run the live watch (npm run watch:20) to look it up in REI'
+            : 'Contact not found in REI BlackBook';
         return this._finish(
           base,
           DISPOSITION.LEAD_NOT_FOUND,
@@ -348,7 +351,15 @@ export class Engine extends EventEmitter {
   }
 
   _finish(base, disposition, reason, contact, extra = {}) {
-    const result = { ...base, L10_Disposition: disposition, L10_Reason: reason };
+    const result = {
+      ...base,
+      L10_Disposition: disposition,
+      L10_Reason: reason,
+      // Exported columns mirror the fields the dashboard uses, set in one place
+      // so the export can never drift from what was shown on screen.
+      L10_ReiUrl: base.reiUrl || '',
+      L10_Message: base.message || '',
+    };
 
     // Record to the campaign ledger for any contact that reached a send attempt
     // OR was blocked after opt-in, so re-runs never re-text. We ALWAYS record

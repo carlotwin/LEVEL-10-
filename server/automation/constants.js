@@ -96,6 +96,12 @@ export const EXPORT_COLUMNS = Object.freeze([
   'L10_SendVerified',
   'L10_ReplyClass',
   'L10_ProcessedAt',
+  // Direct link to the contact in REI BlackBook, so a row can be opened and
+  // checked by hand from the exported sheet.
+  'L10_ReiUrl',
+  // The exact text prepared/sent for this contact — the audit record of what
+  // the homeowner actually received.
+  'L10_Message',
 ]);
 
 // Merge fields the templates are allowed to reference. Anything else in a
