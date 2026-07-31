@@ -20,6 +20,10 @@
 // loadenv.js never overwrites an existing variable, so this entry point cannot
 // send regardless of what .env says.
 // =============================================================================
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+
 process.env.SANDBOX = 'false';
 process.env.WATCH_ONLY = 'true';
 process.env.ALLOW_LIVE_SEND = 'false';
@@ -40,10 +44,68 @@ const { ReiBlackBookAdapter } = await import('../server/adapters/reibb.js');
 const { chooseContact, verifyOpenedContact } = await import('../server/automation/contactMatch.js');
 const { loadLevel10File, detectColumnsForRows } = await import('../server/data/spreadsheet.js');
 
-const file = process.argv[2];
+// ---------------------------------------------------------------------------
+// Locate the spreadsheet. A wrong path is the most common way this run dies, so
+// an explicit path is validated and, failing that, the usual folders are searched
+// for a Level 10 workbook. Never guesses between several matches.
+// ---------------------------------------------------------------------------
+function findSpreadsheet(explicit) {
+  // cmd keeps stray quotes when a drag-and-drop is mixed with typing.
+  const given = String(explicit ?? '').replace(/^["']+|["']+$/g, '').trim();
+  if (given && fs.existsSync(given)) return { file: given, from: 'the path you gave' };
+
+  const home = os.homedir();
+  const dirs = [
+    process.cwd(),
+    path.join(process.cwd(), 'data'),
+    path.join(home, 'Downloads'),
+    path.join(home, 'Desktop'),
+    path.join(home, 'Documents'),
+    path.join(home, 'OneDrive', 'Desktop'),
+    path.join(home, 'OneDrive', 'Documents'),
+    home,
+  ];
+  const hits = [];
+  for (const dir of dirs) {
+    let names = [];
+    try {
+      names = fs.readdirSync(dir);
+    } catch {
+      continue;
+    }
+    for (const n of names) {
+      if (!/\.(xlsx|xlsm|xls|csv)$/i.test(n)) continue;
+      if (!/level\s*-?\s*10|with\s*contacts/i.test(n)) continue;
+      const full = path.join(dir, n);
+      if (!hits.includes(full)) hits.push(full);
+    }
+  }
+  return { file: null, hits, given };
+}
+
+const found = findSpreadsheet(process.argv[2]);
+let file = found.file;
 if (!file) {
-  console.error('\n  Usage: npm run verify:live -- "C:\\path\\to\\Level 10 Properties with Contacts.xlsx"\n');
-  process.exit(1);
+  if (found.given) {
+    console.error(`\n  That file does not exist:\n    ${found.given}\n`);
+  }
+  if (found.hits.length === 1) {
+    file = found.hits[0];
+    console.log(`\n  Using the Level 10 workbook found on this machine:\n    ${file}\n`);
+  } else if (found.hits.length > 1) {
+    console.error('  Several Level 10 workbooks found — pass the one you want:\n');
+    for (const h of found.hits) console.error(`    npm run verify:live -- "${h}"`);
+    console.error('');
+    process.exit(1);
+  } else {
+    console.error('  No Level 10 workbook found in this folder, Downloads, Desktop or Documents.');
+    console.error('  Pass the path explicitly — tip: type the command, then DRAG the .xlsx');
+    console.error('  from File Explorer into this window to paste its full path:\n');
+    console.error('    npm run verify:live -- "C:\\Users\\You\\Downloads\\Level 10 Properties with Contacts.xlsx"\n');
+    process.exit(1);
+  }
+} else if (found.from) {
+  console.log(`\n  Spreadsheet: ${file}\n`);
 }
 
 const sheet = loadLevel10File(file, {
@@ -66,7 +128,16 @@ console.log(`  Columns: name="${cols.name}" phone="${cols.phone}" address="${col
 const adapter = new ReiBlackBookAdapter();
 const findings = [];
 try {
-  await adapter.init();
+  try {
+    await adapter.init();
+  } catch (e) {
+    // A failed login or browser launch is a setup problem, not a finding. Say so
+    // plainly instead of printing a stack trace.
+    console.error(`\n  Could not open REI BlackBook: ${e.message}`);
+    console.error('  Check REIBB_LOGIN_URL / REIBB_EMAIL / REIBB_PASSWORD in .env.');
+    console.error('  If Chromium is missing, run: npx playwright install chromium\n');
+    process.exit(1);
+  }
 
   for (const [i, row] of rows.entries()) {
     const sheetRow = {
