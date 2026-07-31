@@ -213,13 +213,24 @@ function describeLoad(r) {
   return lines.join('\n');
 }
 
+// Test Mode + real uploaded leads is a trap: Start runs entirely offline and
+// every row comes back "Not Level 10" because the simulation has no tags. Say so
+// at the moment the sheet is loaded, not after a confusing run.
+function warnIfTestMode() {
+  if (MODE !== 'test') return '';
+  return (
+    '\nTEST MODE: pressing Start will NOT open REI — it simulates offline and every row will say ' +
+    '"Not Level 10". To check your real REI account, use "Check against REI" below.'
+  );
+}
+
 $('pdFile').onchange = async (e) => {
   const file = e.target.files[0];
   if (!file) return;
   $('loadInfo').textContent = `Reading ${file.name}…`;
   const fd = new FormData(); fd.append('file', file); fd.append('limit', leadLimit());
   const r = await api(`/api/upload/profitdial?limit=${leadLimit()}`, { method: 'POST', body: fd });
-  $('loadInfo').textContent = r.ok ? describeLoad(r) : 'Could not read that file: ' + r.error;
+  $('loadInfo').textContent = r.ok ? describeLoad(r) + warnIfTestMode() : 'Could not read that file: ' + r.error;
   // Allow re-picking the SAME file after changing the limit (no change event fires otherwise).
   e.target.value = '';
 };
@@ -227,7 +238,7 @@ $('btnGoogleSheet').onclick = async () => {
   const url = $('gsUrl').value.trim();
   if (!url) return alert('Paste your Google Sheet link first.');
   const r = await api('/api/ingest/googlesheet', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url, limit: leadLimit() }) });
-  $('loadInfo').textContent = r.ok ? describeLoad(r) : (r.error || 'Error');
+  $('loadInfo').textContent = r.ok ? describeLoad(r) + warnIfTestMode() : (r.error || 'Error');
 };
 // ---- printable daily report ----
 $('btnPrint').onclick = async () => {

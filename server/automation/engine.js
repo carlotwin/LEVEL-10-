@@ -315,7 +315,16 @@ export class Engine extends EventEmitter {
             ? L10_STATUS.LEVEL_10_TAG_MISSING
             : L10_STATUS.SAFETY_REVIEW_FAILED;
         logger.info('eligibility_blocked', { row: contact.contactId, status: base.L10_Status, reason: elig.reason });
-        return this._finish(base, elig.disposition, elig.reason, contact);
+        // In Test Mode a lead from a real sheet has no tags, notes or history —
+        // there is nothing to read, because REI was never contacted. Saying
+        // "Not Level 10" without that context reads as a finding about the
+        // homeowner, which it is not.
+        const reason =
+          env.SANDBOX && contact.syntheticId
+            ? `${elig.reason} — but this is TEST MODE: REI was never opened, so there are no tags to read. ` +
+              'Use "Check against REI" to test the real account.'
+            : elig.reason;
+        return this._finish(base, elig.disposition, reason, contact);
       }
       gates.safetyReviewPassed = true;
 
