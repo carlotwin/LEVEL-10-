@@ -26,8 +26,8 @@
     "nameField": "h1, h2",
     "addressField": "",
     "stateField": "",
-    "phoneRows": "a[href^='tel:']",
-    "tagChips": ".tag-item, .tag, [class*='tag-'], [class*='Tag'] .badge, .badge, .chip, .label, .pill, [class*='chip'], [class*='pill'], [class*='badge']",
+    "phoneRows": "a[href^='tel:'], p.chakra-text",
+    "tagChips": "[class*='tagTheme' i], span.chakra-badge[class*='tagTheme' i]",
     "notesField": "",
     "chatMessages": ".activity-item, [class*='activity']",
     "pageMarker": "",
@@ -58,7 +58,8 @@
   },
   "_verifiedLive": [
     "contacts.searchInput",
-    "contacts.resultRow"
+    "contacts.resultRow",
+    "contacts.openContact"
   ],
-  "_verifiedNote": "Keys in _verifiedLive were observed WORKING in the real REI BlackBook account. contacts.searchInput and contacts.resultRow: verified by the read-only five-record run (5/5 phone searches returned one parseable row each). A sandbox test never qualifies."
+  "_verifiedNote": "Keys in _verifiedLive were observed WORKING in the real REI BlackBook account. contacts.searchInput / contacts.resultRow / contacts.openContact: verified by the read-only runs (5/5 phone searches parsed; 3/3 eligible records opened at /contacts/<id>). contact.phoneRows and contact.tagChips are written from the live DOM probe but the selectors themselves have not yet been re-run. A sandbox test never qualifies."
 }

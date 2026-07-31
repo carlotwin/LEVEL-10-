@@ -196,7 +196,12 @@ try {
     // When the record could not be read, probe the page and print what IS there,
     // so the correct selectors can be written from evidence.
     if (recheck.status !== 'CONTACT_VERIFIED') {
-      const probe = await adapter.probeContactPage(`row${i + 1}-${sheetRow.phone.replace(/\D/g, '')}`);
+      const probe = await adapter.probeContactPage(`row${i + 1}-${sheetRow.phone.replace(/\D/g, '')}`, {
+        // Hunt for the values we already expect — the surest way to find which
+        // element holds the name when the page has no heading.
+        name: (search.candidates?.[0]?.name || sheetRow.name),
+        address: (search.candidates?.[0]?.address || sheetRow.address),
+      });
       f.probe = probe;
       console.log('\n         ── DETAIL PAGE PROBE (read-only) ──');
       console.log(`         url: ${probe.url}`);
@@ -204,8 +209,15 @@ try {
         `           <${d.tag}${d.id ? ' id=' + d.id : ''}${d.cls ? ' class=' + d.cls : ''}` +
         `${d.role ? ' role=' + d.role : ''}${d.aria ? ' aria-label="' + d.aria + '"' : ''}` +
         `${d.testid ? ' data-testid=' + d.testid : ''}${d.href ? ' href="' + d.href + '"' : ''}> ${d.text}`;
+      console.log(`         title: ${probe.title || '(none)'}`);
       console.log('         headings:');
       (probe.headings || []).forEach((d) => console.log(line(d)));
+      console.log('         elements containing the expected NAME:');
+      (probe.nameHits || []).forEach((d) => console.log(line(d)));
+      console.log('         elements containing the expected ADDRESS:');
+      (probe.addressHits || []).forEach((d) => console.log(line(d)));
+      console.log('         largest visible text:');
+      (probe.biggest || []).forEach((d) => console.log(`${line(d)}   [${d.size}px]`));
       console.log('         phone-looking elements:');
       (probe.phones || []).forEach((d) => console.log(line(d)));
       console.log('         tag-looking elements:');

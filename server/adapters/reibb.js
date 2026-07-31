@@ -229,7 +229,7 @@ export class ReiBlackBookAdapter extends Adapter {
    * This exists so detail-page selectors are captured from evidence instead of
    * guessed. It changes nothing on the page.
    */
-  async probeContactPage(label = 'contact') {
+  async probeContactPage(label = 'contact', expect = {}) {
     const describe = (el, text) => {
       const attr = (n) => el.getAttribute(n) || '';
       const cls = String(attr('class') || '').split(/\s+/).filter(Boolean).slice(0, 3).join('.');
@@ -247,7 +247,7 @@ export class ReiBlackBookAdapter extends Adapter {
 
     const out = { url: this.page.url(), headings: [], phones: [], tags: [], html: '' };
     try {
-      const probe = await this.page.evaluate(() => {
+      const probe = await this.page.evaluate((EXPECT) => {
         const vis = (el) => {
           const r = el.getBoundingClientRect();
           const st = getComputedStyle(el);
@@ -287,8 +287,39 @@ export class ReiBlackBookAdapter extends Adapter {
           .filter((d) => d.text && d.text.length < 40)
           .slice(0, 12);
 
-        return { headings, phones, tags };
-      });
+        // TARGETED HUNT: we already know what the name and address should say, so
+        // find the elements that contain those exact values and report how to
+        // select them. Far more reliable than guessing which container holds the
+        // name — this page has no visible heading at all.
+        const hunt = (needle) => {
+          const want = String(needle || '').trim().toLowerCase();
+          if (want.length < 3) return [];
+          return [...document.querySelectorAll('body *')]
+            .filter((el) => {
+              if (el.children.length > 0) return false; // leaf nodes only
+              if (!vis(el)) return false;
+              const t = (el.innerText || el.textContent || '').trim().toLowerCase();
+              return t && (t === want || t.includes(want) || want.includes(t));
+            })
+            .map(desc)
+            .slice(0, 6);
+        };
+
+        return {
+          headings,
+          phones,
+          tags,
+          title: document.title,
+          nameHits: hunt(EXPECT.name),
+          addressHits: hunt(EXPECT.address),
+          // Largest visible text on the page — the name is usually the biggest thing.
+          biggest: [...document.querySelectorAll('body *')]
+            .filter((el) => el.children.length === 0 && vis(el) && (el.innerText || '').trim())
+            .map((el) => ({ ...desc(el), size: parseFloat(getComputedStyle(el).fontSize) || 0 }))
+            .sort((a, b) => b.size - a.size)
+            .slice(0, 6),
+        };
+      }, { name: expect.name || '', address: expect.address || '' });
       Object.assign(out, probe);
     } catch (e) {
       out.error = e.message;
@@ -538,13 +569,23 @@ export class ReiBlackBookAdapter extends Adapter {
     }
   }
 
-  /** Phones on the currently open contact, normalized to last-10. */
+  /**
+   * Phones on the currently open contact, normalized to last-10.
+   *
+   * This account has no `tel:` links — numbers render as plain <p class="chakra-text">
+   * (confirmed by the live DOM probe). That selector also matches ordinary prose, so
+   * only phone-SHAPED text is kept; anything else would pollute the verification.
+   */
   async _openContactPhones() {
     const raw = await this._allText(this.sel.contact.phoneRows);
     const hrefs = await this.page
       .$$eval("a[href^='tel:']", (els) => els.map((e) => e.getAttribute('href') || ''))
       .catch(() => []);
-    return [...raw, ...hrefs].map((p) => normalizePhone(p)).filter(Boolean);
+    const PHONE_SHAPED = /\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/;
+    return [...raw, ...hrefs]
+      .filter((t) => PHONE_SHAPED.test(String(t)))
+      .map((t) => normalizePhone(t))
+      .filter((d) => d.length === 10);
   }
 
   /**
@@ -674,18 +715,25 @@ export class ReiBlackBookAdapter extends Adapter {
     return { opened: true, contactId: candidate?.name || String(candidate?.ref ?? '') };
   }
 
+  /** The stable REI contact id, taken from /contacts/<id> in the URL. */
+  _contactIdFromUrl() {
+    const m = /\/contacts?\/(\d+)/i.exec(this.page.url() || '');
+    return m ? m[1] : '';
+  }
+
   async readContactFacts(contactId) {
     const c = this.sel.contact;
     return {
       found: true,
-      contactId,
+      // Prefer REI's own id from the URL over anything scraped from the page.
+      contactId: this._contactIdFromUrl() || contactId,
       reiUrl: this.page.url(), // direct link to this contact for the dashboard
       name: await this._text(c.nameField),
       firstName: (await this._text(c.nameField)).split(/\s+/)[0] || '',
       lastName: (await this._text(c.nameField)).split(/\s+/).slice(1).join(' '),
       address: await this._text(c.addressField),
       state: await this._text(c.stateField),
-      phones: await this._allText(c.phoneRows),
+      phones: await this._openContactPhones(),
       tags: await this._allText(c.tagChips),
       notes: await this._text(c.notesField),
       chatHistory: await this._allText(c.chatMessages),
