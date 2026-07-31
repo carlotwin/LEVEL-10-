@@ -133,8 +133,11 @@ test('live search tries every phone format, then name, then street — never a s
   assert.ok(values.includes('TONY LAM'), 'name');
   assert.ok(values.includes('2700 Humboldt Ave'), 'street only');
   assert.equal(values.includes('L10-7'), false, 'a synthetic row id is never searched in REI');
-  // Phone first — it is the strongest key we have from the sheet.
+  // Phone first — it is the strongest key we have from the sheet. Street before
+  // name, because many REI contacts are named "Unknown".
   assert.equal(terms[0].label, 'phone');
+  const labels = terms.map((t) => t.label);
+  assert.ok(labels.indexOf('address') < labels.indexOf('name'), 'street is tried before name');
 });
 
 test('a real contact id from the sheet IS searched', async () => {

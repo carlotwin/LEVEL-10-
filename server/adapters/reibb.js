@@ -324,11 +324,13 @@ export class ReiBlackBookAdapter extends Adapter {
       push('phone', `${ten.slice(0, 3)}.${ten.slice(3, 6)}.${ten.slice(6)}`);
     }
     push('phone-as-given', query.phone);
-    push('name', query.name);
-    // Street portion only — REI rarely matches the full "city, ST zip" string.
+    // Street before name: many REI contacts have "Unknown" as the name, so a name
+    // search is the weakest key here. Street portion only — REI rarely matches the
+    // full "city, ST zip" string.
     const street = String(query.address ?? '').split(',')[0];
     push('address', street);
     push('address-full', query.address);
+    push('name', query.name);
     if (query.contactId && !query.syntheticId) push('contact-id', query.contactId);
     return terms;
   }
