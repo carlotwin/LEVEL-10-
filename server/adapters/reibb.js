@@ -715,10 +715,79 @@ export class ReiBlackBookAdapter extends Adapter {
     return { opened: true, contactId: candidate?.name || String(candidate?.ref ?? '') };
   }
 
+  /**
+   * Read a labelled field from the About panel ("Name", "Phone (Mobile)",
+   * "Property Address", "Mailing Address").
+   *
+   * The panel renders label/value pairs with no headings and no stable classes —
+   * the live probe found NO h1/h2/h3 at all, which is why a class-based selector
+   * kept coming back blank. Anchoring on the visible LABEL text and taking the
+   * adjacent value survives Chakra's generated class names.
+   */
+  async _readLabeledField(label) {
+    try {
+      return await this.page.evaluate((LABEL) => {
+        const norm = (t) => String(t || '').replace(/\s+/g, ' ').trim();
+        const wanted = LABEL.toLowerCase();
+        const vis = (el) => {
+          const r = el.getBoundingClientRect();
+          return r.width > 0 && r.height > 0;
+        };
+        const leaves = [...document.querySelectorAll('body *')].filter(
+          (el) => el.children.length === 0 && norm(el.textContent) && vis(el)
+        );
+        for (const el of leaves) {
+          const own = norm(el.textContent).toLowerCase().replace(/:$/, '');
+          if (own !== wanted) continue;
+          const out = [];
+          // Value usually sits immediately after the label, or after its wrapper.
+          let n = el.nextElementSibling;
+          while (n && out.length < 3) {
+            out.push(norm(n.innerText || n.textContent));
+            n = n.nextElementSibling;
+          }
+          const p = el.parentElement;
+          if (p) {
+            let q = p.nextElementSibling;
+            while (q && out.length < 6) {
+              out.push(norm(q.innerText || q.textContent));
+              q = q.nextElementSibling;
+            }
+          }
+          const value = out.find((v) => v && v.toLowerCase() !== wanted && v.length < 200);
+          if (value) return value;
+        }
+        return '';
+      }, label);
+    } catch {
+      return '';
+    }
+  }
+
   /** The stable REI contact id, taken from /contacts/<id> in the URL. */
   _contactIdFromUrl() {
     const m = /\/contacts?\/(\d+)/i.exec(this.page.url() || '');
     return m ? m[1] : '';
+  }
+
+  /** Name / address / state for the open record, read by label then by selector. */
+  async _readIdentity(c) {
+    const name = (await this._readLabeledField('Name')) || (await this._text(c.nameField));
+    const address =
+      (await this._readLabeledField('Property Address')) ||
+      (c.addressField ? await this._text(c.addressField) : '');
+    // State is not its own field on this account — take it from the address
+    // ("..., Oakland, CA 94602"), which is what the geographic filter needs.
+    const fromAddress = /,\s*([A-Z]{2})\s*\d{5}(?:-\d{4})?\s*$/.exec(String(address || ''));
+    const state = (c.stateField ? await this._text(c.stateField) : '') || (fromAddress ? fromAddress[1] : '');
+    const parts = String(name || '').split(/\s+/).filter(Boolean);
+    return {
+      name,
+      firstName: parts[0] || '',
+      lastName: parts.slice(1).join(' '),
+      address,
+      state,
+    };
   }
 
   async readContactFacts(contactId) {
@@ -728,11 +797,7 @@ export class ReiBlackBookAdapter extends Adapter {
       // Prefer REI's own id from the URL over anything scraped from the page.
       contactId: this._contactIdFromUrl() || contactId,
       reiUrl: this.page.url(), // direct link to this contact for the dashboard
-      name: await this._text(c.nameField),
-      firstName: (await this._text(c.nameField)).split(/\s+/)[0] || '',
-      lastName: (await this._text(c.nameField)).split(/\s+/).slice(1).join(' '),
-      address: await this._text(c.addressField),
-      state: await this._text(c.stateField),
+      ...(await this._readIdentity(c)),
       phones: await this._openContactPhones(),
       tags: await this._allText(c.tagChips),
       notes: await this._text(c.notesField),

@@ -40,7 +40,13 @@
     "editModal": "[role='dialog']:has-text('Edit Contact Information'), [role='dialog']:has-text('Contact Information')",
     "optInControl": "[role='dialog'] [role='combobox'], [role='dialog'] button:has-text('Opt'), [role='dialog'] [class*='select' i]:has-text('Opt')",
     "optInOptionIn": "[role='option']:has-text('Opt'), li:has-text('Opt - In'), [role='menuitem']:has-text('Opt')",
-    "optInSave": "[role='dialog'] button:has-text('Update Info'), [role='dialog'] button:has-text('Update')"
+    "optInSave": "[role='dialog'] button:has-text('Update Info'), [role='dialog'] button:has-text('Update')",
+    "_labels": {
+      "name": "Name",
+      "phoneMobile": "Phone (Mobile)",
+      "propertyAddress": "Property Address",
+      "mailingAddress": "Mailing Address"
+    }
   },
   "sms": {
     "optInButton": "",
@@ -67,7 +73,7 @@
     "contacts.resultRow",
     "contacts.openContact"
   ],
-  "_verifiedNote": "Keys in _verifiedLive were observed WORKING in the real REI BlackBook account. contacts.searchInput / contacts.resultRow / contacts.openContact: verified by the read-only runs (5/5 phone searches parsed; 3/3 eligible records opened at /contacts/<id>). contact.phoneRows and contact.tagChips are written from the live DOM probe but the selectors themselves have not yet been re-run. A sandbox test never qualifies.",
+  "_verifiedNote": "Keys in _verifiedLive were observed WORKING in the real REI BlackBook account. contacts.searchInput / contacts.resultRow / contacts.openContact: verified by the read-only runs (5/5 phone searches parsed; 3/3 eligible records opened at /contacts/<id>). contact.phoneRows and contact.tagChips are written from the live DOM probe but the selectors themselves have not yet been re-run. A sandbox test never qualifies. The About panel has no headings and no stable classes, so name/address are read by their visible LABEL text (contact._labels) rather than by selector.",
   "urls": {
     "contactsList": "/contacts",
     "contactDetail": "/contacts/%ID%",
