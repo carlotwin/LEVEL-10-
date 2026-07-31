@@ -119,28 +119,35 @@ the following are required, and each defaults to off:
 1. Verify `config/reibb.selectors.json` against your REI BlackBook account with
    `HEADLESS=false` and `SLOWMO_MS` set. Login / contacts / Chat tab / TinyMCE
    reply box / Send Text / tag chips are confirmed from the account; **opt-in and
-   ProfitDial from-number selectors do not exist in this app** — capture them
-   with `npx playwright codegen`, or set `REQUIRE_OPTIN=false` /
-   `REQUIRE_PROFITDIAL=false` if REI handles those itself.
+   ProfitDial from-number selectors do not exist in this app** — they must be
+   captured with `npx playwright codegen`. There is no way to switch those steps
+   off (see **Mandatory SOP steps** below), so until they are captured every lead
+   stops at `OPT_IN_REQUIRED` / `PROFITDIAL_NOT_VERIFIED` and nothing sends.
 2. Set `REIBB_LOGIN_URL`, `REIBB_EMAIL`, `REIBB_PASSWORD` in `.env`.
 3. ✅ Done — the six approved templates are installed (`placeholder: false`) and
    `EXPECTED_CHECKSUM` is pinned to them.
 4. Set `SANDBOX=false` and `ALLOW_LIVE_SEND=true`. Start with a small
    `MAX_SENDS_PER_RUN`.
 
-### Finding the lead in REI
+### Finding the lead in REI — phone only
 
-The sheet is the search key. The live adapter searches Contacts by **phone in
-every plausible format** (`916-607-2808`, `9166072808`, `(916) 607-2808`,
-`916.607.2808`), then the **name**, then the **street** portion of the address.
-A synthetic row id (`L10-7`, generated because the sheet has no Contact ID
-column) is never searched — it means nothing to REI.
+The normalized 10-digit phone is the **primary and only** search key. The name is
+never searched: a name search can surface a different homeowner. The same number
+is retried in the renderings REI's box may require (`9166072808`,
+`(916) 607-2808`, `916-607-2808`, `916.607.2808`) — still a phone search, not a
+fallback to another key.
 
-After opening a result, the contact's `tel:` numbers are compared against the
-sheet's phone. **A mismatch is not accepted** — it moves on to the next search
-term rather than risk texting a different homeowner. When no term produces a
-verified match, the row reports `Lead Not Found` *and lists every term it tried*,
-so a lookup failure is diagnosable instead of a dead end.
+- **0 results** → `NO_CONTACT_FOUND_BY_PHONE`. The row is skipped. No contact is
+  ever created.
+- **1 result** → phone **and** name must match, with no conflicting address.
+- **several results** → every candidate is compared; the first row is never taken
+  by position. Exactly one confident match proceeds, same-name candidates are
+  separated by property address, anything else is
+  `MULTIPLE_CONTACTS_MANUAL_REVIEW`.
+
+A page the automation could not drive is reported as `MANUAL_REVIEW_REQUIRED`,
+never as `NO_CONTACT_FOUND_BY_PHONE` — "REI has nobody" and "the bot could not
+search" are different facts and must not be conflated.
 
 ### Mandatory SOP steps (no override exists)
 
