@@ -221,12 +221,11 @@ async function loadSettings() {
     const s = await api('/api/settings');
     $('modeSelect').value = s.mode;
     $('maxSends').value = s.maxSends;
-    $('modeHint').textContent = 'Live sending requires choosing "Live · SEND".';
+    $('modeHint').textContent = 'Real sending is never a dashboard toggle — it requires editing .env directly.';
   } catch {}
 }
 $('btnSaveMode').onclick = async () => {
   const body = { mode: $('modeSelect').value, maxSends: parseInt($('maxSends').value || '0', 10) || 0 };
-  if (body.mode === 'live_send' && !confirm('This will send REAL text messages to homeowners. Continue?')) return;
   const r = await api('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   if (!r.ok) { $('modeSaveInfo').textContent = 'Error: ' + r.error; return; }
   $('modeSaveInfo').textContent = 'Saved — restarting to apply…';
