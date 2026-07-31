@@ -17,6 +17,7 @@ import {
   BLOCKING_PHRASES,
   POSITIVE_WORDS,
   NEGATIVE_WORDS,
+  NAME_REVIEW_KEYWORDS,
 } from './constants.js';
 
 const pass = () => ({ ok: true });
@@ -87,6 +88,23 @@ export function checkEligibility(facts, config) {
     return block(DISPOSITION.MULTIPLE_PHONES, `Contact has ${uniquePhones.length} distinct phone numbers — needs review`);
   }
 
+  return pass();
+}
+
+// -----------------------------------------------------------------------------
+// GATE 1b — Owner-name safety. Joint owners ("X & Y"), trusts, and company/estate
+// names have no safe single first name to merge → route to manual review rather
+// than guess (per the pilot handoff spec).
+// -----------------------------------------------------------------------------
+export function checkNameSafety(facts) {
+  const name = String(facts.name || `${facts.firstName || ''} ${facts.lastName || ''}`).trim();
+  if (!name) return block(DISPOSITION.NEEDS_REVIEW, 'No owner name to personalize the message');
+  if (/[&]| and /i.test(name)) return block(DISPOSITION.NEEDS_REVIEW, `Joint owners ("${name}") — manual review, cannot pick one first name`);
+  const lower = ` ${name.toLowerCase()} `;
+  const hit = NAME_REVIEW_KEYWORDS.find((k) => lower.includes(k));
+  if (hit) return block(DISPOSITION.NEEDS_REVIEW, `Owner name looks like a trust/company ("${name}") — manual review`);
+  const first = String(facts.firstName || name.split(/\s+/)[0] || '').trim();
+  if (!first || first.length < 2) return block(DISPOSITION.NEEDS_REVIEW, 'No usable first name for the message');
   return pass();
 }
 

@@ -54,6 +54,14 @@ test('eligibility blocks: invalid + multiple phones', () => {
   assert.equal(sop.checkEligibility({ ...okFacts(), phones: ['5105550101', '5105557777'] }, config).disposition, DISPOSITION.MULTIPLE_PHONES);
 });
 
+test('name safety: joint owners and trusts go to review; clean names pass', () => {
+  assert.equal(sop.checkNameSafety({ name: 'Tony & Sukien Lam', firstName: 'Tony' }).disposition, DISPOSITION.NEEDS_REVIEW);
+  assert.equal(sop.checkNameSafety({ name: 'Smith Family Trust', firstName: 'Smith' }).disposition, DISPOSITION.NEEDS_REVIEW);
+  assert.equal(sop.checkNameSafety({ name: 'Acme LLC' }).disposition, DISPOSITION.NEEDS_REVIEW);
+  assert.equal(sop.checkNameSafety({ name: '', firstName: '' }).disposition, DISPOSITION.NEEDS_REVIEW);
+  assert.deepEqual(sop.checkNameSafety({ name: 'Maria Lopez', firstName: 'Maria' }), { ok: true });
+});
+
 test('already-processed ledger hit blocks', () => {
   assert.equal(sop.checkAlreadyProcessed(true).disposition, DISPOSITION.ALREADY_PROCESSED);
   assert.deepEqual(sop.checkAlreadyProcessed(false), { ok: true });

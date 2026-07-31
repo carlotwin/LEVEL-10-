@@ -121,3 +121,12 @@ export const EXPORT_COLUMNS = Object.freeze([
 
 // Merge fields the templates are allowed to reference.
 export const ALLOWED_MERGE_FIELDS = Object.freeze(['first_name', 'property_address']);
+
+// Owner-name keywords that make a single first-name unsafe to derive → the lead
+// is routed to manual review instead of auto-sent (per the pilot handoff spec).
+export const NAME_REVIEW_KEYWORDS = Object.freeze([
+  'trust', 'trustee', ' tr ', ' tr,', 'llc', 'estate', 'owner', 'unknown', 'l l c', 'inc', 'company', ' co ',
+]);
+
+// Tokens that must never appear in a final rendered message.
+export const FORBIDDEN_MESSAGE_TOKENS = Object.freeze(['{{', '}}', 'undefined', 'null', 'n/a', 'unknown']);

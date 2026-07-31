@@ -207,6 +207,10 @@ export class Engine extends EventEmitter {
       const elig = sop.checkEligibility(facts, this.config);
       if (!elig.ok) return this._finish(base, elig.disposition, elig.reason, contact);
 
+      // GATE 1b — Owner-name safety (joint owners / trusts / companies).
+      const nameChk = sop.checkNameSafety(facts);
+      if (!nameChk.ok) return this._finish(base, nameChk.disposition, nameChk.reason, contact);
+
       // GATE 2 — Campaign duplicate ledger.
       const phone = (facts.phones || [])[0] || '';
       const ledgerHit = this.ledger.has(this.config.campaignBatch, facts.contactId, phone);

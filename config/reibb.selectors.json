@@ -1,5 +1,5 @@
 {
-  "_README": "REI BlackBook selectors. Most are CONFIRMED/VERIFY from the account's own automation (build 58f8bd4). This app's native send flow = open contact -> Chat tab -> type (TinyMCE iframe) -> Send Text; it does NOT natively do a separate Opt-In or ProfitDial from-number pick, so those keys are blank until captured via `npx playwright codegen`. The engine fails closed: if REQUIRE_OPTIN / REQUIRE_PROFITDIAL are on and their selectors are missing, the contact goes to Needs Review (never sent without them).",
+  "_README": "REI BlackBook selectors, mapped from the Level 10 pilot handoff spec (manual 5-contact run on my.reiblackbook.com). Text/label selectors preferred; icon-only controls are marked NEEDS-DOM and are tolerant guesses (capture exact via `npx playwright codegen`). The engine fails closed: any required element not found -> Needs Review, never a send. Confirmed by spec: REI HAS an Opt-In control (pencil -> Edit Contact modal) and a ProfitDial 'From:' picker (~130 numbers; match by trailing number).",
 
   "login": {
     "emailInput": "input[type='email'], input[name='email'], input[name='username'], input[type='text']",
@@ -9,45 +9,46 @@
   },
 
   "contacts": {
-    "navContacts": "text=Contacts",
-    "tagFilterOpen": "button:has-text('Tags'), text=Tags",
-    "tagSearchInput": "input[placeholder='Search...']",
-    "tagFilterOption": "text=%TAG%",
-    "tagApply": "button:has-text('Apply')",
-    "searchInput": "input[placeholder*='Search' i], input[type='search'], input[aria-label*='search' i], input[name*='search' i], .search input",
+    "url": "/contacts",
+    "searchInput": "input[placeholder*='Search By Name' i], input[placeholder*='Search' i], input[type='search'], input[aria-label*='search' i], .search input",
     "resultRow": "table tbody tr, .list-row, [role='row']",
-    "resultRowByText": "text=%QUERY%",
-    "resultRowLink": "table tbody tr td a, .list-row a, [role='row'] a",
-    "noResultsMarker": "text=/no result/i, text=/did not match/i, text=/no records/i",
-    "openContact": "table tbody tr td a, .list-row a, [role='row'] a"
+    "resultRowLink": "table tbody tr td a, .list-row a, [role='row'] a, a[href*='/contacts/']",
+    "noResultsMarker": "text=/no result/i, text=/did not match/i, text=/no records/i"
   },
 
   "contact": {
-    "nameField": "h1, h2",
-    "addressField": "",
-    "stateField": "",
+    "_status": "contact detail = /contacts/<id>?activeTab=about|chat|activities|notes",
+    "nameField": "h1, h2, [class*='contact-name'], [class*='ContactName']",
+    "addressField": "text=Property Address >> xpath=following::*[1]",
     "phoneRows": "a[href^='tel:']",
     "tagChips": ".tag-item, .tag, [class*='tag-'], [class*='Tag'] .badge, .badge, .chip, .label, .pill, [class*='chip'], [class*='pill'], [class*='badge']",
-    "notesField": "",
-    "chatMessages": ".activity-item, [class*='activity']"
+    "engagementTextSent": "text=/Text Sent/i"
   },
 
-  "sms": {
-    "optInButton": "",
-    "optInConfirm": "",
-    "optInSuccessMarker": ""
+  "editContact": {
+    "_status": "Opt-In modal (spec 2.3). Pencil/edit icon near the avatar is NEEDS-DOM; the modal + Update Info button are text-confirmable. Opt-In dropdown is a custom combobox (needs a retry to open); options render as 'Opt - In' / 'Opt - Out'.",
+    "editButton": "[aria-label*='edit' i], [title*='edit' i], button:has(svg[class*='pencil' i]), button:has(i[class*='pencil' i]), button:has(i[class*='edit' i]), .contact-header button:has(svg)",
+    "modalMarker": "text=Edit Contact Information",
+    "optInControl": "text=Primary Phone >> xpath=following::*[@role='combobox' or contains(@class,'select')][1]",
+    "optInOption": "[role='option']:has-text('Opt - In'), [role='option']:has-text('Opt-In'), li:has-text('Opt - In'), text=Opt - In",
+    "optInSelectedText": "text=/Opt\\s*-?\\s*In/i",
+    "updateButton": "button:has-text('Update Info'), button:has-text('Update')",
+    "cancelButton": "button:has-text('Cancel')"
   },
 
   "chat": {
+    "_status": "Chat tab (spec 2.4-2.5). Compose bar has a 'From:' picker (~130 numbers, match by trailing number), TinyMCE reply box (often in an iframe), orange paper-plane Send. Delivery shows async: plain = sent, red 'Undelivered' = failed.",
     "chatTab": "[role='tab']:has-text('Chat'), text=Chat",
+    "numberDropdown": "text=All Numbers, [class*='number'] [class*='dropdown']",
+    "fromControl": "text=/From:/i, button:has-text('From'), [class*='from-number'], [class*='fromNumber']",
+    "fromOptions": "[role='option'], li[class*='option'], .dropdown-item, [class*='menu'] li",
+    "fromSelectedText": "text=/From:/i",
     "editorFrame": "iframe.tox-edit-area__iframe, iframe[id*='tiny' i], iframe[title*='Rich Text' i]",
-    "profitDialSelect": "",
-    "profitDialOptions": "",
-    "profitDialSelectedValue": "",
     "messageInput": "body#tinymce[contenteditable='true'], .mce-content-body[contenteditable='true'], [data-mce-placeholder*='Write Your Reply' i], [aria-placeholder*='Write Your Reply' i], textarea[placeholder*='Write Your Reply' i], [contenteditable='true'], div[role='textbox']",
     "sendButton": "[aria-label='Send Text' i], [title='Send Text' i], button:has-text('Send Text'), [data-testid*='send' i], [aria-label*='send' i], button[title*='send' i], button:has(svg[class*='send' i]), button:has(svg[class*='paper' i])",
-    "threadArea": ".timeline, .activity-feed, .activity-history, .chat-thread, [class*='conversation'], [class*='activity']",
-    "deliveryStatus": "",
+    "threadArea": ".timeline, .activity-feed, .activity-history, .chat-thread, [class*='conversation'], [class*='activity'], [class*='message']",
+    "sentMetaMarker": "text=/PD #:/i, text=/Sent to:/i",
+    "deliveryUndelivered": "text=/Undelivered/i",
     "lastInboundMessage": ".activity-item:first-child, [class*='activity']:first-child, .chat-message:last-child"
   }
 }

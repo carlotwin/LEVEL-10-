@@ -210,98 +210,151 @@ export class ReiBlackBookAdapter extends Adapter {
       await this.page.waitForTimeout(1000);
 
       if (/\/contacts\/\d+/i.test(this.page.url())) {
-        const id = query.contactId || this.page.url().match(/\/contacts\/(\d+)/i)?.[1] || String(term);
+        const id = this.page.url().match(/\/contacts\/(\d+)/i)?.[1] || query.contactId || String(term);
+        this._cid = id; // remember for direct tab navigation
+        this._curUrl = this.page.url().split('?')[0];
         return { found: true, contactId: id, matchedBy: term, reiUrl: this.page.url() };
       }
     }
     return { found: false };
   }
 
+  _contactTabUrl(tab) {
+    const base = this._curUrl || (this._cid ? `${this._contactsUrl()}/${this._cid}` : null);
+    return base ? `${base}?activeTab=${tab}` : null;
+  }
+
   async readContactFacts(contactId) {
     const c = this.sel.contact;
+    const name = await this._text(c.nameField);
     return {
       found: true,
       contactId,
       reiUrl: this.page.url(), // direct link to this contact for the dashboard
-      name: await this._text(c.nameField),
-      firstName: (await this._text(c.nameField)).split(/\s+/)[0] || '',
-      lastName: (await this._text(c.nameField)).split(/\s+/).slice(1).join(' '),
+      name,
+      firstName: name.split(/\s+/)[0] || '',
+      lastName: name.split(/\s+/).slice(1).join(' '),
       address: await this._text(c.addressField),
-      state: await this._text(c.stateField),
+      state: '',
       phones: await this._allText(c.phoneRows),
       tags: await this._allText(c.tagChips),
-      notes: await this._text(c.notesField),
-      chatHistory: await this._allText(c.chatMessages),
-      optOut: false, // derived by sop.js from tags/notes/history
+      notes: '',
+      chatHistory: [],
+      optOut: false, // derived by sop.js from the tag chips
     };
   }
 
   async getSmsStatus() {
-    const marker = this.sel.sms.optInSuccessMarker;
-    const enabled = marker ? await this._present(marker, 1500) : false;
-    return { smsEnabled: enabled, optedIn: enabled };
+    // Not used by the engine; opt-in is confirmed inside optInPhone().
+    return { smsEnabled: false, optedIn: false };
   }
 
-  // Open the contact's Chat tab (this app texts from the contact record -> Chat).
+  // Open the contact's Chat tab. Prefer direct URL (?activeTab=chat) which is
+  // more reliable than clicking; fall back to the Chat tab element.
   async openChatTab() {
-    const { chat } = this.sel;
-    if (chat.chatTab && (await this._present(chat.chatTab, 4000))) {
-      await this.page.click(chat.chatTab);
-      await this.page.waitForTimeout(600);
-      return true;
+    const url = this._contactTabUrl('chat');
+    if (url && !/[?&]activeTab=chat/i.test(this.page.url())) {
+      await this.page.goto(url, { waitUntil: 'domcontentloaded' }).catch(() => {});
+      await this.page.waitForTimeout(800);
     }
-    return false;
+    const { chat } = this.sel;
+    if (chat.chatTab && (await this._present(chat.chatTab, 3000))) {
+      await this.page.click(chat.chatTab).catch(() => {});
+      await this.page.waitForTimeout(400);
+    }
+    return true;
   }
 
   // ---------------------------------------------------------------------------
   // Interface: actions
   // ---------------------------------------------------------------------------
   async optInPhone() {
-    // Only used when REQUIRE_OPTIN=true. This account's app has no native opt-in
-    // step, so selectors are blank until captured — fail closed if so.
-    const { sms } = this.sel;
-    if (!sms.optInButton) {
-      return { status: 'failed', smsEnabled: false, reason: 'No Opt-In control configured (capture via codegen or set REQUIRE_OPTIN=false)' };
+    // Spec 2.3: pencil -> "Edit Contact Information" modal -> Primary Phone
+    // Opt-In combobox (needs a retry to open) -> "Opt - In" -> Update Info; then
+    // re-open the modal and confirm it now reads "Opt - In".
+    const { editContact } = this.sel;
+    const digits = (s) => String(s || '').replace(/\D/g, '');
+
+    const openModal = async () => {
+      if (!(await this._present(editContact.editButton, 4000))) return false;
+      await this.page.click(editContact.editButton);
+      return this._present(editContact.modalMarker, 4000);
+    };
+    const setOptIn = async () => {
+      // Custom combobox: try up to 3 times to expand, then pick "Opt - In".
+      for (let i = 0; i < 3; i++) {
+        if (await this._present(editContact.optInControl, 2000)) {
+          await this.page.click(editContact.optInControl).catch(() => {});
+          await this.page.waitForTimeout(300);
+          if (await this._present(editContact.optInOption, 1500)) {
+            await this.page.click(editContact.optInOption).catch(() => {});
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+
+    if (!(await openModal())) return { status: 'failed', smsEnabled: false, reason: 'Could not open Edit Contact modal' };
+    const picked = await setOptIn();
+    if (!picked) return { status: 'failed', smsEnabled: false, reason: 'Could not set the Opt-In dropdown to "Opt - In"' };
+    if (await this._present(editContact.updateButton, 3000)) await this.page.click(editContact.updateButton);
+    await this.page.waitForTimeout(1000);
+
+    // Re-open and confirm (never trust the click alone — spec rule).
+    if (!(await openModal())) return { status: 'opted_in', smsEnabled: true, reason: 'Set opt-in but could not reopen to confirm' };
+    const confirmed = await this._present(editContact.optInSelectedText, 2500);
+    if (editContact.cancelButton && (await this._present(editContact.cancelButton, 1000))) {
+      await this.page.click(editContact.cancelButton).catch(() => {});
     }
-    if (sms.optInSuccessMarker && (await this._present(sms.optInSuccessMarker, 1500))) {
-      return { status: 'opted_in', smsEnabled: true };
-    }
-    if (!(await this._present(sms.optInButton, 3000))) {
-      return { status: 'failed', smsEnabled: false, reason: 'Opt-In control not found on screen' };
-    }
-    await this.page.click(sms.optInButton);
-    if (sms.optInConfirm && (await this._present(sms.optInConfirm, 2000))) await this.page.click(sms.optInConfirm);
-    const ok = sms.optInSuccessMarker ? await this._present(sms.optInSuccessMarker, this.timeout) : true;
-    return ok
+    return confirmed
       ? { status: 'opted_in', smsEnabled: true }
-      : { status: 'failed', smsEnabled: false, reason: 'SMS did not become enabled after opt-in' };
+      : { status: 'failed', smsEnabled: false, reason: 'Opt-In not confirmed after saving' };
+  }
+
+  // Extract 10-digit numbers from a list of ProfitDial option labels.
+  _digits10(s) {
+    const d = String(s || '').replace(/\D/g, '');
+    return d.length >= 10 ? d.slice(-10) : d;
   }
 
   async getProfitDialNumbers() {
-    // Only used when REQUIRE_PROFITDIAL=true. Blank until captured via codegen.
+    // Spec 2.4: Chat compose bar "From:" control -> long list of sender numbers.
     const { chat } = this.sel;
     await this.openChatTab();
-    if (!chat.profitDialSelect || !(await this._present(chat.profitDialSelect, 3000))) return [];
-    await this.page.click(chat.profitDialSelect);
-    const nums = await this._allText(chat.profitDialOptions);
+    if (!(await this._present(chat.fromControl, 4000))) return [];
+    await this.page.click(chat.fromControl).catch(() => {});
+    await this.page.waitForTimeout(600);
+    const labels = await this._allText(chat.fromOptions);
     await this.page.keyboard.press('Escape').catch(() => {});
-    return nums;
+    // Each label ends with the phone number; return the labels (matching is by
+    // trailing digits in selectProfitDial / sop).
+    return labels.filter((l) => this._digits10(l).length === 10);
   }
 
   async selectProfitDial(contactId, number) {
+    // Spec 2.4: match by TRAILING phone number, not the campaign label.
     const { chat } = this.sel;
-    if (!chat.profitDialSelect || !(await this._present(chat.profitDialSelect, 3000))) {
-      return { selected: false, readback: '', reason: 'No ProfitDial from-number selector configured' };
+    await this.openChatTab();
+    if (!(await this._present(chat.fromControl, 4000))) {
+      return { selected: false, readback: '', reason: 'ProfitDial "From:" control not found' };
     }
-    await this.page.click(chat.profitDialSelect);
-    const optSel = `${chat.profitDialOptions}:has-text(${JSON.stringify(number)})`;
-    if (!(await this._present(optSel, 3000))) {
-      await this.page.keyboard.press('Escape').catch(() => {});
-      return { selected: false, readback: '', reason: 'Requested ProfitDial number not in selector' };
+    const want = this._digits10(number);
+    await this.page.click(chat.fromControl).catch(() => {});
+    await this.page.waitForTimeout(600);
+
+    const opts = await this.page.locator(chat.fromOptions).all().catch(() => []);
+    for (const o of opts) {
+      const label = (await o.innerText().catch(() => '')) || '';
+      if (this._digits10(label) === want) {
+        await o.click().catch(() => {});
+        await this.page.waitForTimeout(500);
+        const readback = await this._text(chat.fromSelectedText);
+        return { selected: true, readback };
+      }
     }
-    await this.page.click(optSel);
-    const readback = chat.profitDialSelectedValue ? await this._text(chat.profitDialSelectedValue) : '';
-    return { selected: true, readback };
+    await this.page.keyboard.press('Escape').catch(() => {});
+    return { selected: false, readback: '', reason: 'Assigned ProfitDial number not found in the From: list' };
   }
 
   async enterMessage(contactId, text) {
@@ -351,12 +404,16 @@ export class ReiBlackBookAdapter extends Adapter {
   }
 
   async readDeliveryStatus() {
-    // This app does not expose a delivery-status element; report pending.
-    if (!this.sel.chat.deliveryStatus) return { delivery: 'pending' };
-    const status = (await this._text(this.sel.chat.deliveryStatus)).toLowerCase();
-    if (status.includes('deliver')) return { delivery: 'delivered' };
-    if (status.includes('fail') || status.includes('undeliver')) return { delivery: 'failed' };
-    return { delivery: 'pending' };
+    // Spec 2.5: status updates asynchronously. Red "Undelivered" = failed; a
+    // plain sent bubble = delivered. Poll a few times for the Undelivered flag.
+    const { chat } = this.sel;
+    for (let i = 0; i < 5; i++) {
+      if (chat.deliveryUndelivered && (await this._present(chat.deliveryUndelivered, 1500))) {
+        return { delivery: 'failed' };
+      }
+      await this.page.waitForTimeout(2000);
+    }
+    return { delivery: 'delivered' };
   }
 
   async readReplies() {

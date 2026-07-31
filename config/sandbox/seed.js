@@ -97,8 +97,10 @@ export const CONTACTS = [
   c('pdunavail-1', 'ProfitDial unavailable in REI', { address: '115 Xi St, Oakland, CA 94601', phones: ['510-555-0115'], behavior: { availableProfitDial: [POOL_A] } }),
   // 16: ProfitDial readback mismatch
   c('pdmismatch-1', 'ProfitDial readback mismatch', { address: '116 Omicron St, Oakland, CA 94601', phones: ['510-555-0116'], behavior: { readback: 'wrong' } }),
-  // 17: invalid merge field (no first name to fill {{first_name}})
-  c('mergebad-1', 'Invalid merge field (missing first name)', { firstName: '', name: 'Sample Owner', address: '117 Pi St, Oakland, CA 94601', phones: ['510-555-0117'] }),
+  // 17: invalid merge field (missing property address for {{property_address}})
+  c('mergebad-1', 'Invalid merge field (missing property address)', { firstName: 'Chris', name: 'Chris Sample', address: '', phones: ['510-555-0117'] }),
+  // 17b: joint owners -> manual review (cannot pick one first name)
+  c('jointowner-1', 'Joint owners (manual review)', { firstName: 'Tony', name: 'Tony & Sukien Lam', address: '130 Joint St, Oakland, CA 94601', phones: ['510-555-0130'] }),
   // 18: placeholder template blocked from live mode (valid in sandbox)
   c('placeholder-live-1', 'Placeholder template blocked in live mode', { address: '118 Rho St, Oakland, CA 94601', phones: ['510-555-0118'] }),
   // 19: already processed (pre-seeded into ledger for this batch)
@@ -145,7 +147,8 @@ export const PROFITDIAL_ROWS = [
   // pdunavail-1: assigned POOL_B but REI only offers POOL_A (adapter override)
   pdRow('115 Xi St, Oakland, CA 94601', '510-555-0115', 'Pat Sample', POOL_B),
   pdRow('116 Omicron St, Oakland, CA 94601', '510-555-0116', 'Pat Sample', POOL_A),
-  pdRow('117 Pi St, Oakland, CA 94601', '510-555-0117', 'Sample Owner', POOL_A),
+  pdRow('117 Pi St, Oakland, CA 94601', '510-555-0117', 'Chris Sample', POOL_A),
+  pdRow('130 Joint St, Oakland, CA 94601', '510-555-0130', 'Tony & Sukien Lam', POOL_A),
   pdRow('118 Rho St, Oakland, CA 94601', '510-555-0118', 'Pat Sample', POOL_A),
   pdRow('119 Sigma St, Oakland, CA 94601', '510-555-0119', 'Pat Sample', POOL_A),
   pdRow('120 Tau St, Oakland, CA 94601', '510-555-0120', 'Pat Sample', POOL_A),
