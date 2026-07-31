@@ -17,7 +17,10 @@
     "resultRow": "table tbody tr, .list-row, [role='row']",
     "resultRowByText": "text=%QUERY%",
     "openContact": "table tbody tr td a, .list-row a, [role='row'] a",
-    "noResults": "text=No Result Found, text=No results found, text=No Results Found"
+    "noResults": "text=No Result Found, text=No results found, text=No Results Found",
+    "resultName": "",
+    "resultPhone": "",
+    "resultAddress": ""
   },
   "contact": {
     "nameField": "h1, h2",
@@ -26,7 +29,13 @@
     "phoneRows": "a[href^='tel:']",
     "tagChips": ".tag-item, .tag, [class*='tag-'], [class*='Tag'] .badge, .badge, .chip, .label, .pill, [class*='chip'], [class*='pill'], [class*='badge']",
     "notesField": "",
-    "chatMessages": ".activity-item, [class*='activity']"
+    "chatMessages": ".activity-item, [class*='activity']",
+    "pageMarker": "",
+    "optInStatus": "",
+    "optInButton": "",
+    "optInConfirm": "",
+    "optInSuccessMarker": "",
+    "chatTab": "[role='tab']:has-text('Chat'), text=Chat"
   },
   "sms": {
     "optInButton": "",
@@ -43,6 +52,10 @@
     "sendButton": "[aria-label='Send Text' i], [title='Send Text' i], button:has-text('Send Text'), [data-testid*='send' i], [aria-label*='send' i], button[title*='send' i], button:has(svg[class*='send' i]), button:has(svg[class*='paper' i])",
     "threadArea": ".timeline, .activity-feed, .activity-history, .chat-thread, [class*='conversation'], [class*='activity']",
     "deliveryStatus": "",
-    "lastInboundMessage": ".activity-item:first-child, [class*='activity']:first-child, .chat-message:last-child"
-  }
+    "lastInboundMessage": ".activity-item:first-child, [class*='activity']:first-child, .chat-message:last-child",
+    "messageThread": ".timeline, .activity-feed, .activity-history, .chat-thread, [class*='conversation'], [class*='activity']",
+    "outgoingMessage": ""
+  },
+  "_verifiedLive": [],
+  "_verifiedNote": "Keys listed in _verifiedLive have been observed WORKING in the real REI BlackBook account. A sandbox test never qualifies. Empty means nothing is verified yet."
 }

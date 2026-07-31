@@ -56,6 +56,7 @@ export const L10_STATUS = Object.freeze({
   SMS_SENT: 'SMS_SENT',
   SMS_SEND_FAILED: 'SMS_SEND_FAILED',
   MANUAL_REVIEW_REQUIRED: 'MANUAL_REVIEW_REQUIRED',
+  ALREADY_PROCESSED: 'ALREADY_PROCESSED',
 });
 
 // Status -> existing disposition, so the dashboard/KPI keep working unchanged.
@@ -71,6 +72,7 @@ export const STATUS_TO_DISPOSITION = Object.freeze({
   [L10_STATUS.PROFITDIAL_NOT_VERIFIED]: DISPOSITION.MISSING_PROFITDIAL,
   [L10_STATUS.SMS_SENT]: DISPOSITION.TEXT_SENT,
   [L10_STATUS.SMS_SEND_FAILED]: DISPOSITION.SEND_VERIFY_FAILED,
+  [L10_STATUS.ALREADY_PROCESSED]: DISPOSITION.ALREADY_PROCESSED,
 });
 
 // Dispositions that count as a successful send (for KPIs).
@@ -103,6 +105,7 @@ export const BLOCKING_PHRASES = Object.freeze([
   'attorney',
   'lawsuit',
   'harass',
+  'complaint',
   'sold',
   'already sold',
   'listed',

@@ -57,12 +57,13 @@ export class SandboxAdapter extends Adapter {
     for (const c of this.contacts.values()) {
       if (c.found === false) continue; // scenario: not in REI at all
       if ((c.phones || []).some((p) => normalizePhone(p) === wantTen)) {
+        // Same candidate contract as the live adapter.
         candidates.push({
-          ref: candidates.length,
           contactId: c.contactId,
           name: c.name || [c.firstName, c.lastName].filter(Boolean).join(' '),
-          address: c.address || '',
           phone: (c.phones || [])[0] || '',
+          address: c.address || '',
+          rowReference: candidates.length,
         });
       }
     }

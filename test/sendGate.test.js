@@ -14,20 +14,23 @@ import { L10_STATUS } from '../server/automation/constants.js';
 
 const ALL_TRUE = () => ({
   contactVerified: true,
+  fullContactVerified: true,
   level10TagVerified: true,
   safetyReviewPassed: true,
   smsOptInVerified: true,
   profitDialVerified: true,
   approvedTemplateVerified: true,
+  duplicateCheckPassed: true,
+  liveSendingEnabled: true,
 });
 
-test('all six gates true => send allowed', () => {
+test('all nine gates true => send allowed', () => {
   const r = checkSendGates(ALL_TRUE());
   assert.equal(r.allowed, true);
   assert.deepEqual(r.failed, []);
 });
 
-test('each gate set false in turn blocks the send', () => {
+test('each of the nine gates set false in turn blocks the send', () => {
   for (const gate of SEND_GATES) {
     const gates = { ...ALL_TRUE(), [gate]: false };
     const r = checkSendGates(gates);

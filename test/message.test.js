@@ -12,7 +12,14 @@ import {
   TEMPLATES,
 } from '../server/automation/message.js';
 
-const APPROVED_IDS = ['L10-1', 'L10-2', 'L10-3', 'L10-4', 'L10-5', 'L10-6'];
+const APPROVED_IDS = [
+  'LEVEL10_TEMPLATE_1',
+  'LEVEL10_TEMPLATE_2',
+  'LEVEL10_TEMPLATE_3',
+  'LEVEL10_TEMPLATE_4',
+  'LEVEL10_TEMPLATE_5',
+  'LEVEL10_TEMPLATE_6',
+];
 const FACTS = { firstName: 'Maria', propertyAddress: '123 Oak St, Fresno, CA 93701' };
 
 test('integrity check passes and the pinned checksum matches the approved copy', () => {
@@ -47,15 +54,15 @@ test('every approved template carries the STOP opt-out language', () => {
 });
 
 test('allocation prefers least-used template (balanced)', () => {
-  const usage = { 'L10-1': 3, 'L10-2': 0, 'L10-3': 5, 'L10-4': 2, 'L10-5': 4, 'L10-6': 6 };
+  const usage = { 'LEVEL10_TEMPLATE_1': 3, 'LEVEL10_TEMPLATE_2': 0, 'LEVEL10_TEMPLATE_3': 5, 'LEVEL10_TEMPLATE_4': 2, 'LEVEL10_TEMPLATE_5': 4, 'LEVEL10_TEMPLATE_6': 6 };
   const { template } = allocateTemplate({ sandbox: true, usageCounts: usage, lastTemplateId: null, seed: 'abc' });
-  assert.equal(template.id, 'L10-2'); // the only least-used
+  assert.equal(template.id, 'LEVEL10_TEMPLATE_2'); // the only least-used
 });
 
 test('allocation avoids immediate repeat when alternatives exist', () => {
   const usage = {}; // all zero -> full tie set
-  const first = allocateTemplate({ sandbox: true, usageCounts: usage, lastTemplateId: 'L10-1', seed: 'x' }).template.id;
-  assert.notEqual(first, 'L10-1');
+  const first = allocateTemplate({ sandbox: true, usageCounts: usage, lastTemplateId: 'LEVEL10_TEMPLATE_1', seed: 'x' }).template.id;
+  assert.notEqual(first, 'LEVEL10_TEMPLATE_1');
 });
 
 test('allocation is deterministic for a given seed', () => {
@@ -100,7 +107,7 @@ test('a 20-lead run spreads across all 6 approved templates', () => {
 });
 
 test('rendering fills both merge fields with the exact approved wording', () => {
-  const tpl = TEMPLATES.find((t) => t.id === 'L10-1');
+  const tpl = TEMPLATES.find((t) => t.id === 'LEVEL10_TEMPLATE_1');
   const out = renderTemplate(tpl, FACTS);
   assert.match(out, /^Hi Maria, it's Juan with Twin Home Buyer\./);
   assert.ok(out.includes('123 Oak St, Fresno, CA 93701'));
@@ -108,17 +115,17 @@ test('rendering fills both merge fields with the exact approved wording', () => 
 });
 
 test('rendering fails closed on a blank first name', () => {
-  const tpl = TEMPLATES.find((t) => t.id === 'L10-1');
+  const tpl = TEMPLATES.find((t) => t.id === 'LEVEL10_TEMPLATE_1');
   assert.throws(() => renderTemplate(tpl, { ...FACTS, firstName: '  ' }), /first name|INVALID_MERGE_FIELD/);
 });
 
 test('rendering fails closed on a blank property address (no hole in a real text)', () => {
-  const tpl = TEMPLATES.find((t) => t.id === 'L10-1');
+  const tpl = TEMPLATES.find((t) => t.id === 'LEVEL10_TEMPLATE_1');
   assert.throws(() => renderTemplate(tpl, { firstName: 'Maria', propertyAddress: '' }), /property address|INVALID_MERGE_FIELD/);
 });
 
 test('rendering falls back to the scraped address when the sheet address is absent', () => {
-  const tpl = TEMPLATES.find((t) => t.id === 'L10-2');
+  const tpl = TEMPLATES.find((t) => t.id === 'LEVEL10_TEMPLATE_2');
   const out = renderTemplate(tpl, { firstName: 'Dan', address: '9 Elm Ave, Clovis, CA' });
   assert.ok(out.includes('9 Elm Ave, Clovis, CA'));
 });

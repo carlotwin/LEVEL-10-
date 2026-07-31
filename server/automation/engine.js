@@ -20,6 +20,8 @@ import {
   anyPlaceholderEnabled,
   allocateTemplate,
   renderTemplate,
+  validateRenderedMessage,
+  isUsableFirstName,
 } from './message.js';
 import { buildProfitDialIndex, matchProfitDial } from './profitdial.js';
 import { DISPOSITION, SENT_DISPOSITIONS, L10_STATUS, STATUS_TO_DISPOSITION } from './constants.js';
@@ -50,6 +52,7 @@ export class Engine extends EventEmitter {
       requireOptIn: env.REQUIRE_OPTIN,
       requireProfitDial: env.REQUIRE_PROFITDIAL,
       requireLevel10Tag: env.REQUIRE_LEVEL10_TAG,
+      readOnly: env.WATCH_ONLY,
     };
   }
 
@@ -286,11 +289,18 @@ export class Engine extends EventEmitter {
       // Gates start closed and are only set by the checks that prove them.
       const gates = {
         contactVerified: true,
+        // Set by the SAME re-verification of the opened record, so the gate cannot
+        // be true on the strength of the search row alone.
+        fullContactVerified: recheck.flags.phoneVerified === true && recheck.flags.nameVerified === true && recheck.flags.addressOk === true,
         level10TagVerified: recheck.flags.level10TagVerified === true,
         safetyReviewPassed: false,
         smsOptInVerified: false,
         profitDialVerified: false,
         approvedTemplateVerified: false,
+        duplicateCheckPassed: false,
+        // Production switch. Sandbox simulates a send, so it satisfies this gate
+        // for the pipeline test; a LIVE send additionally needs liveSendGate().
+        liveSendingEnabled: env.SANDBOX === true || env.ALLOW_LIVE_SEND === true,
       };
 
       // GATE 1 — Safety review: state, suppression scan, phone validity (and the
@@ -306,19 +316,49 @@ export class Engine extends EventEmitter {
       }
       gates.safetyReviewPassed = true;
 
-      // GATE 2 — Campaign duplicate ledger. Keyed on the SHEET's contact id, which
-      // is what _finish() records — the id scraped off the screen can differ run
-      // to run, which would let the same lead through twice.
+      // GATE 2 — Duplicate prevention. Checked on BOTH keys: the spreadsheet row
+      // (stable across re-uploads) and the REI contact id (catches two rows that
+      // resolve to the same contact). A confirmed, pending or uncertain send all
+      // block; only a clean pre-send 'blocked' record may be retried.
       const phone = (facts.phones || [])[0] || '';
-      const ledgerHit = this.ledger.has(this.config.campaignBatch, contact.contactId, phone);
-      const dup = sop.checkAlreadyProcessed(ledgerHit);
-      if (!dup.ok) return this._finish(base, dup.disposition, dup.reason, contact);
+      const dupHit =
+        this.ledger.isSendBlocked(this.config.campaignBatch, contact.contactId, phone) ||
+        this.ledger.isSendBlocked(this.config.campaignBatch, facts.contactId, phone) ||
+        // The homeowner IS the phone: a different spreadsheet row that resolves to
+        // the same number must not produce a second text.
+        this.ledger.isSendBlockedByPhone(this.config.campaignBatch, phone);
+      if (dupHit) {
+        base.L10_Status = L10_STATUS.ALREADY_PROCESSED;
+        logger.info('duplicate_blocked', { row: contact.contactId, reason: dupHit.reason });
+        return this._finish(
+          base,
+          DISPOSITION.ALREADY_PROCESSED,
+          `${L10_STATUS.ALREADY_PROCESSED} — ${dupHit.reason} (template ${dupHit.entry.templateId || 'n/a'} on ${dupHit.entry.dateTime}). Not sending again.`,
+          contact
+        );
+      }
+      // A Level 10 initial SMS already in the conversation is the same thing seen
+      // from REI's side rather than from our ledger.
+      const priorInitial = (facts.chatHistory || []).some((m) =>
+        /it's Juan with Twin Home Buyer/i.test(String(m))
+      );
+      if (priorInitial) {
+        base.L10_Status = L10_STATUS.ALREADY_PROCESSED;
+        logger.info('duplicate_blocked', { row: contact.contactId, reason: 'prior Level 10 message found in the REI thread' });
+        return this._finish(
+          base,
+          DISPOSITION.ALREADY_PROCESSED,
+          `${L10_STATUS.ALREADY_PROCESSED} — a Level 10 message from Juan is already in this conversation. Not sending another.`,
+          contact
+        );
+      }
+      gates.duplicateCheckPassed = true;
 
       // WATCH-ONLY: verify the bot navigates + reads + matches correctly WITHOUT
       // changing anything (no opt-in, no ProfitDial selection, no send). Safe
       // first live check. Reads the assigned number from the sheet and whether
       // it is available in REI, then reports and stops.
-      if (env.WATCH_ONLY) {
+      if (this.config.readOnly) {
         const wMatch = matchProfitDial({ contactId: facts.contactId, address: facts.address, phone }, this.pdIndex);
         const wAvail = await this.adapter.getProfitDialNumbers(facts.contactId);
         base.L10_ProfitDial = wMatch.profitDial || '';
@@ -425,16 +465,28 @@ export class Engine extends EventEmitter {
 
       // Requirement #3 — placeholder can never be used in live mode. In sandbox
       // it is allowed but flagged. The final send gate enforces the live block.
-      // Merge values: the SHEET is the source of truth for the property address
-      // ("Full Address"), because this account's REI contact screen has no
-      // mapped address field. The scraped value is only a fallback. Same for the
-      // first name. A blank on either side fails closed below — we never send a
-      // text with an empty merge field.
+      // Merge values. The SHEET is the source of truth for the property address
+      // ("Full Address"); the REI screen value is only a fallback. The first name
+      // must be a real personal name — a record called "TRUST" or "UNKNOWN"
+      // produces no first name and is held for review rather than texted.
+      const candidateFirst = [facts.firstName, contact.firstName, String(facts.name ?? '').split(/\s+/)[0]]
+        .map((v) => String(v ?? '').trim())
+        .find((v) => isUsableFirstName(v)) || '';
       const mergeFacts = {
         ...facts,
-        firstName: facts.firstName || contact.firstName || '',
+        firstName: candidateFirst,
         propertyAddress: contact.address || facts.address || '',
       };
+      if (!candidateFirst) {
+        base.L10_Status = L10_STATUS.MANUAL_REVIEW_REQUIRED;
+        logger.info('first_name_unsafe', { row: contact.contactId, reiName: facts.name, sheetName: contact.name });
+        return this._finish(
+          base,
+          DISPOSITION.INVALID_MERGE_FIELD,
+          `${L10_STATUS.MANUAL_REVIEW_REQUIRED} — no safe personal first name could be determined (REI "${facts.name || ''}" / sheet "${contact.name || ''}"). Not sending.`,
+          contact
+        );
+      }
 
       let rendered;
       try {
@@ -449,7 +501,26 @@ export class Engine extends EventEmitter {
 
       // The template is verified when it is an APPROVED (non-placeholder) template
       // whose wording passed the integrity checksum and rendered with no holes.
-      gates.approvedTemplateVerified = template.placeholder !== true && !/\{\{|\}\}/.test(rendered);
+      // Exact-template proof: an approved id, ending in the STOP sentence, with no
+      // forbidden tokens, and byte-identical to the approved body with only the two
+      // merge values substituted.
+      const exact = validateRenderedMessage({
+        templateId: template.id,
+        rendered,
+        firstName: mergeFacts.firstName,
+        propertyAddress: mergeFacts.propertyAddress,
+      });
+      gates.approvedTemplateVerified = exact.ok && template.placeholder !== true;
+      if (!gates.approvedTemplateVerified) {
+        base.L10_Status = L10_STATUS.MANUAL_REVIEW_REQUIRED;
+        logger.info('template_not_exact', { row: contact.contactId, template: template.id, reason: exact.reason });
+        return this._finish(
+          base,
+          DISPOSITION.INVALID_MERGE_FIELD,
+          `${L10_STATUS.MANUAL_REVIEW_REQUIRED} — ${exact.reason}. Not sending.`,
+          contact
+        );
+      }
       base.L10_Status = L10_STATUS.READY_TO_SEND;
       logger.info('ready_to_send', { row: contact.contactId, template: template.id, profitDial: base.L10_ProfitDial });
 
@@ -473,10 +544,35 @@ export class Engine extends EventEmitter {
         return this._finish(base, DISPOSITION.NEEDS_REVIEW, `${L10_STATUS.MANUAL_REVIEW_REQUIRED} — ${sendGate.reason}`, contact);
       }
 
-      // STEP 8 — Enter + send + verify.
+      // STEP 8 — Enter + send + confirm.
       await this.adapter.enterMessage(facts.contactId, rendered);
+
+      // Write a PENDING ledger entry BEFORE the irreversible action. If the
+      // process dies between send and confirmation, the restart sees 'pending'
+      // and refuses to send again instead of double-texting the homeowner.
+      this.ledger.record({
+        campaignBatch: this.config.campaignBatch,
+        reiContactId: contact.contactId,
+        phone,
+        profitDial: base.L10_ProfitDial,
+        templateId: template.id,
+        sendVerified: false,
+        state: 'pending',
+        disposition: 'send in progress',
+      });
+
       const sent = await this.adapter.sendMessage(facts.contactId);
       if (!sent.sent) {
+        // The click itself failed, so nothing left our side: a clean retry is safe.
+        this.ledger.record({
+          campaignBatch: this.config.campaignBatch,
+          reiContactId: contact.contactId,
+          phone,
+          templateId: '',
+          sendVerified: false,
+          state: 'blocked',
+          disposition: 'send action failed before delivery',
+        });
         base.L10_Status = L10_STATUS.SMS_SEND_FAILED;
         return this._finish(base, DISPOSITION.SEND_VERIFY_FAILED, sent.reason || 'Send action failed', contact);
       }
@@ -485,8 +581,25 @@ export class Engine extends EventEmitter {
       const vCheck = sop.checkSendVerification(verify);
       base.L10_SendVerified = Boolean(verify.verified);
       if (!vCheck.ok) {
+        // Clicked but unconfirmed: it may or may not have gone out. Mark it
+        // UNCERTAIN so no automatic retry can ever double-send; a human decides.
+        this.ledger.record({
+          campaignBatch: this.config.campaignBatch,
+          reiContactId: contact.contactId,
+          phone,
+          profitDial: base.L10_ProfitDial,
+          templateId: template.id,
+          sendVerified: false,
+          state: 'uncertain',
+          disposition: 'sent but not confirmed',
+        });
         base.L10_Status = L10_STATUS.SMS_SEND_FAILED;
-        return this._finish(base, vCheck.disposition, vCheck.reason, contact);
+        return this._finish(
+          base,
+          vCheck.disposition,
+          `${vCheck.reason} — recorded as UNCERTAIN; this lead will not be retried automatically.`,
+          contact
+        );
       }
       base.L10_Status = L10_STATUS.SMS_SENT;
 
@@ -519,8 +632,12 @@ export class Engine extends EventEmitter {
     // Record to the campaign ledger for any contact that reached a send attempt
     // OR was blocked after opt-in, so re-runs never re-text. We ALWAYS record
     // sends; for non-sends we record so the same contact isn't reworked blindly.
+    // Only a CONFIRMED send is recorded here. The send path itself already wrote
+    // the precise 'pending' / 'uncertain' / 'blocked' state, and re-recording from
+    // this generic place would overwrite it — which previously downgraded an
+    // unconfirmed send to 'blocked' and made it look safe to retry.
     const isSend = SENT_DISPOSITIONS.includes(disposition);
-    if (isSend || disposition === DISPOSITION.SEND_VERIFY_FAILED) {
+    if (isSend) {
       const phone = (contact.phones || [])[0] || '';
       this.ledger.record({
         campaignBatch: this.config.campaignBatch,
@@ -528,7 +645,8 @@ export class Engine extends EventEmitter {
         phone,
         profitDial: result.L10_ProfitDial,
         templateId: result.L10_TemplateId,
-        sendVerified: result.L10_SendVerified,
+        sendVerified: true,
+        state: 'sent',
         disposition,
       });
     }

@@ -485,11 +485,14 @@ export function verifyOpenedContact({ sheet, detail, level10Tag }) {
 // -----------------------------------------------------------------------------
 export const SEND_GATES = Object.freeze([
   'contactVerified',
+  'fullContactVerified',
   'level10TagVerified',
   'safetyReviewPassed',
   'smsOptInVerified',
   'profitDialVerified',
   'approvedTemplateVerified',
+  'duplicateCheckPassed',
+  'liveSendingEnabled',
 ]);
 
 /**

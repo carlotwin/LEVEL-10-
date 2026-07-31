@@ -395,12 +395,16 @@ export class ReiBlackBookAdapter extends Adapter {
           // hidden column cannot silently shift the phone into the name slot.
           const phoneCell = r.cells.find((c) => digitsOnly(c).length >= 10) || '';
           const nonPhone = r.cells.filter((c) => c && c !== phoneCell);
+          // The one candidate contract, shared with the sandbox adapter:
+          // { contactId, name, phone, address, rowReference }
+          const idFromHref = r.href ? r.href.split('/').filter(Boolean).pop() : '';
           return {
-            ref: r.index,
-            href: r.href || '',
+            contactId: idFromHref || '',
             name: nonPhone[0] || '',
-            address: nonPhone[1] || '',
             phone: phoneCell,
+            address: nonPhone[1] || '',
+            rowReference: r.index,
+            href: r.href || '',
             rowText: r.text,
           };
         })
@@ -538,8 +542,8 @@ export class ReiBlackBookAdapter extends Adapter {
     const frame = await this._frameFor(contacts.resultRow, 4000);
     if (!frame) return { opened: false, reason: 'result rows are no longer on screen' };
     const rows = await frame.$$(contacts.resultRow);
-    const row = rows[candidate?.ref ?? 0];
-    if (!row) return { opened: false, reason: `candidate row ${candidate?.ref} not found` };
+    const row = rows[candidate?.rowReference ?? 0];
+    if (!row) return { opened: false, reason: `candidate row ${candidate?.rowReference} not found` };
     const link = (await row.$('a')) || row;
     await link.click().catch(() => {});
     await this.page.waitForTimeout(900);
