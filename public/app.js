@@ -224,5 +224,26 @@ $('btnPause').onclick = () => api('/api/pause', { method: 'POST' });
 $('btnResume').onclick = () => api('/api/resume', { method: 'POST' });
 $('btnStop').onclick = () => api('/api/stop', { method: 'POST' });
 
+// ---- mode / settings ----
+async function loadSettings() {
+  try {
+    const s = await api('/api/settings');
+    $('modeSelect').value = s.mode;
+    $('maxSends').value = s.maxSends;
+    $('modeHint').textContent = 'Live sending requires choosing "Live · SEND".';
+  } catch {}
+}
+$('btnSaveMode').onclick = async () => {
+  const body = { mode: $('modeSelect').value, maxSends: parseInt($('maxSends').value || '0', 10) || 0 };
+  if (body.mode === 'live_send' && !confirm('This will send REAL text messages to homeowners. Continue?')) return;
+  const r = await api('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!r.ok) { $('modeSaveInfo').textContent = 'Error: ' + r.error; return; }
+  $('modeSaveInfo').textContent = 'Saved — restarting to apply…';
+  await api('/api/restart', { method: 'POST' }).catch(() => {});
+  // The desktop app relaunches the engine; reload shortly.
+  setTimeout(() => location.reload(), 3500);
+};
+
 loadConfig();
+loadSettings();
 connectSSE();

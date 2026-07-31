@@ -14,6 +14,14 @@
 // texting. Every gate defaults to the safe value.
 // =============================================================================
 
+// Bootstrap config BEFORE reading any values, so .env and the app's
+// settings.json take effect regardless of module import order. Real environment
+// variables win, then .env, then settings.json.
+import { loadEnv, loadSettings } from '../loadenv.js';
+import { dataDir } from '../data/paths.js';
+loadEnv();
+loadSettings(dataDir());
+
 function readBool(name, def = false) {
   const raw = process.env[name];
   if (raw === undefined || raw === '') return def;

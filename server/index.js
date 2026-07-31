@@ -17,7 +17,8 @@ import { analyzeSheet } from './automation/profitdial.js';
 import { importContacts, readTabFromFile, exportResults } from './data/spreadsheet.js';
 import { fetchGoogleSheetRows, parseSheetUrl } from './data/googleSheet.js';
 import { logger } from './logger.js';
-import { uploadsDir } from './data/paths.js';
+import { uploadsDir, dataDir } from './data/paths.js';
+import pathModule from 'node:path';
 import { CONTACTS, PROFITDIAL_ROWS, PD_COLS } from '../config/sandbox/seed.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -219,6 +220,48 @@ app.post('/api/upload/contacts', upload.single('file'), (req, res) => {
   } finally {
     if (req.file) fs.unlink(req.file.path, () => {});
   }
+});
+
+// ---- Settings (in-app, no file editing) ----
+function currentMode() {
+  if (env.SANDBOX) return 'test';
+  if (env.WATCH_ONLY) return 'watch';
+  if (env.ALLOW_LIVE_SEND) return 'live_send';
+  return 'live_nosend';
+}
+app.get('/api/settings', (req, res) => {
+  res.json({
+    mode: currentMode(),
+    maxSends: env.MAX_SENDS_PER_RUN,
+    requireOptIn: env.REQUIRE_OPTIN,
+    requireProfitDial: env.REQUIRE_PROFITDIAL,
+    reibbLoginUrl: env.REIBB_LOGIN_URL,
+  });
+});
+app.post('/api/settings', (req, res) => {
+  const { mode, maxSends, requireOptIn, requireProfitDial, reibbLoginUrl } = req.body || {};
+  const flags = {
+    test: { SANDBOX: 'true', WATCH_ONLY: 'false', ALLOW_LIVE_SEND: 'false' },
+    watch: { SANDBOX: 'false', WATCH_ONLY: 'true', ALLOW_LIVE_SEND: 'false' },
+    live_nosend: { SANDBOX: 'false', WATCH_ONLY: 'false', ALLOW_LIVE_SEND: 'false' },
+    live_send: { SANDBOX: 'false', WATCH_ONLY: 'false', ALLOW_LIVE_SEND: 'true' },
+  }[mode] || {};
+  const settings = { ...flags };
+  if (maxSends != null) settings.MAX_SENDS_PER_RUN = String(maxSends);
+  if (requireOptIn != null) settings.REQUIRE_OPTIN = String(requireOptIn);
+  if (requireProfitDial != null) settings.REQUIRE_PROFITDIAL = String(requireProfitDial);
+  if (reibbLoginUrl) settings.REIBB_LOGIN_URL = String(reibbLoginUrl);
+  try {
+    fs.writeFileSync(pathModule.join(dataDir(), 'settings.json'), JSON.stringify(settings, null, 2));
+    res.json({ ok: true, restartRequired: true, settings });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+// Clean exit so the desktop app relaunches the server with the new settings.
+app.post('/api/restart', (req, res) => {
+  res.json({ ok: true });
+  setTimeout(() => process.exit(0), 300);
 });
 
 // ---- Controls ----

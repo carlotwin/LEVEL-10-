@@ -28,3 +28,21 @@ export function loadEnv(file = path.join(ROOT, '.env')) {
 }
 
 export const PROJECT_ROOT = ROOT;
+
+// Load app settings (JSON) written by the in-app Settings panel, into
+// process.env WITHOUT overwriting existing values (real env / .env win). This
+// lets the packaged desktop app change mode/config without editing files or
+// using a terminal. Location: <data dir>/settings.json.
+export function loadSettings(dataDirPath) {
+  try {
+    const file = path.join(dataDirPath, 'settings.json');
+    if (!fs.existsSync(file)) return;
+    const obj = JSON.parse(fs.readFileSync(file, 'utf8'));
+    for (const [k, v] of Object.entries(obj)) {
+      if (v === null || v === undefined) continue;
+      if (!(k in process.env)) process.env[k] = String(v);
+    }
+  } catch {
+    /* ignore malformed settings */
+  }
+}

@@ -18,6 +18,22 @@
     <div id="note" class="note"></div>
 
     <main>
+      <!-- Mode / settings -->
+      <section class="card">
+        <div class="card-head"><h2>Mode</h2><span id="modeHint" class="muted small"></span></div>
+        <div class="run-row">
+          <select id="modeSelect" class="txt" style="max-width:340px">
+            <option value="test">Test Mode — nothing is sent (practice)</option>
+            <option value="watch">Live · Watch only — check REI, never send</option>
+            <option value="live_nosend">Live · Prepare only — stop before sending</option>
+            <option value="live_send">Live · SEND real texts</option>
+          </select>
+          <label class="file" style="flex-direction:row;align-items:center;gap:6px">Batch cap<input type="number" id="maxSends" class="txt" style="max-width:90px" value="5" min="0" /></label>
+          <button id="btnSaveMode" class="btn primary">Save &amp; apply</button>
+        </div>
+        <div id="modeSaveInfo" class="muted small" style="margin-top:8px"></div>
+      </section>
+
       <!-- Step 1: data + run -->
       <section class="card">
         <div class="card-head">

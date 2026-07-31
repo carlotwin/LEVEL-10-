@@ -1,0 +1,43 @@
+name: Build Windows App
+
+# Builds the Level 10 SMS Outreach Windows installer (.exe) so it can be
+# installed without Node.js or a terminal. Run it from the Actions tab
+# ("Run workflow"), or it runs automatically on a version tag (v*).
+
+on:
+  workflow_dispatch: {}
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      # Bundle the automation browser INTO the app so it ships inside the
+      # installer and works on a fresh PC with nothing to install.
+      - name: Bundle automation browser
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: "0"
+        run: npx playwright install chromium
+
+      - name: Build installer
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: "0"
+        run: npm run dist
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Level-10-SMS-Outreach-Windows-Installer
+          path: dist/*.exe
+          if-no-files-found: error

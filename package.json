@@ -2,13 +2,17 @@
   "name": "level-10-sms-outreach",
   "version": "1.0.0",
   "private": true,
-  "description": "Twin Home Buyer — Level 10 SMS Outreach Campaign automation (SANDBOX build). Fail-closed SOP pipeline over REI BlackBook with controlled template allocation, ProfitDial source-of-truth matching, campaign duplicate ledger, and daily KPI reporting.",
+  "description": "Twin Home Buyer — Level 10 SMS Outreach Campaign automation. Fail-closed SOP pipeline over REI BlackBook with controlled template allocation, ProfitDial source-of-truth matching, campaign duplicate ledger, and daily KPI reporting. Ships as a double-click Windows app.",
   "type": "module",
+  "main": "electron/main.cjs",
   "engines": {
     "node": ">=18"
   },
   "scripts": {
     "start": "node server/index.js",
+    "app": "electron electron/main.cjs",
+    "predist": "node scripts/write-build-info.js",
+    "dist": "electron-builder --win --publish never",
     "test": "node --test test/*.test.js"
   },
   "dependencies": {
@@ -16,5 +20,42 @@
     "multer": "^1.4.5-lts.1",
     "playwright": "^1.48.0",
     "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.twinhomebuyer.level10sms",
+    "productName": "Level 10 SMS Outreach",
+    "directories": {
+      "output": "dist"
+    },
+    "asar": false,
+    "files": [
+      "electron/**/*",
+      "server/**/*",
+      "public/**/*",
+      "config/**/*",
+      "package.json",
+      "build-info.json",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Level 10 SMS Outreach"
+    }
   }
 }
