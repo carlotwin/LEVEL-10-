@@ -51,6 +51,34 @@ const CONTACTS_PATH_CANDIDATES = Object.freeze([
   '/app/contacts',
 ]);
 
+/**
+ * Does the name on the REI contact screen refer to the same person as the sheet?
+ *
+ * Deliberately tolerant about formatting and strict about identity:
+ *   - case, punctuation, extra spaces and titles/suffixes are ignored
+ *   - order is ignored ("LAM TONY" == "Tony Lam")
+ *   - one name being a subset of the other counts ("TONY LAM" vs
+ *     "TONY LAM JR", or a sheet "Primary Name" that omits a middle name)
+ * A blank on either side is NOT a match — "Unknown" contacts must not silently
+ * pass a name check.
+ */
+export function namesMatch(a, b) {
+  const tokens = (s) =>
+    String(s ?? '')
+      .toUpperCase()
+      .replace(/[^A-Z\s]/g, ' ')
+      .split(/\s+/)
+      .filter((t) => t.length > 1 && !NAME_NOISE.has(t));
+  const A = new Set(tokens(a));
+  const B = new Set(tokens(b));
+  if (A.size === 0 || B.size === 0) return false;
+  const [small, big] = A.size <= B.size ? [A, B] : [B, A];
+  for (const t of small) if (!big.has(t)) return false;
+  return true;
+}
+
+const NAME_NOISE = new Set(['MR', 'MRS', 'MS', 'DR', 'JR', 'SR', 'II', 'III', 'IV', 'THE', 'AND', 'UNKNOWN', 'OWNER']);
+
 export class ReiBlackBookAdapter extends Adapter {
   constructor(opts = {}) {
     super();
@@ -432,23 +460,39 @@ export class ReiBlackBookAdapter extends Adapter {
       resultsSeen = true;
       await this.page.waitForTimeout(900);
 
-      // VERIFY we opened the right person. Without this a loose search match
-      // could text a different homeowner — the one failure this app must never
-      // have. No phone on the sheet to check against => treat as unverified.
+      // VERIFY we opened the right person. A loose search match could text a
+      // different homeowner — the one failure this app must never have. What
+      // counts as verified is set by CONTACT_VERIFY (default: phone AND name).
       const phones = await this._openContactPhones();
-      if (!wantPhone) {
-        return { found: true, contactId: query.contactId || (await this._text(this.sel.contact.nameField)), matchedBy: term.label, searched, phoneVerified: false };
-      }
-      if (phones.includes(wantPhone)) {
+      const reiName = await this._text(this.sel.contact.nameField);
+      const phoneOk = wantPhone ? phones.includes(wantPhone) : false;
+      const nameOk = namesMatch(reiName, query.name);
+
+      const mode = env.CONTACT_VERIFY;
+      const verified =
+        mode === 'phone'
+          ? phoneOk
+          : mode === 'name'
+            ? nameOk
+            : mode === 'either'
+              ? phoneOk || nameOk
+              : phoneOk && nameOk; // 'phone+name' (default)
+
+      if (verified) {
         return {
           found: true,
-          contactId: query.contactId || (await this._text(this.sel.contact.nameField)) || term.value,
+          contactId: query.contactId || reiName || term.value,
           matchedBy: term.label,
           searched,
-          phoneVerified: true,
+          phoneVerified: phoneOk,
+          nameVerified: nameOk,
+          reiName,
         };
       }
-      searched.push(`opened-but-phone-mismatch(found ${phones.join('/') || 'none'}, wanted ${wantPhone})`);
+      searched.push(
+        `opened-but-not-verified(${mode}: phone ${phoneOk ? 'ok' : `no — REI has ${phones.join('/') || 'none'}, sheet has ${wantPhone || 'none'}`}` +
+          `; name ${nameOk ? 'ok' : `no — REI "${reiName || '(blank)'}" vs sheet "${query.name || '(blank)'}"`})`
+      );
     }
 
     // Say WHICH step failed — that is the difference between a selector to fix

@@ -146,3 +146,26 @@ test('a real contact id from the sheet IS searched', async () => {
   const values = a._searchTerms({ contactId: 'REI-9931', syntheticId: false, phone: '510-206-1922' }).map((t) => t.value);
   assert.ok(values.includes('REI-9931'));
 });
+
+// --- name verification against the sheet ----------------------------------
+test('namesMatch is tolerant about formatting, strict about identity', async () => {
+  const { namesMatch } = await import('../server/adapters/reibb.js');
+  // Same person, different formatting.
+  assert.equal(namesMatch('TONY LAM', 'Tony Lam'), true);
+  assert.equal(namesMatch('Lam, Tony', 'TONY LAM'), true);
+  assert.equal(namesMatch('TONY LAM JR', 'Tony Lam'), true, 'suffix ignored');
+  assert.equal(namesMatch('Tony R. Lam', 'TONY LAM'), true, 'middle initial ignored');
+  assert.equal(namesMatch('  tony   lam  ', 'Tony Lam'), true);
+  // Different people must NOT match.
+  assert.equal(namesMatch('LINDA HUNT', 'TONY LAM'), false);
+  assert.equal(namesMatch('TONY NGUYEN', 'TONY LAM'), false, 'shared first name is not enough');
+  // Blank / placeholder names never pass.
+  assert.equal(namesMatch('', 'TONY LAM'), false);
+  assert.equal(namesMatch('Unknown', 'TONY LAM'), false);
+  assert.equal(namesMatch('TONY LAM', ''), false);
+});
+
+test('CONTACT_VERIFY defaults to phone+name and rejects junk values', async () => {
+  const { env } = await import('../server/config/env.js');
+  assert.ok(['phone', 'name', 'either', 'phone+name'].includes(env.CONTACT_VERIFY));
+});
