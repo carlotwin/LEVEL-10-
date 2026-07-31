@@ -142,22 +142,48 @@ term rather than risk texting a different homeowner. When no term produces a
 verified match, the row reports `Lead Not Found` *and lists every term it tried*,
 so a lookup failure is diagnosable instead of a dead end.
 
-### When the sheet is the source of truth
+### Mandatory SOP steps (no override exists)
 
-Three SOP steps re-verify in REI what the sheet already says. Each can be turned
-off — all default ON (fail closed), and turning any off is a deliberate,
-documented choice, not a side effect:
+Three steps were configurable and are now hard-coded. Setting them to `false` in
+`.env` is logged and ignored:
 
-| Setting | ON (default) | OFF |
-|---|---|---|
-| `REQUIRE_LEVEL10_TAG` | Re-reads the tag chips on each contact | Trusts the uploaded sheet as the Level 10 list |
-| `REQUIRE_OPTIN` | Runs SOP Step 4 opt-in (needs selectors) | Assumes numbers are already opt-in |
-| `REQUIRE_PROFITDIAL` | Selects the assigned number + digit-for-digit readback | REI sends from **its own default number** |
+| | Enforced behaviour |
+|---|---|
+| `REQUIRE_LEVEL10_TAG` | The "Level 10 Properties" tag must be READ on the contact record. It is never written or added. Missing tag → `LEVEL_10_TAG_MISSING`, no send. |
+| `REQUIRE_OPTIN` | The phone must be verifiably SMS-enabled. Clicking Opt In is not proof — the status is re-read afterwards. No control found → `OPT_IN_REQUIRED`; re-read still not enabled → `OPT_IN_FAILED`. Either way, no send. |
+| `REQUIRE_PROFITDIAL` | The assigned sender must be selected and read back digit-for-digit. Missing assignment, missing selector, failed selection or unreadable read-back → `PROFITDIAL_NOT_VERIFIED`, no send. **The bot never sends from REI's default number.** |
 
-Turning `REQUIRE_PROFITDIAL` off does **not** make REI send from the sheet's
-assigned number — this app has no from-number picker, so the text goes out from
-whatever number REI uses by default. The result row records
-`(REI default number)` rather than claiming the assigned one was used.
+### Verification is done twice
+
+The Smart Contacts result row is only a **candidate** — its columns can be
+truncated or stale. `CONTACT_VERIFIED` is set from the opened contact's own
+detail page, where the phone, name, property address and Level 10 tag are read
+again. An unreadable detail page is `MANUAL_REVIEW_REQUIRED`, never a pass.
+
+### The production send gate
+
+`sendText` is unreachable unless all six of these are the boolean `true`:
+
+```
+contactVerified · level10TagVerified · safetyReviewPassed
+smsOptInVerified · profitDialVerified · approvedTemplateVerified
+```
+
+Anything `false`, missing, `undefined`, or merely truthy (`1`, `"true"`) blocks
+the send. `test/sendGate.test.js` drives each gate false in turn against a spy
+adapter and asserts `enterMessage` and `sendMessage` are never called.
+
+### Read-only live verification (the next stage)
+
+```bash
+npm run verify:live -- "C:\path\to\Level 10 Properties with Contacts.xlsx"
+```
+
+Walks the first five rows and reports what could actually be read from the live
+account: phone search, result parsing, contact opening, detail reads, the Opt In
+control, and the ProfitDial sender selector. Sends nothing, opts in nobody,
+selects no number, writes no tag. The sender read-back is deliberately skipped
+because selecting a number modifies the record.
 
 ### Approved templates
 

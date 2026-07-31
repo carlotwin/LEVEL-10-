@@ -84,66 +84,118 @@ export const NAME_RESULT = Object.freeze({
   POSSIBLE: 'POSSIBLE_MATCH_MANUAL_REVIEW',
 });
 
+/** Single letters in a name are middle initials, kept separately from the core. */
+export function nameInitials(raw) {
+  return String(raw ?? '')
+    .toUpperCase()
+    .replace(/[^A-Z\s]/g, ' ')
+    .split(/\s+/)
+    .filter((t) => t.length === 1);
+}
+
+/** Did this name carry trust/vesting wording? Such records get a stricter bar. */
+export function isTrustName(raw) {
+  return String(raw ?? '')
+    .toUpperCase()
+    .split(/[^A-Z]+/)
+    .some((t) => OWNERSHIP_WORDS.has(t));
+}
+
+const setsEqual = (a, b) => a.size === b.size && [...a].every((t) => b.has(t));
+
 /**
  * Compare a spreadsheet name with a REI contact name.
  *
- * Order-insensitive ("SMITH JOHN" == "John Smith") and tolerant of vesting words
- * and middle initials, but strict about identity:
+ * Automatic approval requires the SAME PERSON, not merely a family resemblance:
+ * the core name tokens (everything except middle initials) must be identical as
+ * sets. Order is irrelevant — "SMITH JOHN" is "John Smith" — and vesting words,
+ * titles and suffixes are stripped first.
  *
- *   MATCH     one token set contains the other, >= 2 tokens agree, single owner
- *   POSSIBLE  multiple owners, or only one token agrees, or both sides carry
- *             tokens the other lacks while still overlapping
- *   NO_MATCH  no meaningful overlap, or either side has no usable tokens
+ *   MATCH     core tokens identical, single owner, and any middle initial is
+ *             consistent with the other side's full middle name
+ *   POSSIBLE  first and last agree but a middle name differs or is extra
+ *             ("JOHN ALLEN SMITH" vs "John Andrew Smith", "ROBERT JOHN SMITH"
+ *             vs "John Smith"), or the record has multiple owners
+ *   NO_MATCH  fewer than two tokens agree, or either side is unusable
  *
- * @returns {{result: string, reason: string}}
+ * Two shared tokens are NEVER enough on their own — that is what could approve
+ * the wrong family member.
+ *
+ * @returns {{result: string, reason: string, trust: boolean}}
  */
 export function compareNames(sheetName, reiName) {
   const s = nameTokens(sheetName);
   const r = nameTokens(reiName);
+  const trust = isTrustName(sheetName) || isTrustName(reiName);
 
   if (s.length === 0 || r.length === 0) {
     return {
       result: NAME_RESULT.NO_MATCH,
       reason: `no usable name tokens (sheet "${sheetName ?? ''}" / REI "${reiName ?? ''}")`,
+      trust,
     };
   }
 
   const S = new Set(s);
   const R = new Set(r);
   const overlap = [...S].filter((t) => R.has(t));
-  const subset = overlap.length === S.size || overlap.length === R.size;
   const multiOwner = hasMultipleOwners(sheetName) || hasMultipleOwners(reiName);
-
-  // Each side carrying a token the other lacks means two different people —
-  // "JOHN SMITH" vs "Michael Smith" is a mismatch, not an ambiguity. Only when
-  // one name is contained in the other (extra vesting words, a second owner, a
-  // middle name) can this be the same person.
-  if (!subset) {
-    const sheetOnly = [...S].filter((t) => !R.has(t));
-    const reiOnly = [...R].filter((t) => !S.has(t));
-    return {
-      result: NAME_RESULT.NO_MATCH,
-      reason: overlap.length
-        ? `names conflict — "${sheetName}" has ${sheetOnly.join(', ')}, REI "${reiName}" has ${reiOnly.join(', ')}`
-        : `no shared name tokens — "${sheetName}" vs "${reiName}"`,
-    };
-  }
 
   if (multiOwner) {
     return {
       result: NAME_RESULT.POSSIBLE,
       reason: `multiple owners on the record — "${sheetName}" vs "${reiName}" needs a human`,
+      trust,
     };
   }
 
-  if (overlap.length >= 2) {
-    return { result: NAME_RESULT.MATCH, reason: `names agree on ${overlap.join(', ')}` };
+  // Identical core names: the same person.
+  if (setsEqual(S, R)) {
+    return { result: NAME_RESULT.MATCH, reason: `names identical after normalization (${overlap.join(', ')})`, trust };
   }
 
-  // A single shared token (usually just a surname) is not enough to act on.
+  // One side carries extra full name tokens the other does not. This is only the
+  // same person when every extra token is explained by a matching middle INITIAL
+  // on the shorter side ("JOHN A SMITH" vs "John Andrew Smith"). An unexplained
+  // extra name ("ROBERT JOHN SMITH" vs "John Smith") is not auto-approved.
+  const [small, big, smallRaw] = S.size <= R.size ? [S, R, sheetName] : [R, S, reiName];
+  const smallInitials = new Set(nameInitials(S.size <= R.size ? sheetName : reiName));
+  if ([...small].every((t) => big.has(t))) {
+    const extra = [...big].filter((t) => !small.has(t));
+    const explained = extra.every((t) => smallInitials.has(t[0]));
+    if (explained && extra.length > 0) {
+      return {
+        result: NAME_RESULT.MATCH,
+        reason: `names agree; middle name ${extra.join(', ')} matches the initial in "${smallRaw}"`,
+        trust,
+      };
+    }
+    return {
+      result: NAME_RESULT.POSSIBLE,
+      reason: `"${sheetName}" vs "${reiName}" differ by ${extra.join(', ')} — could be a different family member`,
+      trust,
+    };
+  }
+
+  // Both sides hold tokens the other lacks. Two agreeing tokens (typically first
+  // and last) with conflicting middle names is a manual review; anything less is
+  // a different person.
+  if (overlap.length >= 2) {
+    const sheetOnly = [...S].filter((t) => !R.has(t));
+    const reiOnly = [...R].filter((t) => !S.has(t));
+    return {
+      result: NAME_RESULT.POSSIBLE,
+      reason: `"${sheetName}" and REI "${reiName}" agree on ${overlap.join(', ')} but conflict: ${sheetOnly.join(', ')} vs ${reiOnly.join(', ')}`,
+      trust,
+    };
+  }
+
   return {
-    result: NAME_RESULT.POSSIBLE,
-    reason: `only "${overlap[0]}" agrees — "${sheetName}" vs "${reiName}"`,
+    result: NAME_RESULT.NO_MATCH,
+    reason: overlap.length
+      ? `only "${overlap[0]}" agrees — "${sheetName}" vs "${reiName}"`
+      : `no shared name tokens — "${sheetName}" vs "${reiName}"`,
+    trust,
   };
 }
 
@@ -228,6 +280,19 @@ export function chooseContact({ sheet, candidates }) {
           nameResult: name.result,
         };
       }
+      // A trust name matched to an individual needs MORE than the name: the phone
+      // must match exactly (already true here) AND the property address must
+      // positively agree. An unknown address is not good enough for a trust.
+      if (name.trust && addr !== ADDRESS_RESULT.MATCH) {
+        return {
+          status: L10_STATUS.MANUAL_REVIEW_REQUIRED,
+          chosen: null,
+          reason:
+            `trust/vested name "${sheet?.name}" matched individual "${c.name}", but a trust also requires the ` +
+            `property address to agree and it could not be confirmed (sheet "${sheet?.address || '(blank)'}" vs REI "${c.address || '(blank)'}")`,
+          nameResult: name.result,
+        };
+      }
       return {
         status: L10_STATUS.CONTACT_VERIFIED,
         chosen: c,
@@ -261,7 +326,12 @@ export function chooseContact({ sheet, candidates }) {
   }));
 
   const confident = scored.filter(
-    (x) => x.phoneOk && x.name.result === NAME_RESULT.MATCH && x.addr !== ADDRESS_RESULT.CONFLICT
+    (x) =>
+      x.phoneOk &&
+      x.name.result === NAME_RESULT.MATCH &&
+      x.addr !== ADDRESS_RESULT.CONFLICT &&
+      // Same stricter bar for trust names among several candidates.
+      (!x.name.trust || x.addr === ADDRESS_RESULT.MATCH)
   );
 
   if (confident.length === 1) {
@@ -302,4 +372,137 @@ export function chooseContact({ sheet, candidates }) {
 export function searchResultStatus(count) {
   if (!count) return L10_STATUS.NO_CONTACT_FOUND_BY_PHONE;
   return count === 1 ? L10_STATUS.ONE_CONTACT_FOUND : L10_STATUS.MULTIPLE_CONTACTS_FOUND;
+}
+
+// -----------------------------------------------------------------------------
+// RE-VERIFICATION ON THE FULL CONTACT RECORD
+//
+// The Smart Contacts result row is a summary: columns can be truncated, stale, or
+// show a different phone than the record holds. So the row is only ever a
+// CANDIDATE — CONTACT_VERIFIED is set from the opened contact's own detail page.
+// If the detail cannot be read confidently, that is MANUAL_REVIEW_REQUIRED, not
+// a pass.
+// -----------------------------------------------------------------------------
+
+/**
+ * Final verification against the opened contact record.
+ *
+ * @param {object} p
+ * @param {object} p.sheet   { phone, name, address } from the spreadsheet row
+ * @param {object} p.detail  { phones[], name, address, tags[] } read from the record
+ * @param {string} p.level10Tag  the tag that must be present
+ * @returns {{status, reason, flags:{phoneVerified,nameVerified,addressOk,level10TagVerified}}}
+ */
+export function verifyOpenedContact({ sheet, detail, level10Tag }) {
+  const flags = {
+    phoneVerified: false,
+    nameVerified: false,
+    addressOk: false,
+    level10TagVerified: false,
+  };
+
+  const detailPhones = (detail?.phones || []).map((p) => normalizePhone(p)).filter(Boolean);
+  const detailName = String(detail?.name ?? '').trim();
+  const sheetPhone = normalizePhone(sheet?.phone);
+
+  // Could we read the record at all? An unreadable detail page must never pass.
+  if (detailPhones.length === 0 && !detailName) {
+    return {
+      status: L10_STATUS.MANUAL_REVIEW_REQUIRED,
+      reason: 'the contact record could not be read (no phone and no name on the detail page)',
+      flags,
+    };
+  }
+
+  // 1. Phone on the record must match the spreadsheet.
+  if (!detailPhones.includes(sheetPhone)) {
+    return {
+      status: L10_STATUS.MANUAL_REVIEW_REQUIRED,
+      reason: `contact record phone ${detailPhones.join('/') || '(unreadable)'} does not match spreadsheet ${sheetPhone}`,
+      flags,
+    };
+  }
+  flags.phoneVerified = true;
+
+  // 2. Name on the record must match the spreadsheet.
+  const name = compareNames(sheet?.name, detailName);
+  if (name.result !== NAME_RESULT.MATCH) {
+    return {
+      status:
+        name.result === NAME_RESULT.NO_MATCH
+          ? L10_STATUS.PHONE_MATCH_NAME_MISMATCH
+          : L10_STATUS.MANUAL_REVIEW_REQUIRED,
+      reason: `contact record name: ${name.reason}`,
+      flags,
+    };
+  }
+  flags.nameVerified = true;
+
+  // 3. No conflicting property address.
+  const addr = compareAddresses(sheet?.address, detail?.address);
+  if (addr === ADDRESS_RESULT.CONFLICT) {
+    return {
+      status: L10_STATUS.MANUAL_REVIEW_REQUIRED,
+      reason: `contact record property address conflicts (sheet "${sheet?.address}" vs record "${detail?.address}")`,
+      flags,
+    };
+  }
+  // A trust matched to an individual needs the address to positively agree.
+  if (name.trust && addr !== ADDRESS_RESULT.MATCH) {
+    return {
+      status: L10_STATUS.MANUAL_REVIEW_REQUIRED,
+      reason: `trust/vested name requires a confirmed property address on the record (got "${detail?.address || '(blank)'}")`,
+      flags,
+    };
+  }
+  flags.addressOk = true;
+
+  // 4. Level 10 tag must be present on the record. Read only — never written.
+  const want = String(level10Tag ?? '').trim().toLowerCase();
+  const tags = (detail?.tags || []).map((t) => String(t).trim().toLowerCase());
+  if (!want || !tags.includes(want)) {
+    return {
+      status: L10_STATUS.LEVEL_10_TAG_MISSING,
+      reason: `the "${level10Tag}" tag is not on this contact (tags read: ${(detail?.tags || []).join(', ') || 'none'})`,
+      flags,
+    };
+  }
+  flags.level10TagVerified = true;
+
+  return {
+    status: L10_STATUS.CONTACT_VERIFIED,
+    reason: `verified on the contact record: phone ${sheetPhone}, ${name.reason}, "${level10Tag}" tag present`,
+    flags,
+  };
+}
+
+// -----------------------------------------------------------------------------
+// PRODUCTION SEND GATE
+//
+// The last thing standing between the pipeline and an irreversible SMS. Every
+// gate must be the boolean `true`. Anything false, missing, undefined, or merely
+// truthy ("yes", 1) fails — an unknown gate is a closed gate.
+// -----------------------------------------------------------------------------
+export const SEND_GATES = Object.freeze([
+  'contactVerified',
+  'level10TagVerified',
+  'safetyReviewPassed',
+  'smsOptInVerified',
+  'profitDialVerified',
+  'approvedTemplateVerified',
+]);
+
+/**
+ * @returns {{allowed: boolean, failed: string[], reason: string}}
+ */
+export function checkSendGates(gates) {
+  const g = gates || {};
+  const failed = SEND_GATES.filter((k) => g[k] !== true);
+  return {
+    allowed: failed.length === 0,
+    failed,
+    reason: failed.length
+      ? `send blocked — these safety gates are not verified: ${failed.join(', ')}`
+      : 'all six safety gates verified',
+  };
 }

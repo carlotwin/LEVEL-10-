@@ -14,7 +14,9 @@
 //   openContact(candidate)        -> { opened, contactId? } open the one the
 //                                    decision layer (contactMatch.js) selected
 //   readContactFacts(contactId)   -> facts (tags, phones, notes, chatHistory, state, name, address)
-//   getSmsStatus(contactId)       -> { smsEnabled, optedIn }
+//   getSmsStatus(contactId)       -> { smsEnabled, optedIn } RE-READ after opt-in
+//   optInAvailable(contactId)     -> boolean; false = no Opt In control exists
+//   profitDialSelectorAvailable() -> boolean; false = no sender selector exists
 //   optInPhone(contactId)         -> { status:'opted_in'|'failed', smsEnabled, reason? }
 //   getProfitDialNumbers()        -> [ '(510) 916-3995', ... ] numbers available in REI
 //   selectProfitDial(contactId, number) -> { selected: true|false, reason? }
@@ -31,6 +33,8 @@ export const ADAPTER_METHODS = Object.freeze([
   'openContact',
   'readContactFacts',
   'getSmsStatus',
+  'optInAvailable',
+  'profitDialSelectorAvailable',
   'optInPhone',
   'getProfitDialNumbers',
   'selectProfitDial',

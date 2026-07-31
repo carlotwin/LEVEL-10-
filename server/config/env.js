@@ -31,12 +31,18 @@ export const env = Object.freeze({
   SANDBOX: readBool('SANDBOX', true), // defaults to sandbox
   ALLOW_LIVE_SEND: readBool('ALLOW_LIVE_SEND', false), // defaults off
   WATCH_ONLY: readBool('WATCH_ONLY', false), // navigate + read + match, never send
-  REQUIRE_OPTIN: readBool('REQUIRE_OPTIN', true), // SOP Step 4; off = REI app skips it
-  REQUIRE_PROFITDIAL: readBool('REQUIRE_PROFITDIAL', true), // SOP Step 5/6; off = REI sends from default number
-  // SOP Step 2. Off = trust the uploaded sheet as the Level 10 list instead of
-  // re-reading the tag chips on each contact. Only valid when the sheet IS the
-  // tag-filtered export; defaults ON so a missing tag still blocks.
-  REQUIRE_LEVEL10_TAG: readBool('REQUIRE_LEVEL10_TAG', true),
+  // ---------------------------------------------------------------------------
+  // MANDATORY SOP STEPS — deliberately NOT configurable.
+  //
+  // These were env flags. They are constants now: a live SMS must never be
+  // sendable without a verified opt-in, a verified ProfitDial sender, and the
+  // Level 10 tag present on the record. Setting REQUIRE_OPTIN=false,
+  // REQUIRE_PROFITDIAL=false or REQUIRE_LEVEL10_TAG=false in the environment has
+  // NO effect; the attempt is logged and ignored (see assertNoDisabledGates).
+  // ---------------------------------------------------------------------------
+  REQUIRE_OPTIN: true,
+  REQUIRE_PROFITDIAL: true,
+  REQUIRE_LEVEL10_TAG: true,
   HEADLESS: readBool('HEADLESS', false),
   MAX_SENDS_PER_RUN: readInt('MAX_SENDS_PER_RUN', 10),
   PORT: readInt('PORT', 3000),
@@ -145,4 +151,20 @@ export function liveSendGate({ placeholderEnabled } = {}) {
     };
   }
   return { allowed: true, simulated: false, reason: 'live send permitted' };
+}
+
+/**
+ * Warn loudly if the environment tries to disable a mandatory gate. The value is
+ * ignored either way — this exists so a stale .env cannot look like it worked.
+ */
+export function assertNoDisabledGates(log = console) {
+  const ignored = ['REQUIRE_OPTIN', 'REQUIRE_PROFITDIAL', 'REQUIRE_LEVEL10_TAG'].filter(
+    (k) => String(process.env[k] ?? '').trim() === 'false'
+  );
+  if (ignored.length) {
+    log.warn?.(
+      `  IGNORED: ${ignored.join(', ')}=false. These SOP steps are mandatory and cannot be disabled.`
+    );
+  }
+  return ignored;
 }

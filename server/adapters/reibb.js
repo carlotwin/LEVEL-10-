@@ -565,6 +565,28 @@ export class ReiBlackBookAdapter extends Adapter {
     };
   }
 
+  /**
+   * Is the Opt In control actually present? A blank selector in
+   * reibb.selectors.json means it was never captured for this account, so the
+   * answer is a definite NO — the engine then records OPT_IN_REQUIRED rather than
+   * pretending an opt-in happened.
+   */
+  async optInAvailable() {
+    const { sms } = this.sel;
+    if (!sms.optInButton) return false;
+    return this._present(sms.optInButton, 4000);
+  }
+
+  /**
+   * Is the ProfitDial sender selector present? Blank selector = not captured =
+   * unavailable, which blocks the send with PROFITDIAL_NOT_VERIFIED.
+   */
+  async profitDialSelectorAvailable() {
+    const { chat } = this.sel;
+    if (!chat.profitDialSelect) return false;
+    return this._present(chat.profitDialSelect, 4000);
+  }
+
   async getSmsStatus() {
     const marker = this.sel.sms.optInSuccessMarker;
     const enabled = marker ? await this._present(marker, 1500) : false;

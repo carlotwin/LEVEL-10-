@@ -12,6 +12,8 @@ import {
   nameTokens,
   hasMultipleOwners,
   searchResultStatus,
+  isTrustName,
+  verifyOpenedContact,
   NAME_RESULT,
   ADDRESS_RESULT,
 } from '../server/automation/contactMatch.js';
@@ -238,4 +240,127 @@ test('search result status reflects the raw candidate count', () => {
   assert.equal(searchResultStatus(0), L10_STATUS.NO_CONTACT_FOUND_BY_PHONE);
   assert.equal(searchResultStatus(1), L10_STATUS.ONE_CONTACT_FOUND);
   assert.equal(searchResultStatus(3), L10_STATUS.MULTIPLE_CONTACTS_FOUND);
+});
+
+// ---------------------------------------------------------------------------
+// TIGHTENED INDIVIDUAL NAME MATCHING — two shared tokens are never enough
+// ---------------------------------------------------------------------------
+test('middle initial is ignored when it does not conflict', () => {
+  assert.equal(compareNames('JOHN A SMITH', 'John Smith').result, NAME_RESULT.MATCH);
+  assert.equal(compareNames('John Smith', 'JOHN A SMITH').result, NAME_RESULT.MATCH);
+});
+
+test('a middle initial consistent with a full middle name still matches', () => {
+  // "A" is consistent with "Andrew" — same person, spelled out on one side.
+  assert.equal(compareNames('JOHN A SMITH', 'John Andrew Smith').result, NAME_RESULT.MATCH);
+});
+
+test('conflicting FULL middle names are never auto-approved', () => {
+  const r = compareNames('JOHN ALLEN SMITH', 'John Andrew Smith');
+  assert.notEqual(r.result, NAME_RESULT.MATCH);
+  assert.equal(r.result, NAME_RESULT.POSSIBLE);
+});
+
+test('a middle initial that conflicts with a full middle name is not a match', () => {
+  const r = compareNames('JOHN B SMITH', 'John Andrew Smith');
+  assert.notEqual(r.result, NAME_RESULT.MATCH);
+});
+
+test('an extra full first name is not auto-matched on two shared tokens', () => {
+  // ROBERT JOHN SMITH vs John Smith — could be father and son.
+  const r = compareNames('ROBERT JOHN SMITH', 'John Smith');
+  assert.notEqual(r.result, NAME_RESULT.MATCH, 'must not auto-match on JOHN + SMITH alone');
+  assert.equal(r.result, NAME_RESULT.POSSIBLE);
+});
+
+test('different first name with shared surname is still NO MATCH', () => {
+  assert.equal(compareNames('JOHN SMITH', 'Michael Smith').result, NAME_RESULT.NO_MATCH);
+});
+
+test('the wrong family member cannot be verified end to end', () => {
+  const r = chooseContact({
+    sheet: { phone: '559-555-0150', name: 'ROBERT JOHN SMITH', address: '40 Pine St, Fresno, CA' },
+    candidates: [{ name: 'John Smith', phone: '5595550150', address: '40 Pine St', ref: 0 }],
+  });
+  assert.equal(r.status, L10_STATUS.MANUAL_REVIEW_REQUIRED);
+  assert.equal(r.chosen, null);
+});
+
+// ---------------------------------------------------------------------------
+// TRUST NAMES need phone AND address, not just the name
+// ---------------------------------------------------------------------------
+test('a trust verifies only when the property address also agrees', () => {
+  const sheet = { phone: '559-555-0160', name: 'SMITH JOHN LIVING TRUST', address: '12 Elm St, Fresno, CA 93701' };
+  const ok = chooseContact({
+    sheet,
+    candidates: [{ name: 'John Smith', phone: '5595550160', address: '12 Elm St', ref: 0 }],
+  });
+  assert.equal(ok.status, L10_STATUS.CONTACT_VERIFIED, ok.reason);
+
+  // Same name and phone, but the record has no address to confirm against.
+  const noAddr = chooseContact({
+    sheet,
+    candidates: [{ name: 'John Smith', phone: '5595550160', address: '', ref: 0 }],
+  });
+  assert.equal(noAddr.status, L10_STATUS.MANUAL_REVIEW_REQUIRED);
+  assert.match(noAddr.reason, /trust/i);
+});
+
+test('isTrustName spots vesting wording', () => {
+  assert.equal(isTrustName('SMITH JOHN LIVING TRUST'), true);
+  assert.equal(isTrustName('BANK DAVID M TR'), true);
+  assert.equal(isTrustName('ACME LLC'), true);
+  assert.equal(isTrustName('TONY LAM'), false);
+});
+
+// ---------------------------------------------------------------------------
+// RE-VERIFICATION on the opened record
+// ---------------------------------------------------------------------------
+const TAG = 'Level 10 Properties';
+const DETAIL_OK = {
+  name: 'Tony Lam',
+  phones: ['(916) 607-2808'],
+  address: '2700 Humboldt Ave, Oakland, CA 94602',
+  tags: [TAG],
+};
+
+test('re-verification passes when the record confirms phone, name, address and tag', () => {
+  const r = verifyOpenedContact({ sheet: SHEET, detail: DETAIL_OK, level10Tag: TAG });
+  assert.equal(r.status, L10_STATUS.CONTACT_VERIFIED);
+  assert.deepEqual(r.flags, { phoneVerified: true, nameVerified: true, addressOk: true, level10TagVerified: true });
+});
+
+test('an unreadable detail page is manual review, never a pass', () => {
+  const r = verifyOpenedContact({ sheet: SHEET, detail: { name: '', phones: [], tags: [] }, level10Tag: TAG });
+  assert.equal(r.status, L10_STATUS.MANUAL_REVIEW_REQUIRED);
+  assert.equal(r.flags.phoneVerified, false);
+});
+
+test('the record phone must match even if the search row did', () => {
+  const r = verifyOpenedContact({
+    sheet: SHEET,
+    detail: { ...DETAIL_OK, phones: ['510-000-9999'] },
+    level10Tag: TAG,
+  });
+  assert.equal(r.status, L10_STATUS.MANUAL_REVIEW_REQUIRED);
+});
+
+test('the record name must match even if the search row did', () => {
+  const r = verifyOpenedContact({ sheet: SHEET, detail: { ...DETAIL_OK, name: 'Linda Hunt' }, level10Tag: TAG });
+  assert.equal(r.status, L10_STATUS.PHONE_MATCH_NAME_MISMATCH);
+});
+
+test('a missing Level 10 tag blocks verification and is never written', () => {
+  const r = verifyOpenedContact({ sheet: SHEET, detail: { ...DETAIL_OK, tags: ['Hot Lead'] }, level10Tag: TAG });
+  assert.equal(r.status, L10_STATUS.LEVEL_10_TAG_MISSING);
+  assert.equal(r.flags.level10TagVerified, false);
+});
+
+test('a conflicting address on the record blocks verification', () => {
+  const r = verifyOpenedContact({
+    sheet: SHEET,
+    detail: { ...DETAIL_OK, address: '999 Nowhere Rd, Bakersfield, CA' },
+    level10Tag: TAG,
+  });
+  assert.equal(r.status, L10_STATUS.MANUAL_REVIEW_REQUIRED);
 });

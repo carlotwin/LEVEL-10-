@@ -23,7 +23,7 @@ import {
 } from './message.js';
 import { buildProfitDialIndex, matchProfitDial } from './profitdial.js';
 import { DISPOSITION, SENT_DISPOSITIONS, L10_STATUS, STATUS_TO_DISPOSITION } from './constants.js';
-import { chooseContact } from './contactMatch.js';
+import { chooseContact, verifyOpenedContact, checkSendGates } from './contactMatch.js';
 import { Store } from '../data/store.js';
 import { SentLedger } from '../data/sentLedger.js';
 import { logger } from '../logger.js';
@@ -260,12 +260,41 @@ export class Engine extends EventEmitter {
 
       // Gather facts from the opened contact (tags, phones, notes, chat history).
       const facts = await this.adapter.readContactFacts(opened.contactId);
-      base.L10_Reason = decision.reason;
       if (facts.name) base.name = facts.name;
       if (facts.reiUrl) base.reiUrl = facts.reiUrl; // clickable link to the REI contact
 
-      // GATE 1 — Eligibility (tag, state, suppression, phone). The tag failure and
-      // the safety/history failures are distinct tracking statuses.
+      // RE-VERIFY on the full record. The search row was only a candidate: its
+      // columns can be truncated or stale. CONTACT_VERIFIED is set here, from the
+      // contact's own detail page, or not at all.
+      const recheck = verifyOpenedContact({ sheet: sheetRow, detail: facts, level10Tag: this.config.level10Tag });
+      base.L10_Status = recheck.status;
+      base.L10_Reason = recheck.reason;
+      logger.info('contact_reverified', {
+        row: contact.contactId,
+        status: recheck.status,
+        flags: recheck.flags,
+        reason: recheck.reason,
+      });
+      if (recheck.status !== L10_STATUS.CONTACT_VERIFIED) {
+        return this._finish(
+          base,
+          STATUS_TO_DISPOSITION[recheck.status] || DISPOSITION.NEEDS_REVIEW,
+          `${recheck.status} — ${recheck.reason} (search row said: ${decision.reason})`,
+          contact
+        );
+      }
+      // Gates start closed and are only set by the checks that prove them.
+      const gates = {
+        contactVerified: true,
+        level10TagVerified: recheck.flags.level10TagVerified === true,
+        safetyReviewPassed: false,
+        smsOptInVerified: false,
+        profitDialVerified: false,
+        approvedTemplateVerified: false,
+      };
+
+      // GATE 1 — Safety review: state, suppression scan, phone validity (and the
+      // tag, which verifyOpenedContact has already confirmed).
       const elig = sop.checkEligibility(facts, this.config);
       if (!elig.ok) {
         base.L10_Status =
@@ -275,6 +304,7 @@ export class Engine extends EventEmitter {
         logger.info('eligibility_blocked', { row: contact.contactId, status: base.L10_Status, reason: elig.reason });
         return this._finish(base, elig.disposition, elig.reason, contact);
       }
+      gates.safetyReviewPassed = true;
 
       // GATE 2 — Campaign duplicate ledger. Keyed on the SHEET's contact id, which
       // is what _finish() records — the id scraped off the screen can differ run
@@ -300,42 +330,87 @@ export class Engine extends EventEmitter {
           `CONTACT_VERIFIED (${base.L10_Reason}). Watch-only: assigned ProfitDial ${wMatch.profitDial || '—'} (${availTxt}). No changes made, nothing sent.`, contact);
       }
 
-      // STEP 4 — Opt in the phone (SOP). Can be turned off (REQUIRE_OPTIN=false)
-      // to match apps/accounts where numbers are already opt-in / auto-handled.
-      if (this.config.requireOptIn) {
-        const optIn = await this.adapter.optInPhone(facts.contactId);
-        base.L10_OptInStatus = optIn.status;
-        const optCheck = sop.checkOptIn(optIn);
-        if (!optCheck.ok) {
-          base.L10_Status = L10_STATUS.OPT_IN_FAILED;
-          logger.info('opt_in_failed', { row: contact.contactId, reason: optCheck.reason });
-          return this._finish(base, optCheck.disposition, optCheck.reason, contact);
-        }
+      // STEP 4 — SMS opt-in. MANDATORY, no bypass. Clicking the button is not
+      // proof: the status is re-read from the screen afterwards and must visibly
+      // show SMS-enabled. An unavailable or uncertain control is OPT_IN_REQUIRED.
+      const optStatus = await this.adapter.getSmsStatus(facts.contactId);
+      if (optStatus?.smsEnabled === true) {
+        base.L10_OptInStatus = 'already opted in';
+        gates.smsOptInVerified = true;
       } else {
-        base.L10_OptInStatus = 'skipped';
+        const available = (await this.adapter.optInAvailable?.(facts.contactId)) ?? true;
+        if (!available) {
+          base.L10_Status = L10_STATUS.OPT_IN_REQUIRED;
+          base.L10_OptInStatus = 'control unavailable';
+          logger.info('opt_in_required', { row: contact.contactId, reason: 'no Opt In control could be located' });
+          return this._finish(
+            base,
+            DISPOSITION.OPT_IN_FAILED,
+            `${L10_STATUS.OPT_IN_REQUIRED} — the phone is not SMS opted in and no Opt In control could be located. Not sending.`,
+            contact
+          );
+        }
+
+        const optIn = await this.adapter.optInPhone(facts.contactId);
+        // Re-READ the status rather than trusting the click's own return value.
+        const after = await this.adapter.getSmsStatus(facts.contactId);
+        base.L10_OptInStatus = after?.smsEnabled === true ? 'opted in (verified)' : optIn?.status || 'unknown';
+        logger.info('opt_in_attempt', {
+          row: contact.contactId,
+          clickResult: optIn?.status,
+          reReadSmsEnabled: after?.smsEnabled,
+        });
+        if (after?.smsEnabled !== true) {
+          base.L10_Status = L10_STATUS.OPT_IN_FAILED;
+          return this._finish(
+            base,
+            DISPOSITION.OPT_IN_FAILED,
+            `${L10_STATUS.OPT_IN_FAILED} — opt-in did not verify on re-read (${optIn?.reason || 'status still not SMS-enabled'}). Not sending.`,
+            contact
+          );
+        }
+        gates.smsOptInVerified = true;
       }
 
-      // STEP 5/6 — ProfitDial: match source-of-truth, verify availability + readback.
-      // Can be turned off (REQUIRE_PROFITDIAL=false) when REI sends from a fixed
-      // number and no from-number pick exists. Default ON per SOP requirement #5.
-      if (this.config.requireProfitDial) {
-        const match = matchProfitDial({ contactId: facts.contactId, address: facts.address, phone }, this.pdIndex);
-        const availableNumbers = await this.adapter.getProfitDialNumbers(facts.contactId);
-        let selectedReadback = '';
-        if (match.status === 'ok') {
-          const sel = await this.adapter.selectProfitDial(facts.contactId, match.profitDial);
-          selectedReadback = sel.readback || '';
-          base.L10_ProfitDial = match.profitDial;
-        }
-        const pdCheck = sop.checkProfitDial({ match, availableNumbers, selectedReadback });
-        if (!pdCheck.ok) {
-          base.L10_Status = L10_STATUS.PROFITDIAL_NOT_VERIFIED;
-          logger.info('profitdial_not_verified', { row: contact.contactId, reason: pdCheck.reason });
-          return this._finish(base, pdCheck.disposition, pdCheck.reason, contact);
-        }
-      } else {
-        base.L10_ProfitDial = '(REI default number)';
+      // STEP 5/6 — ProfitDial sender. MANDATORY, no bypass: the bot must never send
+      // from REI's default sender. Every one of these is PROFITDIAL_NOT_VERIFIED
+      // and stops the row: no assigned number, no sender selector, cannot select
+      // it, or cannot read the selection back digit-for-digit.
+      const pdFail = (why) => {
+        base.L10_Status = L10_STATUS.PROFITDIAL_NOT_VERIFIED;
+        logger.info('profitdial_not_verified', { row: contact.contactId, reason: why });
+        return this._finish(
+          base,
+          DISPOSITION.MISSING_PROFITDIAL,
+          `${L10_STATUS.PROFITDIAL_NOT_VERIFIED} — ${why}. Not sending.`,
+          contact
+        );
+      };
+
+      const match = matchProfitDial({ contactId: facts.contactId, address: facts.address, phone }, this.pdIndex);
+      if (match.status !== 'ok' || !match.profitDial) {
+        return pdFail(`no single assigned ProfitDial in the sheet for this homeowner (${match.status})`);
       }
+      base.L10_ProfitDial = match.profitDial;
+
+      const senderAvailable = (await this.adapter.profitDialSelectorAvailable?.(facts.contactId)) ?? true;
+      if (!senderAvailable) {
+        return pdFail('the ProfitDial sender selector could not be located in REI');
+      }
+
+      const availableNumbers = await this.adapter.getProfitDialNumbers(facts.contactId);
+      const sel = await this.adapter.selectProfitDial(facts.contactId, match.profitDial);
+      if (!sel?.selected) {
+        return pdFail(`the assigned number ${match.profitDial} could not be selected (${sel?.reason || 'no reason given'})`);
+      }
+      const selectedReadback = sel.readback || '';
+      if (!selectedReadback) {
+        return pdFail(`the selected sender number could not be read back for confirmation`);
+      }
+      const pdCheck = sop.checkProfitDial({ match, availableNumbers, selectedReadback });
+      if (!pdCheck.ok) return pdFail(pdCheck.reason);
+      gates.profitDialVerified = true;
+      logger.info('profitdial_verified', { row: contact.contactId, number: match.profitDial, readback: selectedReadback });
 
       // STEP 7 — Select the approved template (controlled balanced allocation).
       const usage = this.ledger.templateUsage(this.config.campaignBatch);
@@ -371,6 +446,10 @@ export class Engine extends EventEmitter {
       const msgCheck = sop.checkRenderedMessage(rendered, template);
       if (!msgCheck.ok) return this._finish(base, msgCheck.disposition, msgCheck.reason, contact);
       base.message = rendered; // the exact text that was sent / prepared
+
+      // The template is verified when it is an APPROVED (non-placeholder) template
+      // whose wording passed the integrity checksum and rendered with no holes.
+      gates.approvedTemplateVerified = template.placeholder !== true && !/\{\{|\}\}/.test(rendered);
       base.L10_Status = L10_STATUS.READY_TO_SEND;
       logger.info('ready_to_send', { row: contact.contactId, template: template.id, profitDial: base.L10_ProfitDial });
 
@@ -380,6 +459,18 @@ export class Engine extends EventEmitter {
         // In live mode a placeholder still enabled -> TEMPLATE_BLOCKED.
         const disp = anyPlaceholderEnabled() && !env.SANDBOX ? DISPOSITION.TEMPLATE_BLOCKED : DISPOSITION.NEEDS_REVIEW;
         return this._finish(base, disp, gate.reason, contact);
+      }
+
+      // ---------------------------------------------------------------------
+      // PRODUCTION SAFETY GATE — the last thing before an irreversible send.
+      // All six must be exactly `true`. Anything false/unknown blocks the send,
+      // and the adapter's enterMessage/sendMessage are never reached.
+      // ---------------------------------------------------------------------
+      const sendGate = checkSendGates(gates);
+      logger.info('send_gates', { row: contact.contactId, gates, allowed: sendGate.allowed, failed: sendGate.failed });
+      if (!sendGate.allowed) {
+        base.L10_Status = L10_STATUS.MANUAL_REVIEW_REQUIRED;
+        return this._finish(base, DISPOSITION.NEEDS_REVIEW, `${L10_STATUS.MANUAL_REVIEW_REQUIRED} — ${sendGate.reason}`, contact);
       }
 
       // STEP 8 — Enter + send + verify.

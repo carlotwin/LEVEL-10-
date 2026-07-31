@@ -100,6 +100,18 @@ export class SandboxAdapter extends Adapter {
     };
   }
 
+  /** Sandbox always has an Opt In control unless a scenario says otherwise. */
+  async optInAvailable(contactId) {
+    const c = this._get(contactId);
+    return c?.behavior?.optIn !== 'unavailable';
+  }
+
+  /** Sandbox always has a sender selector unless a scenario says otherwise. */
+  async profitDialSelectorAvailable(contactId) {
+    const c = this._get(contactId);
+    return c?.behavior?.profitDialSelector !== 'unavailable';
+  }
+
   async getSmsStatus(contactId) {
     const c = this._get(contactId);
     return { smsEnabled: Boolean(c?.optedIn), optedIn: Boolean(c?.optedIn) };

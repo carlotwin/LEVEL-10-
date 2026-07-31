@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { loadEnv } from './loadenv.js';
 loadEnv();
 
-import { env } from './config/env.js';
+import { env, assertNoDisabledGates } from './config/env.js';
 import { Engine } from './automation/engine.js';
 import { buildKpi } from './data/kpi.js';
 import { templatePoolSummary, anyPlaceholderEnabled, EXPECTED_CHECKSUM } from './automation/message.js';
@@ -351,8 +351,10 @@ app.listen(PORT, () => {
   console.log(`  Dashboard: http://localhost:${PORT}`);
   console.log(`  ALLOW_LIVE_SEND=${env.ALLOW_LIVE_SEND} | MAX_SENDS_PER_RUN=${env.MAX_SENDS_PER_RUN}`);
   console.log(
-    `  Gates: tag=${env.REQUIRE_LEVEL10_TAG} optIn=${env.REQUIRE_OPTIN} profitDial=${env.REQUIRE_PROFITDIAL} watchOnly=${env.WATCH_ONLY}`
+    `  Mandatory gates (not configurable): tag=${env.REQUIRE_LEVEL10_TAG} optIn=${env.REQUIRE_OPTIN} profitDial=${env.REQUIRE_PROFITDIAL}`
   );
+  console.log(`  WATCH_ONLY=${env.WATCH_ONLY}`);
+  assertNoDisabledGates({ warn: (m) => console.log(m) });
   console.log(`  Build: ${buildId()}\n`);
 });
 

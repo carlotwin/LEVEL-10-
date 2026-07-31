@@ -10,6 +10,7 @@
   "scripts": {
     "start": "node server/index.js",
     "watch:20": "node scripts/watch-20.js",
+    "verify:live": "node scripts/verify-live.js",
     "test": "node --test test/*.test.js"
   },
   "dependencies": {
