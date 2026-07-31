@@ -5,6 +5,8 @@
 //   - Export results back into the user's own columns + appended L10_* columns.
 // =============================================================================
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import * as XLSX from 'xlsx';
 import { EXPORT_COLUMNS } from '../automation/constants.js';
 
@@ -262,4 +264,51 @@ export function exportResults(originalRows, results, format = 'xlsx') {
     return Buffer.from(XLSX.utils.sheet_to_csv(ws), 'utf8');
   }
   return XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+}
+
+// -----------------------------------------------------------------------------
+// FINDING THE WORKBOOK
+//
+// Used by the server at boot and by the CLI. Looks where the file actually tends
+// to be, and never guesses between several matches.
+// -----------------------------------------------------------------------------
+export function findLevel10Workbook(explicit, { home = os.homedir(), cwd = process.cwd() } = {}) {
+  // cmd keeps stray quotes when a drag-and-drop is mixed with typing.
+  const given = String(explicit ?? '').replace(/^["']+|["']+$/g, '').trim();
+  if (given && fs.existsSync(given)) return { file: given, hits: [given], given };
+
+  const dirs = [
+    cwd,
+    path.join(cwd, 'data'),
+    path.join(home, 'Downloads'),
+    path.join(home, 'Desktop'),
+    path.join(home, 'Documents'),
+    path.join(home, 'OneDrive', 'Desktop'),
+    path.join(home, 'OneDrive', 'Documents'),
+    home,
+  ];
+  const hits = [];
+  for (const dir of dirs) {
+    let names = [];
+    try {
+      names = fs.readdirSync(dir);
+    } catch {
+      continue;
+    }
+    for (const n of names) {
+      if (!/\.(xlsx|xlsm|xls|csv)$/i.test(n)) continue;
+      if (!/level\s*-?\s*10|with\s*contacts/i.test(n)) continue;
+      const full = path.join(dir, n);
+      if (!hits.includes(full)) hits.push(full);
+    }
+  }
+  // Newest first — a re-downloaded sheet is usually the one wanted.
+  hits.sort((a, b) => {
+    try {
+      return fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs;
+    } catch {
+      return 0;
+    }
+  });
+  return { file: hits.length === 1 ? hits[0] : null, hits, given };
 }

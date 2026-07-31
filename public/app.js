@@ -62,6 +62,31 @@ async function loadConfig() {
   note.textContent +=
     `  ·  build ${cfg.build || '?'}  ·  tag check ${onOff(g.requireLevel10Tag)}` +
     `, opt-in ${onOff(g.requireOptIn)}, ProfitDial ${onOff(g.requireProfitDial)}`;
+
+  // Say up front whether the sheet loaded itself and whether REI can be reached,
+  // so neither is discovered after a click.
+  const a = cfg.autoLoad || {};
+  const lines = [];
+  if (a.loaded) {
+    lines.push(`Sheet loaded automatically: ${a.loaded} of ${a.totalRows} leads from ${a.source}`);
+    lines.push('Upload a different file above only if you want another sheet.');
+  } else if (a.error) {
+    lines.push(a.error);
+    (a.candidates || []).forEach((c) => lines.push('  ' + c));
+  }
+  if (lines.length) $('loadInfo').textContent = lines.join('\n') + warnIfTestMode();
+
+  const rei = cfg.rei || {};
+  const btn = $('btnVerify');
+  if (rei.ready) {
+    $('verifyInfo').textContent = 'REI login is configured. Click to check — read-only, nothing is sent or changed.';
+    btn.disabled = false;
+  } else {
+    btn.disabled = true;
+    $('verifyInfo').textContent =
+      `Cannot reach REI yet: ${(rei.missing || []).join(', ')} missing from .env.\n` +
+      'Add your REI login to the .env file in the project folder, then restart the app.';
+  }
 }
 
 // ---- controls state ----
@@ -213,9 +238,7 @@ function describeLoad(r) {
   return lines.join('\n');
 }
 
-// Test Mode + real uploaded leads is a trap: Start runs entirely offline and
-// every row comes back "Not Level 10" because the simulation has no tags. Say so
-// at the moment the sheet is loaded, not after a confusing run.
+// (defined below as a function declaration, hoisted — used by loadConfig too)
 function warnIfTestMode() {
   if (MODE !== 'test') return '';
   return (

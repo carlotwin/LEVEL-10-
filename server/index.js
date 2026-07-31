@@ -20,6 +20,7 @@ import {
   exportResults,
   loadLevel10File,
   detectColumnsForRows,
+  findLevel10Workbook,
 } from './data/spreadsheet.js';
 import { fetchGoogleSheetRows, parseSheetUrl } from './data/googleSheet.js';
 import { runReadOnlyVerification, summarize } from './automation/verifyLive.js';
@@ -83,6 +84,12 @@ app.get('/api/config', (req, res) => {
       requireOptIn: env.REQUIRE_OPTIN,
       requireProfitDial: env.REQUIRE_PROFITDIAL,
     },
+    // Can the REI check actually run? Answered at page load, not after a click.
+    rei: {
+      ready: REI_KEYS.every((k) => Boolean(process.env[k])),
+      missing: REI_KEYS.filter((k) => !process.env[k]),
+    },
+    autoLoad,
   });
 });
 
@@ -99,6 +106,54 @@ function buildId() {
     return sha.slice(0, 7);
   } catch {
     return 'unknown';
+  }
+}
+
+const REI_KEYS = ['REIBB_LOGIN_URL', 'REIBB_EMAIL', 'REIBB_PASSWORD'];
+
+// What the boot-time auto-load did, so the dashboard can show it on first paint.
+let autoLoad = { tried: false, loaded: 0, source: '', candidates: [], error: '' };
+
+/**
+ * Load the Level 10 sheet at boot if one can be found on this machine.
+ *
+ * Without this the dashboard opens empty and the operator has to find and upload
+ * the file before anything can be checked — which is the slow part. A single
+ * unambiguous match is loaded; several matches are listed instead of guessed.
+ */
+function autoLoadWorkbook() {
+  autoLoad.tried = true;
+  try {
+    const found = findLevel10Workbook(process.env.L10_SHEET);
+    autoLoad.candidates = found.hits;
+    if (!found.file) {
+      autoLoad.error = found.hits.length
+        ? `${found.hits.length} Level 10 workbooks found — pick one in the dashboard.`
+        : 'No Level 10 workbook found on this machine — upload it in the dashboard.';
+      return;
+    }
+    const wb = loadLevel10File(found.file, {
+      preferredTab: env.PD_SHEET_TAB,
+      preferredCols: pdColsFromEnv(),
+    });
+    if (!wb.rows.length) {
+      autoLoad.error = `Found ${found.file} but it has no data rows.`;
+      return;
+    }
+    engine._uploadedPd = { rows: wb.rows, cols: wb.cols };
+    const limit = parseInt(process.env.L10_AUTO_LIMIT ?? '20', 10) || 20;
+    const r = loadLevel10FromRows(wb.rows, wb.cols, {
+      source: found.file,
+      tab: wb.tab,
+      limit,
+      detected: { tab: wb.tab, tabs: wb.tabs, headerRow: wb.headerRow, cols: wb.cols, how: wb.how, missing: wb.missing },
+    });
+    autoLoad.loaded = r.leadCount;
+    autoLoad.totalRows = r.totalRows;
+    autoLoad.source = found.file;
+    logger.info('auto_loaded_sheet', { file: found.file, leads: r.leadCount, of: r.totalRows });
+  } catch (e) {
+    autoLoad.error = e.message;
   }
 }
 
@@ -433,7 +488,20 @@ app.listen(PORT, () => {
   );
   console.log(`  WATCH_ONLY=${env.WATCH_ONLY}`);
   assertNoDisabledGates({ warn: (m) => console.log(m) });
-  console.log(`  Build: ${buildId()}\n`);
+  console.log(`  Build: ${buildId()}`);
+  autoLoadWorkbook();
+  if (autoLoad.loaded) {
+    console.log(`  Sheet: auto-loaded ${autoLoad.loaded} of ${autoLoad.totalRows} leads from ${autoLoad.source}`);
+  } else if (autoLoad.error) {
+    console.log(`  Sheet: ${autoLoad.error}`);
+  }
+  const reiMissing = REI_KEYS.filter((k) => !process.env[k]);
+  console.log(
+    reiMissing.length
+      ? `  REI check: NOT ready — add ${reiMissing.join(', ')} to .env`
+      : '  REI check: ready — click "Check against REI" in the dashboard'
+  );
+  console.log('');
 });
 
 export { app };
