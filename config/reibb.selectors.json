@@ -17,6 +17,8 @@
     "searchInput": "input[placeholder*='Search' i], input[type='search'], input[aria-label*='search' i], input[name*='search' i], .search input",
     "resultRow": "table tbody tr, .list-row, [role='row']",
     "resultRowByText": "text=%QUERY%",
+    "resultRowLink": "table tbody tr td a, .list-row a, [role='row'] a",
+    "noResultsMarker": "text=/no result/i, text=/did not match/i, text=/no records/i",
     "openContact": "table tbody tr td a, .list-row a, [role='row'] a"
   },
 

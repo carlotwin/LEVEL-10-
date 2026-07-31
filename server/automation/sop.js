@@ -70,7 +70,7 @@ export function checkEligibility(facts, config) {
   const hit = BLOCKING_PHRASES.find((p) => haystack.includes(p));
   if (hit) {
     // "sold"/"listed" and DNC-style phrases are all hard blocks here.
-    if (['do not contact', 'do not text', 'do not automate', 'dnc', 'attorney', 'lawsuit', 'harass'].includes(hit)) {
+    if (['do not contact', 'do not text', 'do not call', 'do not automate', 'dnc', 'close my file', 'remove me', 'remove from list', 'remove from the list', 'attorney', 'lawsuit', 'harass'].includes(hit)) {
       return block(DISPOSITION.DO_NOT_CONTACT, `Blocking note found: "${hit}"`);
     }
     return block(DISPOSITION.NEEDS_REVIEW, `Blocking phrase found: "${hit}"`);

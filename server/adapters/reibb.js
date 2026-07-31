@@ -166,21 +166,52 @@ export class ReiBlackBookAdapter extends Adapter {
     return rows;
   }
 
+  _contactsUrl() {
+    // Derive the Contacts URL from the login URL origin (e.g. my.reiblackbook.com).
+    try {
+      return new URL(env.REIBB_LOGIN_URL).origin + '/contacts';
+    } catch {
+      return 'https://my.reiblackbook.com/contacts';
+    }
+  }
+
+  // Confirmed flow (docs/REI-SMARTCONTACTS-PHONE-SEARCH.md from the Revival AI
+  // repo): go to /contacts, search by ADDRESS then digits-only PHONE, open the
+  // first /contacts/<id> result, with a direct-URL fallback if the click didn't
+  // navigate. Address is the primary key (many contacts are "Unknown").
   async findContact(query) {
     const { contacts } = this.sel;
-    await this.page.click(contacts.navContacts);
-    // Ordered search fallbacks: address -> phone -> name.
-    const terms = [query.address, query.phone, query.name, query.contactId].filter(Boolean);
+    const digits = (s) => String(s || '').replace(/\D/g, '');
+    const terms = [query.address, digits(query.phone), query.name].filter(Boolean);
+
+    await this.page.goto(this._contactsUrl(), { waitUntil: 'domcontentloaded' }).catch(() => {});
+    await this.page.waitForTimeout(1200);
+
     for (const term of terms) {
       if (!(await this._present(contacts.searchInput, 4000))) continue;
+      await this.page.fill(contacts.searchInput, '');
       await this.page.fill(contacts.searchInput, String(term));
-      await this.page.waitForTimeout(800);
-      const rowSel = contacts.resultRowByText.replace('%QUERY%', String(term));
-      if (await this._present(rowSel, 4000)) {
-        await this.page.click(rowSel);
-        await this.page.waitForTimeout(500);
-        const id = query.contactId || (await this._text(this.sel.contact.nameField)) || String(term);
-        return { found: true, contactId: id, matchedBy: term };
+      await this.page.keyboard.press('Enter');
+      await this.page.waitForTimeout(1400);
+
+      if (contacts.noResultsMarker && (await this._present(contacts.noResultsMarker, 800))) continue;
+
+      // Open the first contact result; fall back to a direct /contacts/<id> goto.
+      if (!/\/contacts\/\d+/i.test(this.page.url())) {
+        const href = await this.page
+          .evaluate(() =>
+            Array.from(document.querySelectorAll("a[href*='/contacts/']"))
+              .map((a) => a.href)
+              .find((h) => /\/contacts\/\d+/i.test(h)) || ''
+          )
+          .catch(() => '');
+        if (href) await this.page.goto(href, { waitUntil: 'domcontentloaded' }).catch(() => {});
+      }
+      await this.page.waitForTimeout(1000);
+
+      if (/\/contacts\/\d+/i.test(this.page.url())) {
+        const id = query.contactId || this.page.url().match(/\/contacts\/(\d+)/i)?.[1] || String(term);
+        return { found: true, contactId: id, matchedBy: term, reiUrl: this.page.url() };
       }
     }
     return { found: false };

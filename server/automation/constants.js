@@ -48,20 +48,41 @@ export const REPLY_CLASS = Object.freeze({
 export const OPT_OUT_REGEX =
   /\b(stop|stopall|unsubscribe|cancel|end|quit|remove me|opt[\s-]?out|take me off)\b/i;
 
-// Phrases that block a send when found in tags/notes/history.
+// Phrases/tags that block a send when found in tags/notes/history.
+// Mirrors Revival AI's SAFETY_TAG_RULES (same REI account) for parity.
+// (Opt-out/STOP/unsubscribe are handled separately by OPT_OUT_REGEX.)
 export const BLOCKING_PHRASES = Object.freeze([
   'not interested',
+  'no interest in selling',
   'wrong number',
+  'wrong call',
+  'not the owner',
   'do not contact',
   'do not text',
+  'do not call',
   'do not automate',
   'dnc',
+  'close my file',
+  'remove me',
+  'remove from list',
+  'remove from the list',
   'attorney',
   'lawsuit',
   'harass',
   'sold',
   'already sold',
+  'sold to competitor',
+  'sold to realtor',
+  'deal closed',
+  'under contract',
+  'contract signed',
   'listed',
+  'already listed',
+  'currently for sale',
+  'dead lead',
+  'disqualified',
+  'spam',
+  'telemarketer',
 ]);
 
 // Positive / negative reply signal words (coarse; sales team does real triage).
