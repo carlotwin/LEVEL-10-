@@ -59,6 +59,9 @@ export const env = Object.freeze({
 
   // --- live adapter (unused in sandbox) ---
   REIBB_LOGIN_URL: process.env.REIBB_LOGIN_URL || '',
+  // Optional: the exact URL of the Contacts list. Set it and the adapter goes
+  // straight there instead of clicking a nav label or probing candidate paths.
+  REIBB_CONTACTS_URL: process.env.REIBB_CONTACTS_URL || '',
   ACTION_TIMEOUT_MS: readInt('ACTION_TIMEOUT_MS', 15000),
 });
 

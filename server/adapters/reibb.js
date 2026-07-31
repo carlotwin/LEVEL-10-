@@ -37,6 +37,18 @@ function loadSelectors() {
 
 const SLOWMO_MS = Number.parseInt(process.env.SLOWMO_MS ?? '0', 10) || 0;
 
+// Paths to try for the Contacts list when no REIBB_CONTACTS_URL is configured.
+// Each is verified by the search box appearing, so a wrong guess costs a page
+// load and nothing else. Set REIBB_CONTACTS_URL to skip probing entirely.
+const CONTACTS_PATH_CANDIDATES = Object.freeze([
+  '/contacts',
+  '/services/contacts',
+  '/crm/contacts',
+  '/contacts/list',
+  '/services/contact/list',
+  '/app/contacts',
+]);
+
 export class ReiBlackBookAdapter extends Adapter {
   constructor(opts = {}) {
     super();
@@ -178,14 +190,70 @@ export class ReiBlackBookAdapter extends Adapter {
     return [...new Set(out)].slice(0, 12);
   }
 
-  /** Open Contacts and wait for its search box, wherever it lives. */
+  /**
+   * Get to the Contacts list and return the frame holding its search box.
+   *
+   * Clicking `text=Contacts` is not reliable: it can match a heading, a stat
+   * card or a menu label, so the bot ended up on a date-filtered view with no
+   * search box and searched nothing at all. Order of attempts:
+   *   1. REIBB_CONTACTS_URL, if configured — deterministic, no guessing.
+   *   2. A remembered URL that worked earlier in this run.
+   *   3. A real nav LINK (anchor with an href), not any text on the page.
+   *   4. Candidate paths on the same origin, each verified by the search box
+   *      actually appearing. Navigation is read-only, so probing is safe.
+   * Whatever works is remembered for the remaining leads.
+   */
   async _openContactsSearch() {
     const { contacts } = this.sel;
-    // Clicking the nav is best-effort: "text=Contacts" can resolve to several
-    // elements, and we may already be on the page.
-    await this.page.click(contacts.navContacts).catch(() => {});
-    await this.page.waitForLoadState('domcontentloaded').catch(() => {});
-    return this._frameFor(contacts.searchInput, this.timeout);
+
+    const check = async (timeout) => this._frameFor(contacts.searchInput, timeout);
+
+    // Already there (or the box is present) — cheapest case.
+    let frame = await check(2500);
+    if (frame) return frame;
+
+    const tryUrl = async (url) => {
+      if (!url) return null;
+      try {
+        await this.page.goto(url, { waitUntil: 'domcontentloaded' });
+      } catch {
+        return null;
+      }
+      const f = await check(this.timeout);
+      if (f) {
+        this._contactsUrl = url;
+        logger.info('contacts_url_ok', { url });
+      }
+      return f;
+    };
+
+    for (const url of [env.REIBB_CONTACTS_URL, this._contactsUrl]) {
+      frame = await tryUrl(url);
+      if (frame) return frame;
+    }
+
+    // A genuine navigation link, then wait for the SPA to render.
+    if (await this._present(contacts.navContacts, 4000)) {
+      await this.page.click(contacts.navContacts).catch(() => {});
+      await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+      frame = await check(this.timeout);
+      if (frame) return frame;
+    }
+
+    // Candidate paths on this account's origin.
+    let origin = '';
+    try {
+      origin = new URL(this.page.url() || env.REIBB_LOGIN_URL).origin;
+    } catch {
+      origin = '';
+    }
+    if (origin) {
+      for (const p of CONTACTS_PATH_CANDIDATES) {
+        frame = await tryUrl(origin + p);
+        if (frame) return frame;
+      }
+    }
+    return null;
   }
 
   async _text(selector) {
@@ -355,12 +423,14 @@ export class ReiBlackBookAdapter extends Adapter {
     // and a contact REI genuinely does not have.
     let stage = 'no result matched';
     if (!searchBoxSeen) {
-      // List the text inputs that DO exist (every frame) so the right selector
-      // can be written from the report alone.
+      // List the text inputs that DO exist (every frame) plus the URL we were
+      // actually on — the inputs alone can't tell you it was the wrong page.
       const inputs = await this._describeInputs();
       stage =
-        "could not find REI's Contacts search box (selectors.contacts.searchInput). " +
-        `Text inputs on screen: ${inputs.length ? inputs.join(' | ') : 'none'}`;
+        "could not reach REI's Contacts list (no search box). " +
+        `Page was: ${this.page.url()}. ` +
+        `Text inputs on screen: ${inputs.length ? inputs.join(' | ') : 'none'}. ` +
+        'If this is not the Contacts list, set REIBB_CONTACTS_URL in .env to its exact URL.';
     }
     else if (!resultsSeen) stage = 'the search box worked but no result row could be opened (selectors.contacts.openContact)';
     const shot = await this._diagnosticShot(`notfound-${normalizePhone(query.phone) || query.name || 'lead'}`);

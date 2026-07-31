@@ -9,7 +9,7 @@
   },
 
   "contacts": {
-    "navContacts": "text=Contacts",
+    "navContacts": "a[href*='contact' i], nav a:has-text('Contacts'), aside a:has-text('Contacts'), [role='navigation'] a:has-text('Contacts'), a:has-text('Contacts')",
     "tagFilterOpen": "button:has-text('Tags'), text=Tags",
     "tagSearchInput": "input[placeholder='Search...']",
     "tagFilterOption": "text=%TAG%",
