@@ -56,6 +56,9 @@
     "messageThread": ".timeline, .activity-feed, .activity-history, .chat-thread, [class*='conversation'], [class*='activity']",
     "outgoingMessage": ""
   },
-  "_verifiedLive": [],
-  "_verifiedNote": "Keys listed in _verifiedLive have been observed WORKING in the real REI BlackBook account. A sandbox test never qualifies. Empty means nothing is verified yet."
+  "_verifiedLive": [
+    "contacts.searchInput",
+    "contacts.resultRow"
+  ],
+  "_verifiedNote": "Keys in _verifiedLive were observed WORKING in the real REI BlackBook account. contacts.searchInput and contacts.resultRow: verified by the read-only five-record run (5/5 phone searches returned one parseable row each). A sandbox test never qualifies."
 }

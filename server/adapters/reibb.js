@@ -373,10 +373,23 @@ export class ReiBlackBookAdapter extends Adapter {
   async _readCandidates(frame) {
     const { contacts } = this.sel;
     try {
-      const rows = await frame.$$eval(contacts.resultRow, (els) =>
-        els
+      const rows = await frame.$$eval(contacts.resultRow, (els) => {
+        // REI renders an avatar badge inside the Name cell, so its text arrives as
+        // "JP\n\nJames Potts". Left alone, "JP" becomes a name token and
+        // "JAMES POTTS" vs "JP JAMES POTTS" reads as a different family member.
+        // Drop lines that are only 1-3 capitals (avatar initials) and join the rest.
+        const cleanCell = (raw) => {
+          const lines = String(raw || '')
+            .split('\n')
+            .map((l) => l.trim())
+            .filter(Boolean);
+          const kept = lines.filter((l) => !/^[A-Z]{1,3}$/.test(l));
+          // If a contact really is called "JP", keeping nothing would be worse.
+          return (kept.length ? kept : lines).join(' ');
+        };
+        return els
           .map((el, index) => {
-            const cells = [...el.querySelectorAll('td, [role="cell"]')].map((c) => c.innerText.trim());
+            const cells = [...el.querySelectorAll('td, [role="cell"]')].map((c) => cleanCell(c.innerText));
             const link = el.querySelector('a');
             return {
               index,
@@ -385,8 +398,8 @@ export class ReiBlackBookAdapter extends Adapter {
               text: el.innerText.replace(/\s+/g, ' ').trim(),
             };
           })
-          .filter((r) => r.text && r.cells.length)
-      );
+          .filter((r) => r.text && r.cells.length);
+      });
 
       return rows
         .map((r) => {

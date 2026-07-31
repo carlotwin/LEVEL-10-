@@ -364,3 +364,67 @@ test('a conflicting address on the record blocks verification', () => {
   });
   assert.equal(r.status, L10_STATUS.MANUAL_REVIEW_REQUIRED);
 });
+
+// ---------------------------------------------------------------------------
+// REAL records from the live read-only run (5/5 phone searches succeeded).
+// These are the actual sheet-vs-REI pairs, with REI's avatar initials stripped
+// by the adapter. They lock in the decisions a human reviewed and agreed with.
+// ---------------------------------------------------------------------------
+const LIVE_ROWS = [
+  {
+    label: 'two owners on the REI record',
+    sheet: { name: 'TONY LAM', phone: '916-607-2808', address: '2700 Humboldt Ave, Oakland, CA 94602' },
+    rei: { name: 'Tony & Sukien Lam', phone: '(916) 607-2808', address: '2700 Humboldt Ave, Oakland, CA 94602' },
+    expect: L10_STATUS.MANUAL_REVIEW_REQUIRED,
+  },
+  {
+    label: 'same first name, different surname',
+    sheet: { name: 'LINDA VANBROCKLIN', phone: '925-937-2580', address: '3451 Rhoda Ave, Oakland, CA 94602' },
+    rei: { name: 'Linda Lew', phone: '(925) 937-2580', address: '3451 Rhoda Ave, Oakland, CA 94602' },
+    expect: L10_STATUS.PHONE_MATCH_NAME_MISMATCH,
+  },
+  {
+    label: 'exact match',
+    sheet: { name: 'JAMES POTTS', phone: '510-206-1922', address: '3951 Whittle Ave, Oakland, CA 94602' },
+    rei: { name: 'James Potts', phone: '(510) 206-1922', address: '3951 Whittle Ave, Oakland, CA 94602' },
+    expect: L10_STATUS.CONTACT_VERIFIED,
+  },
+  {
+    label: 'exact match',
+    sheet: { name: 'JAMES FEHR', phone: '510-482-5020', address: '1959 Wrenn St, Oakland, CA 94602' },
+    rei: { name: 'James Fehr', phone: '(510) 482-5020', address: '1959 Wrenn St, Oakland, CA 94602' },
+    expect: L10_STATUS.CONTACT_VERIFIED,
+  },
+  {
+    label: 'exact match',
+    sheet: { name: 'LINDA HUNT', phone: '510-332-9764', address: '4516 Walnut St, Oakland, CA 94619' },
+    rei: { name: 'Linda Hunt', phone: '(510) 332-9764', address: '4516 Walnut St, Oakland, CA 94619' },
+    expect: L10_STATUS.CONTACT_VERIFIED,
+  },
+];
+
+test('the five live records reach the reviewed decisions', () => {
+  for (const [i, row] of LIVE_ROWS.entries()) {
+    const d = chooseContact({
+      sheet: row.sheet,
+      candidates: [{ ...row.rei, contactId: `live-${i}`, rowReference: 0 }],
+    });
+    assert.equal(d.status, row.expect, `row ${i + 1} (${row.label}): got ${d.status} — ${d.reason}`);
+  }
+});
+
+test("REI's avatar initials must never survive into a name comparison", () => {
+  // If the adapter ever stops stripping "JP\n\n", this is what would happen —
+  // an exact match downgraded to a possible different family member.
+  const withAvatar = chooseContact({
+    sheet: { name: 'JAMES POTTS', phone: '510-206-1922', address: '3951 Whittle Ave' },
+    candidates: [{ name: 'JP\n\nJames Potts', phone: '(510) 206-1922', address: '3951 Whittle Ave', rowReference: 0 }],
+  });
+  assert.notEqual(withAvatar.status, L10_STATUS.CONTACT_VERIFIED, 'unstripped avatar text should not verify');
+
+  const stripped = chooseContact({
+    sheet: { name: 'JAMES POTTS', phone: '510-206-1922', address: '3951 Whittle Ave' },
+    candidates: [{ name: 'James Potts', phone: '(510) 206-1922', address: '3951 Whittle Ave', rowReference: 0 }],
+  });
+  assert.equal(stripped.status, L10_STATUS.CONTACT_VERIFIED);
+});
