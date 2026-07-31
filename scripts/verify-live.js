@@ -193,6 +193,27 @@ try {
     console.log(`                        address="${f.detail.address}" tags=${JSON.stringify(f.detail.tags)}`);
     console.log(`         re-verify    : ${recheck.status} ${JSON.stringify(recheck.flags)}`);
 
+    // When the record could not be read, probe the page and print what IS there,
+    // so the correct selectors can be written from evidence.
+    if (recheck.status !== 'CONTACT_VERIFIED') {
+      const probe = await adapter.probeContactPage(`row${i + 1}-${sheetRow.phone.replace(/\D/g, '')}`);
+      f.probe = probe;
+      console.log('\n         ── DETAIL PAGE PROBE (read-only) ──');
+      console.log(`         url: ${probe.url}`);
+      const line = (d) =>
+        `           <${d.tag}${d.id ? ' id=' + d.id : ''}${d.cls ? ' class=' + d.cls : ''}` +
+        `${d.role ? ' role=' + d.role : ''}${d.aria ? ' aria-label="' + d.aria + '"' : ''}` +
+        `${d.testid ? ' data-testid=' + d.testid : ''}${d.href ? ' href="' + d.href + '"' : ''}> ${d.text}`;
+      console.log('         headings:');
+      (probe.headings || []).forEach((d) => console.log(line(d)));
+      console.log('         phone-looking elements:');
+      (probe.phones || []).forEach((d) => console.log(line(d)));
+      console.log('         tag-looking elements:');
+      (probe.tags || []).forEach((d) => console.log(line(d)));
+      if (probe.html) console.log(`         page saved: ${probe.html}`);
+      console.log('');
+    }
+
     // 5. Opt In control — located only, never clicked.
     f.optInAvailable = await adapter.optInAvailable(opened.contactId);
     const sms = await adapter.getSmsStatus(opened.contactId);

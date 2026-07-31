@@ -219,6 +219,95 @@ export class ReiBlackBookAdapter extends Adapter {
   }
 
   /**
+   * Read-only probe of the OPEN contact record, for selector capture.
+   *
+   * Reports what is actually on the page — visible headings, every element whose
+   * text looks like a phone number, and anything that looks like a tag chip —
+   * each with the attributes needed to write a selector (tag, id, class, role,
+   * aria-label, data-testid, href). Also saves the page HTML.
+   *
+   * This exists so detail-page selectors are captured from evidence instead of
+   * guessed. It changes nothing on the page.
+   */
+  async probeContactPage(label = 'contact') {
+    const describe = (el, text) => {
+      const attr = (n) => el.getAttribute(n) || '';
+      const cls = String(attr('class') || '').split(/\s+/).filter(Boolean).slice(0, 3).join('.');
+      return {
+        tag: el.tagName.toLowerCase(),
+        id: attr('id'),
+        cls,
+        role: attr('role'),
+        aria: attr('aria-label'),
+        testid: attr('data-testid'),
+        href: attr('href'),
+        text: String(text || '').replace(/\s+/g, ' ').trim().slice(0, 60),
+      };
+    };
+
+    const out = { url: this.page.url(), headings: [], phones: [], tags: [], html: '' };
+    try {
+      const probe = await this.page.evaluate(() => {
+        const vis = (el) => {
+          const r = el.getBoundingClientRect();
+          const st = getComputedStyle(el);
+          return r.width > 0 && r.height > 0 && st.visibility !== 'hidden' && st.display !== 'none';
+        };
+        const desc = (el) => {
+          const a = (n) => el.getAttribute(n) || '';
+          return {
+            tag: el.tagName.toLowerCase(),
+            id: a('id'),
+            cls: (a('class') || '').split(/\s+/).filter(Boolean).slice(0, 3).join('.'),
+            role: a('role'),
+            aria: a('aria-label'),
+            testid: a('data-testid'),
+            href: a('href'),
+            text: (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60),
+          };
+        };
+
+        const headings = [...document.querySelectorAll('h1,h2,h3,[role="heading"]')]
+          .filter(vis)
+          .map(desc)
+          .filter((d) => d.text)
+          .slice(0, 8);
+
+        // Leaf elements whose own text looks like a US phone number.
+        const PHONE = /\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/;
+        const phones = [...document.querySelectorAll('body *')]
+          .filter((el) => el.children.length === 0 && vis(el) && PHONE.test(el.textContent || ''))
+          .map(desc)
+          .slice(0, 10);
+
+        // Small visible elements that look like chips/badges/tags.
+        const tags = [...document.querySelectorAll('[class*="tag" i],[class*="chip" i],[class*="badge" i],[class*="pill" i],[class*="label" i]')]
+          .filter(vis)
+          .map(desc)
+          .filter((d) => d.text && d.text.length < 40)
+          .slice(0, 12);
+
+        return { headings, phones, tags };
+      });
+      Object.assign(out, probe);
+    } catch (e) {
+      out.error = e.message;
+    }
+
+    try {
+      const dir = path.join(dataDir(), 'diagnostics');
+      fs.mkdirSync(dir, { recursive: true });
+      const safe = String(label).replace(/[^a-zA-Z0-9_-]+/g, '-').slice(0, 60);
+      const file = path.join(dir, `contact-${safe}.html`);
+      fs.writeFileSync(file, await this.page.content(), 'utf8');
+      out.html = file;
+    } catch {
+      /* artifact is best-effort */
+    }
+    return out;
+  }
+
+  /**
    * Get to the Contacts list and return the frame holding its search box.
    *
    * Clicking `text=Contacts` is not reliable: it can match a heading, a stat
@@ -291,10 +380,30 @@ export class ReiBlackBookAdapter extends Adapter {
     return null;
   }
 
-  async _text(selector) {
+  /**
+   * Text of the first VISIBLE, non-empty match.
+   *
+   * page.$ returns the first element in DOM order regardless of visibility, which
+   * is how "h1, h2" produced "Logging Out..." from a hidden overlay instead of the
+   * contact's name. Walking the matches and skipping invisible/empty ones is the
+   * difference between reading the record and reading furniture.
+   */
+  async _text(selector, { frame = this.page } = {}) {
+    if (!selector) return '';
     try {
-      const el = await this.page.$(selector);
-      return el ? (await el.innerText()).trim() : '';
+      const els = await frame.$$(selector);
+      for (const el of els.slice(0, 20)) {
+        let visible = false;
+        try {
+          visible = await el.isVisible();
+        } catch {
+          visible = false;
+        }
+        if (!visible) continue;
+        const txt = (await el.innerText()).trim();
+        if (txt) return txt;
+      }
+      return '';
     } catch {
       return '';
     }
@@ -356,8 +465,10 @@ export class ReiBlackBookAdapter extends Adapter {
     const ten = digits.length >= 10 ? digits.slice(-10) : '';
     if (!ten) return terms; // no usable phone -> nothing to search
 
-    push(ten); // 9166072808 — the normalized form
+    // Order is from live evidence: "(916) 607-2808" returned a row on every record
+    // that reached it, while the bare 10 digits returned nothing on 2 of 5.
     push(`(${ten.slice(0, 3)}) ${ten.slice(3, 6)}-${ten.slice(6)}`);
+    push(ten); // 9166072808 — the normalized form
     push(`${ten.slice(0, 3)}-${ten.slice(3, 6)}-${ten.slice(6)}`);
     push(`${ten.slice(0, 3)}.${ten.slice(3, 6)}.${ten.slice(6)}`);
     return terms;

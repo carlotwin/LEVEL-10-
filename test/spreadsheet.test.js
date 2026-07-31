@@ -129,8 +129,10 @@ test('live search uses the phone only — never the name, address or a row id', 
   const values = terms.map((t) => t.value);
   // Every term is the SAME number in a different rendering.
   assert.ok(terms.every((t) => t.label === 'phone'), 'only phone terms');
-  assert.equal(values[0], '9166072808', 'normalized 10-digit form first');
-  assert.ok(values.includes('(916) 607-2808'));
+  // Live evidence: "(916) 607-2808" returned a row on every record that reached
+  // it, while the bare 10 digits returned nothing on 2 of 5. So it goes first.
+  assert.equal(values[0], '(916) 607-2808', 'the format REI actually accepts goes first');
+  assert.ok(values.includes('9166072808'), 'the normalized form is still tried');
   assert.ok(values.includes('916-607-2808'));
   assert.ok(values.includes('916.607.2808'));
   // The name/address/row id are NEVER searched.
