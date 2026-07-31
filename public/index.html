@@ -22,12 +22,7 @@
       <section class="card">
         <div class="card-head"><h2>Mode</h2><span id="modeHint" class="muted small"></span></div>
         <div class="run-row">
-          <select id="modeSelect" class="txt" style="max-width:340px">
-            <option value="test">Not Live — nothing is sent (practice)</option>
-            <option value="watch">Live — pulls real REI data, still won't send</option>
-          </select>
-          <label class="file" style="flex-direction:row;align-items:center;gap:6px">Batch cap<input type="number" id="maxSends" class="txt" style="max-width:90px" value="5" min="0" /></label>
-          <button id="btnSaveMode" class="btn primary">Save &amp; apply</button>
+          <button id="btnModeToggle" class="btn primary">Not Live Send</button>
         </div>
         <div id="modeSaveInfo" class="muted small" style="margin-top:8px"></div>
       </section>
@@ -57,7 +52,6 @@
               Upload your “Level 10 Properties with Contacts” file (.xlsx). It has both the homeowners and their ProfitDial numbers — no numbers to type.
             </p>
             <label class="file"><b>Upload leads file (.xlsx)</b><input type="file" id="pdFile" accept=".xlsx,.xls,.csv" /></label>
-            <button id="btnLoadSample" class="btn ghost">Load sample (demo)</button>
             <div id="loadInfo" class="muted small" style="width:100%"></div>
           </div>
         </details>

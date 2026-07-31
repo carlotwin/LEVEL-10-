@@ -47,6 +47,8 @@ main { max-width: 1120px; margin: 22px auto; padding: 0 20px; display: grid; gap
 .btn.primary:hover:not(:disabled) { background: #2f6fe0; }
 .btn.ghost { color: var(--muted); }
 .btn.small { padding: 7px 13px; font-size: 13px; }
+.btn.danger { background: #b3261e; border-color: #b3261e; color: #fff; }
+.btn.danger:hover:not(:disabled) { background: #932019; }
 
 .status { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: capitalize; }
 .status.running { color: var(--accent); }

@@ -4,7 +4,7 @@
 //   - Map many column-name variants to internal contact fields.
 //   - Export results back into the user's own columns + appended L10_* columns.
 // =============================================================================
-import * as XLSX from 'xlsx';
+import XLSX from 'xlsx';
 import { EXPORT_COLUMNS } from '../automation/constants.js';
 
 /** Read a workbook from a file path. Returns the XLSX workbook object. */

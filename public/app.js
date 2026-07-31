@@ -161,10 +161,6 @@ function connectSSE() {
 }
 
 // ---- actions ----
-$('btnLoadSample').onclick = async () => {
-  const r = await api('/api/sandbox/load', { method: 'POST' });
-  $('loadInfo').textContent = r.ok ? `Loaded ${r.scenarios} sample leads. Click Start.` : 'Error: ' + r.error;
-};
 $('pdFile').onchange = async (e) => {
   const fd = new FormData(); fd.append('file', e.target.files[0]);
   const r = await api('/api/upload/profitdial', { method: 'POST', body: fd });
@@ -216,18 +212,31 @@ $('btnResume').onclick = () => api('/api/resume', { method: 'POST' });
 $('btnStop').onclick = () => api('/api/stop', { method: 'POST' });
 
 // ---- mode / settings ----
+function paintModeToggle(isSend) {
+  const btn = $('btnModeToggle');
+  btn.textContent = isSend ? 'Live Send' : 'Not Live Send';
+  btn.className = 'btn primary' + (isSend ? ' danger' : '');
+  btn.dataset.mode = isSend ? 'live_send' : 'live_nosend';
+  $('modeHint').textContent = isSend
+    ? 'Real texts WILL be sent to real homeowners on the next run.'
+    : 'Connects to real REI data and prepares messages, but does not send.';
+}
 async function loadSettings() {
   try {
     const s = await api('/api/settings');
-    $('modeSelect').value = s.mode;
-    $('maxSends').value = s.maxSends;
-    $('modeHint').textContent = 'Real sending is never a dashboard toggle — it requires editing .env directly.';
+    paintModeToggle(s.mode === 'live_send');
   } catch {}
 }
-$('btnSaveMode').onclick = async () => {
-  const body = { mode: $('modeSelect').value, maxSends: parseInt($('maxSends').value || '0', 10) || 0 };
-  const r = await api('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+$('btnModeToggle').onclick = async () => {
+  const goingLive = $('btnModeToggle').dataset.mode !== 'live_send';
+  if (goingLive && !confirm('This will send REAL text messages to real homeowners on the next run. Continue?')) return;
+  const r = await api('/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mode: goingLive ? 'live_send' : 'live_nosend' }),
+  });
   if (!r.ok) { $('modeSaveInfo').textContent = 'Error: ' + r.error; return; }
+  paintModeToggle(goingLive);
   $('modeSaveInfo').textContent = 'Saved — restarting to apply…';
   await api('/api/restart', { method: 'POST' }).catch(() => {});
   // The desktop app relaunches the engine; reload shortly.
