@@ -10,7 +10,9 @@
 // =============================================================================
 import { Adapter } from './adapter-interface.js';
 import { CONTACTS, POOL_A, POOL_B } from '../../config/sandbox/seed.js';
-import { digitsOnly } from '../automation/sop.js';
+import { digitsOnly, normalizePhone } from '../automation/sop.js';
+import { searchResultStatus } from '../automation/contactMatch.js';
+import { L10_STATUS } from '../automation/constants.js';
 
 export class SandboxAdapter extends Adapter {
   constructor({ contacts = CONTACTS } = {}) {
@@ -35,25 +37,48 @@ export class SandboxAdapter extends Adapter {
     return [...this.contacts.keys()];
   }
 
+  /**
+   * Simulated Smart Contacts phone search. Mirrors the live adapter's contract:
+   * gather EVERY candidate whose phone matches, decide nothing. Scenario contacts
+   * flagged `found: false` are treated as absent from REI.
+   */
   async findContact(query) {
-    // Accept {contactId} directly. A miss must FALL THROUGH to phone matching:
-    // leads loaded from a real sheet carry synthetic row ids ("L10-7") that are
-    // not in the sandbox, and returning early made every such lead "Not found".
-    if (query?.contactId) {
-      const c = this._get(query.contactId);
-      if (c) return { found: c.found !== false, contactId: c.contactId, matchedBy: 'contact-id' };
+    const wantTen = normalizePhone(query?.phone);
+    if (!wantTen || wantTen.length !== 10) {
+      return {
+        status: L10_STATUS.MANUAL_REVIEW_REQUIRED,
+        candidates: [],
+        searched: [],
+        stage: `spreadsheet phone "${query?.phone ?? ''}" is not a usable 10-digit number`,
+      };
     }
+
+    const candidates = [];
     for (const c of this.contacts.values()) {
-      if (query?.phone && c.phones.some((p) => digitsOnly(p) === digitsOnly(query.phone))) {
-        return { found: c.found !== false, contactId: c.contactId, matchedBy: 'phone' };
+      if (c.found === false) continue; // scenario: not in REI at all
+      if ((c.phones || []).some((p) => normalizePhone(p) === wantTen)) {
+        candidates.push({
+          ref: candidates.length,
+          contactId: c.contactId,
+          name: c.name || [c.firstName, c.lastName].filter(Boolean).join(' '),
+          address: c.address || '',
+          phone: (c.phones || [])[0] || '',
+        });
       }
     }
+
     return {
-      found: false,
-      searched: [query?.contactId ? `contact-id:"${query.contactId}"` : '', query?.phone ? `phone:"${query.phone}"` : '']
-        .filter(Boolean),
-      sandboxMiss: true,
+      status: searchResultStatus(candidates.length),
+      candidates,
+      searched: [`phone:"${wantTen}"→${candidates.length} row(s)`],
     };
+  }
+
+  /** Open a candidate the decision layer selected. */
+  async openContact(candidate) {
+    const c = candidate?.contactId ? this._get(candidate.contactId) : null;
+    if (!c) return { opened: false, reason: `sandbox has no contact ${candidate?.contactId}` };
+    return { opened: true, contactId: c.contactId };
   }
 
   async readContactFacts(contactId) {

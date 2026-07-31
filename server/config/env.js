@@ -62,14 +62,6 @@ export const env = Object.freeze({
   // Optional: the exact URL of the Contacts list. Set it and the adapter goes
   // straight there instead of clicking a nav label or probing candidate paths.
   REIBB_CONTACTS_URL: process.env.REIBB_CONTACTS_URL || '',
-  // What proves the opened REI contact is the right homeowner:
-  //   'phone+name' (default) both must match the sheet
-  //   'phone'      the number is unique, a hit is definitive
-  //   'name'       compare names only
-  //   'either'     accept if phone OR name matches
-  CONTACT_VERIFY: ['phone', 'name', 'either', 'phone+name'].includes(String(process.env.CONTACT_VERIFY || '').trim())
-    ? String(process.env.CONTACT_VERIFY).trim()
-    : 'phone+name',
   ACTION_TIMEOUT_MS: readInt('ACTION_TIMEOUT_MS', 15000),
 });
 

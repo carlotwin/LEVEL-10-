@@ -23,6 +23,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Adapter } from './adapter-interface.js';
 import { digitsOnly, normalizePhone } from '../automation/sop.js';
+import { searchResultStatus, compareNames, NAME_RESULT } from '../automation/contactMatch.js';
+import { L10_STATUS } from '../automation/constants.js';
 import { env } from '../config/env.js';
 import { dataDir } from '../data/paths.js';
 import { logger } from '../logger.js';
@@ -52,32 +54,13 @@ const CONTACTS_PATH_CANDIDATES = Object.freeze([
 ]);
 
 /**
- * Does the name on the REI contact screen refer to the same person as the sheet?
- *
- * Deliberately tolerant about formatting and strict about identity:
- *   - case, punctuation, extra spaces and titles/suffixes are ignored
- *   - order is ignored ("LAM TONY" == "Tony Lam")
- *   - one name being a subset of the other counts ("TONY LAM" vs
- *     "TONY LAM JR", or a sheet "Primary Name" that omits a middle name)
- * A blank on either side is NOT a match — "Unknown" contacts must not silently
- * pass a name check.
+ * Does the REI name refer to the same person as the sheet? Thin wrapper over the
+ * pure rule in automation/contactMatch.js — one implementation, one behaviour.
+ * Kept because it reads well at call sites and in tests.
  */
-export function namesMatch(a, b) {
-  const tokens = (s) =>
-    String(s ?? '')
-      .toUpperCase()
-      .replace(/[^A-Z\s]/g, ' ')
-      .split(/\s+/)
-      .filter((t) => t.length > 1 && !NAME_NOISE.has(t));
-  const A = new Set(tokens(a));
-  const B = new Set(tokens(b));
-  if (A.size === 0 || B.size === 0) return false;
-  const [small, big] = A.size <= B.size ? [A, B] : [B, A];
-  for (const t of small) if (!big.has(t)) return false;
-  return true;
+export function namesMatch(reiName, sheetName) {
+  return compareNames(sheetName, reiName).result === NAME_RESULT.MATCH;
 }
-
-const NAME_NOISE = new Set(['MR', 'MRS', 'MS', 'DR', 'JR', 'SR', 'II', 'III', 'IV', 'THE', 'AND', 'UNKNOWN', 'OWNER']);
 
 export class ReiBlackBookAdapter extends Adapter {
   constructor(opts = {}) {
@@ -353,45 +336,78 @@ export class ReiBlackBookAdapter extends Adapter {
   }
 
   /**
-   * Search terms to try, in order. The sheet's phone is the strongest key, and
-   * REI's search box is picky about formatting, so every plausible rendering of
-   * the same number is tried before falling back to name, then address.
+   * PHONE ONLY, and nothing else. The specification makes the phone the primary
+   * and sole search key: name is never searched, because a name search can surface
+   * a different homeowner, and address is never searched either.
    *
-   * A synthetic row id ("L10-7") is never searched — it means nothing to REI and
-   * would only produce a wrong-contact match.
+   * The normalized 10-digit number goes first. The remaining entries are the SAME
+   * number in the renderings REI's box may require — still a phone search, not a
+   * fallback to another key. If none of them return a row, that is a genuine
+   * NO_CONTACT_FOUND_BY_PHONE and the row is skipped.
    */
   _searchTerms(query) {
     const terms = [];
-    const push = (label, value) => {
+    const push = (value) => {
       const v = String(value ?? '').trim();
-      if (v && !terms.some((t) => t.value === v)) terms.push({ label, value: v });
+      if (v && !terms.some((t) => t.value === v)) terms.push({ label: 'phone', value: v });
     };
 
-    // NAME FIRST. REI's contact search does not match every phone rendering — a
-    // dotted number ("916.607.2808") returns "No Result Found" for a contact that
-    // is definitely there. The name is what reliably finds the record; the phone's
-    // job is to CONFIRM the opened contact, which happens after the match either
-    // way. Searching by a format REI cannot match just wastes a lookup.
-    push('name', query.name);
-
-    // Street portion only — REI rarely matches the full "city, ST zip" string.
-    const street = String(query.address ?? '').split(',')[0];
-    push('address', street);
-    push('address-full', query.address);
-
-    // Phone last, in the formats REI is most likely to accept. Dots go last:
-    // observed to fail on this account.
     const digits = digitsOnly(query.phone);
     const ten = digits.length >= 10 ? digits.slice(-10) : '';
-    if (ten) {
-      push('phone', `(${ten.slice(0, 3)}) ${ten.slice(3, 6)}-${ten.slice(6)}`);
-      push('phone', `${ten.slice(0, 3)}-${ten.slice(3, 6)}-${ten.slice(6)}`);
-      push('phone', ten);
-      push('phone', `${ten.slice(0, 3)}.${ten.slice(3, 6)}.${ten.slice(6)}`);
-    }
-    push('phone-as-given', query.phone);
-    if (query.contactId && !query.syntheticId) push('contact-id', query.contactId);
+    if (!ten) return terms; // no usable phone -> nothing to search
+
+    push(ten); // 9166072808 — the normalized form
+    push(`(${ten.slice(0, 3)}) ${ten.slice(3, 6)}-${ten.slice(6)}`);
+    push(`${ten.slice(0, 3)}-${ten.slice(3, 6)}-${ten.slice(6)}`);
+    push(`${ten.slice(0, 3)}.${ten.slice(3, 6)}.${ten.slice(6)}`);
     return terms;
+  }
+
+  /**
+   * Read every result row of the Contacts list as a candidate.
+   *
+   * The list itself shows Name / Property Address / Phone, so all candidates can
+   * be compared WITHOUT opening anyone — which is what makes "never automatically
+   * choose the first result" possible.
+   */
+  async _readCandidates(frame) {
+    const { contacts } = this.sel;
+    try {
+      const rows = await frame.$$eval(contacts.resultRow, (els) =>
+        els
+          .map((el, index) => {
+            const cells = [...el.querySelectorAll('td, [role="cell"]')].map((c) => c.innerText.trim());
+            const link = el.querySelector('a');
+            return {
+              index,
+              cells,
+              href: link ? link.getAttribute('href') : '',
+              text: el.innerText.replace(/\s+/g, ' ').trim(),
+            };
+          })
+          .filter((r) => r.text && r.cells.length)
+      );
+
+      return rows
+        .map((r) => {
+          // Columns on this account: Name | Property Address | Phone | Email | Tags.
+          // Identify by content rather than fixed position, so a reordered or
+          // hidden column cannot silently shift the phone into the name slot.
+          const phoneCell = r.cells.find((c) => digitsOnly(c).length >= 10) || '';
+          const nonPhone = r.cells.filter((c) => c && c !== phoneCell);
+          return {
+            ref: r.index,
+            href: r.href || '',
+            name: nonPhone[0] || '',
+            address: nonPhone[1] || '',
+            phone: phoneCell,
+            rowText: r.text,
+          };
+        })
+        .filter((c) => c.name || c.phone);
+    } catch {
+      return [];
+    }
   }
 
   /** Phones on the currently open contact, normalized to last-10. */
@@ -421,17 +437,32 @@ export class ReiBlackBookAdapter extends Adapter {
     }
   }
 
+  /**
+   * Search Smart Contacts BY PHONE and return every candidate row.
+   *
+   * This method only GATHERS facts: it does not pick a contact and does not open
+   * one. `chooseContact()` in automation/contactMatch.js makes that decision from
+   * the candidates, which is what keeps "never automatically choose the first
+   * result" true and unit-testable.
+   *
+   * @returns {{status, candidates, searched, stage?, screenshot?}}
+   */
   async findContact(query) {
     const { contacts } = this.sel;
-    const wantPhone = normalizePhone(query.phone);
     const searched = [];
     let searchBoxSeen = false;
-    let resultsSeen = false;
 
-    for (const term of this._searchTerms(query)) {
-      // Full ACTION_TIMEOUT_MS, not 4s: the contact list is rendered by an SPA
-      // and was timing out while still loading, which skipped every search term
-      // and produced a bare "not found" with nothing tried.
+    const terms = this._searchTerms(query);
+    if (terms.length === 0) {
+      return {
+        status: L10_STATUS.MANUAL_REVIEW_REQUIRED,
+        candidates: [],
+        searched: [],
+        stage: `spreadsheet phone "${query.phone ?? ''}" is not a usable 10-digit number — no phone search possible`,
+      };
+    }
+
+    for (const term of terms) {
       const frame = await this._openContactsSearch();
       if (!frame) continue;
       searchBoxSeen = true;
@@ -440,74 +471,33 @@ export class ReiBlackBookAdapter extends Adapter {
       await frame.fill(contacts.searchInput, term.value);
       await frame.press(contacts.searchInput, 'Enter').catch(() => {});
       await this.page.waitForTimeout(1500);
-      // REI renders an explicit empty state. Recording it separates "REI says it
-      // has nobody matching this" from "the automation could not drive the page".
+
+      // REI's explicit empty state: this format found nobody. Try the next
+      // rendering of the SAME number before concluding anything.
       if (contacts.noResults && (await this._present(contacts.noResults, 1200))) {
-        searched.push(`${term.label}:"${term.value}"→No Result Found`);
+        searched.push(`phone:"${term.value}"→No Result Found`);
         continue;
       }
-      searched.push(`${term.label}:"${term.value}"`);
 
-      // Open the first result. Prefer a row whose text contains the term, but
-      // don't require it — REI's list columns may not show what we searched on.
-      const byText = contacts.resultRowByText.replace('%QUERY%', term.value);
-      let opened = false;
-      const textFrame = await this._frameFor(byText, 3000);
-      if (textFrame) {
-        await textFrame.click(byText).catch(() => {});
-        opened = true;
-      } else {
-        const linkFrame = await this._frameFor(contacts.openContact, 3000);
-        if (linkFrame) {
-          await linkFrame.click(contacts.openContact).catch(() => {});
-          opened = true;
-        }
+      const candidates = await this._readCandidates(frame);
+      if (candidates.length === 0) {
+        searched.push(`phone:"${term.value}"→no rows read`);
+        continue;
       }
-      if (!opened) continue;
-      resultsSeen = true;
-      await this.page.waitForTimeout(900);
 
-      // VERIFY we opened the right person. A loose search match could text a
-      // different homeowner — the one failure this app must never have. What
-      // counts as verified is set by CONTACT_VERIFY (default: phone AND name).
-      const phones = await this._openContactPhones();
-      const reiName = await this._text(this.sel.contact.nameField);
-      const phoneOk = wantPhone ? phones.includes(wantPhone) : false;
-      const nameOk = namesMatch(reiName, query.name);
-
-      const mode = env.CONTACT_VERIFY;
-      const verified =
-        mode === 'phone'
-          ? phoneOk
-          : mode === 'name'
-            ? nameOk
-            : mode === 'either'
-              ? phoneOk || nameOk
-              : phoneOk && nameOk; // 'phone+name' (default)
-
-      if (verified) {
-        return {
-          found: true,
-          contactId: query.contactId || reiName || term.value,
-          matchedBy: term.label,
-          searched,
-          phoneVerified: phoneOk,
-          nameVerified: nameOk,
-          reiName,
-        };
-      }
-      searched.push(
-        `opened-but-not-verified(${mode}: phone ${phoneOk ? 'ok' : `no — REI has ${phones.join('/') || 'none'}, sheet has ${wantPhone || 'none'}`}` +
-          `; name ${nameOk ? 'ok' : `no — REI "${reiName || '(blank)'}" vs sheet "${query.name || '(blank)'}"`})`
-      );
+      searched.push(`phone:"${term.value}"→${candidates.length} row(s)`);
+      logger.info('contact_search', {
+        phone: term.value,
+        count: candidates.length,
+        candidates: candidates.map((c) => ({ name: c.name, phone: c.phone, address: c.address })),
+      });
+      return { status: searchResultStatus(candidates.length), candidates, searched, matchedFormat: term.value };
     }
 
-    // Say WHICH step failed — that is the difference between a selector to fix
-    // and a contact REI genuinely does not have.
-    let stage = 'no result matched';
+    // Nothing found by any rendering of the number. Distinguish "REI has nobody"
+    // from "the automation could not drive the page" — different problems.
+    let stage = '';
     if (!searchBoxSeen) {
-      // List the text inputs that DO exist (every frame) plus the URL we were
-      // actually on — the inputs alone can't tell you it was the wrong page.
       const inputs = await this._describeInputs();
       stage =
         "could not reach REI's Contacts list (no search box). " +
@@ -515,10 +505,45 @@ export class ReiBlackBookAdapter extends Adapter {
         `Text inputs on screen: ${inputs.length ? inputs.join(' | ') : 'none'}. ` +
         'If this is not the Contacts list, set REIBB_CONTACTS_URL in .env to its exact URL.';
     }
-    else if (!resultsSeen) stage = 'the search box worked but no result row could be opened (selectors.contacts.openContact)';
-    const shot = await this._diagnosticShot(`notfound-${normalizePhone(query.phone) || query.name || 'lead'}`);
-    logger.warn('contact_not_found', { stage, searched, screenshot: shot });
-    return { found: false, searched, stage, screenshot: shot, searchBoxSeen, resultsSeen };
+    const shot = await this._diagnosticShot(`nocontact-${normalizePhone(query.phone) || 'lead'}`);
+    logger.warn('no_contact_found_by_phone', { phone: normalizePhone(query.phone), searched, stage, screenshot: shot });
+    return {
+      // A page the automation could not drive is NOT evidence that REI lacks the
+      // contact, so it must not be recorded as NO_CONTACT_FOUND_BY_PHONE.
+      status: searchBoxSeen ? L10_STATUS.NO_CONTACT_FOUND_BY_PHONE : L10_STATUS.MANUAL_REVIEW_REQUIRED,
+      candidates: [],
+      searched,
+      stage,
+      screenshot: shot,
+      searchBoxSeen,
+    };
+  }
+
+  /**
+   * Open one specific candidate returned by findContact. Called only after
+   * chooseContact() has confirmed WHICH contact is the right homeowner.
+   */
+  async openContact(candidate) {
+    const { contacts } = this.sel;
+    if (candidate?.href) {
+      try {
+        const url = new URL(candidate.href, this.page.url()).toString();
+        await this.page.goto(url, { waitUntil: 'domcontentloaded' });
+        await this.page.waitForTimeout(800);
+        return { opened: true, contactId: candidate.href.split('/').filter(Boolean).pop() || candidate.name };
+      } catch {
+        /* fall through to clicking the row */
+      }
+    }
+    const frame = await this._frameFor(contacts.resultRow, 4000);
+    if (!frame) return { opened: false, reason: 'result rows are no longer on screen' };
+    const rows = await frame.$$(contacts.resultRow);
+    const row = rows[candidate?.ref ?? 0];
+    if (!row) return { opened: false, reason: `candidate row ${candidate?.ref} not found` };
+    const link = (await row.$('a')) || row;
+    await link.click().catch(() => {});
+    await this.page.waitForTimeout(900);
+    return { opened: true, contactId: candidate?.name || String(candidate?.ref ?? '') };
   }
 
   async readContactFacts(contactId) {

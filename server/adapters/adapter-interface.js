@@ -9,7 +9,10 @@
 // all decisions live in sop.js. Every method is async.
 //
 // Method contract:
-//   findContact(query)            -> { found, contactId?, ... } locate one contact
+//   findContact(query)            -> { status, candidates[], searched } PHONE search;
+//                                    gathers every candidate, decides nothing
+//   openContact(candidate)        -> { opened, contactId? } open the one the
+//                                    decision layer (contactMatch.js) selected
 //   readContactFacts(contactId)   -> facts (tags, phones, notes, chatHistory, state, name, address)
 //   getSmsStatus(contactId)       -> { smsEnabled, optedIn }
 //   optInPhone(contactId)         -> { status:'opted_in'|'failed', smsEnabled, reason? }
@@ -25,6 +28,7 @@
 
 export const ADAPTER_METHODS = Object.freeze([
   'findContact',
+  'openContact',
   'readContactFacts',
   'getSmsStatus',
   'optInPhone',

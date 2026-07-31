@@ -22,7 +22,8 @@ import {
   renderTemplate,
 } from './message.js';
 import { buildProfitDialIndex, matchProfitDial } from './profitdial.js';
-import { DISPOSITION, SENT_DISPOSITIONS } from './constants.js';
+import { DISPOSITION, SENT_DISPOSITIONS, L10_STATUS, STATUS_TO_DISPOSITION } from './constants.js';
+import { chooseContact } from './contactMatch.js';
 import { Store } from '../data/store.js';
 import { SentLedger } from '../data/sentLedger.js';
 import { logger } from '../logger.js';
@@ -187,6 +188,7 @@ export class Engine extends EventEmitter {
       L10_OptInStatus: '',
       L10_SendVerified: false,
       L10_ReplyClass: 'none',
+      L10_Status: L10_STATUS.PENDING,
       L10_ProcessedAt: new Date().toISOString(),
       delivery: '',
     };
@@ -195,40 +197,84 @@ export class Engine extends EventEmitter {
       // Integrity re-check before doing anything irreversible.
       assertMessageIntegrity();
 
-      // STEP 3 — Open one contact. The sheet is the search key: phone first
-      // (strongest), then name, then street. Everything we know is handed over so
-      // the adapter can fall back instead of failing on one format.
-      const found = await this.adapter.findContact({
-        contactId: contact.contactId,
-        syntheticId: Boolean(contact.syntheticId),
-        phone: (contact.phones || [])[0],
-        name: contact.name,
-        address: contact.address,
+      // STEP 3 — Search Smart Contacts BY PHONE. The phone is the primary and only
+      // search key; name is never searched (it can surface a different homeowner).
+      // The adapter gathers every candidate row and decides nothing.
+      const sheetRow = {
+        phone: (contact.phones || [])[0] || '',
+        name: contact.name || '',
+        address: contact.address || '',
+      };
+      base.L10_Status = L10_STATUS.SEARCHING_BY_PHONE;
+      logger.info('searching_by_phone', {
+        row: contact.contactId,
+        phone: sop.normalizePhone(sheetRow.phone),
+        name: sheetRow.name,
       });
-      if (!found.found) {
-        const tried = (found.searched || []).join(' → ');
-        // In sandbox, a lead loaded from the real sheet simply isn't in the test
-        // data — say so, rather than implying REI doesn't have the contact.
-        const where =
-          env.SANDBOX && contact.syntheticId
-            ? 'Not in the sandbox test data — this lead is from your real sheet, so run the live watch (npm run watch:20) to look it up in REI'
-            : 'Contact not found in REI BlackBook';
-        const parts = [where];
-        if (found.stage) parts.push(`Stage: ${found.stage}`);
-        parts.push(tried ? `Searched: ${tried}` : 'Searched: nothing (no search was performed)');
-        if (found.screenshot) parts.push(`Screenshot: ${found.screenshot}`);
-        return this._finish(base, DISPOSITION.LEAD_NOT_FOUND, parts.join(' · '), contact);
+
+      const search = await this.adapter.findContact({ ...sheetRow, contactId: contact.contactId });
+      const searchStatus = search.status || L10_STATUS.NO_CONTACT_FOUND_BY_PHONE;
+      const candidates = search.candidates || [];
+      const trail = (search.searched || []).join(' → ');
+      logger.info('phone_search_result', { row: contact.contactId, status: searchStatus, count: candidates.length });
+
+      // STEP 4/5 — Decide WHICH contact (if any) is this homeowner. Pure rule:
+      // phone must match, name must match, no conflicting address. Anything
+      // uncertain becomes a manual-review status and is never texted.
+      const decision = chooseContact({ sheet: sheetRow, candidates });
+      base.L10_Status = decision.status;
+      logger.info('contact_decision', {
+        row: contact.contactId,
+        searchStatus,
+        status: decision.status,
+        reason: decision.reason,
+        chosen: decision.chosen ? { name: decision.chosen.name, phone: decision.chosen.phone } : null,
+      });
+
+      if (decision.status !== L10_STATUS.CONTACT_VERIFIED) {
+        const parts = [decision.reason];
+        if (search.stage) parts.push(`Stage: ${search.stage}`);
+        if (trail) parts.push(`Searched: ${trail}`);
+        if (search.screenshot) parts.push(`Screenshot: ${search.screenshot}`);
+        if (env.SANDBOX && contact.syntheticId && searchStatus === L10_STATUS.NO_CONTACT_FOUND_BY_PHONE) {
+          parts.push('(Test mode: this lead is from your real sheet, so it is not in the sandbox data — run npm run watch:20 to search REI)');
+        }
+        return this._finish(
+          base,
+          STATUS_TO_DISPOSITION[decision.status] || DISPOSITION.NEEDS_REVIEW,
+          `${decision.status} — ${parts.join(' · ')}`,
+          contact
+        );
+      }
+
+      // Verified: open that specific contact (never "the first result").
+      const opened = await this.adapter.openContact(decision.chosen);
+      if (!opened.opened) {
+        return this._finish(
+          base,
+          DISPOSITION.NEEDS_REVIEW,
+          `${L10_STATUS.MANUAL_REVIEW_REQUIRED} — verified the contact but could not open it: ${opened.reason || 'unknown'}`,
+          contact
+        );
       }
 
       // Gather facts from the opened contact (tags, phones, notes, chat history).
-      const facts = await this.adapter.readContactFacts(found.contactId);
-      base.L10_Reason = found.matchedBy ? `Matched by ${found.matchedBy}` : '';
+      const facts = await this.adapter.readContactFacts(opened.contactId);
+      base.L10_Reason = decision.reason;
       if (facts.name) base.name = facts.name;
       if (facts.reiUrl) base.reiUrl = facts.reiUrl; // clickable link to the REI contact
 
-      // GATE 1 — Eligibility (tag, state, suppression, phone).
+      // GATE 1 — Eligibility (tag, state, suppression, phone). The tag failure and
+      // the safety/history failures are distinct tracking statuses.
       const elig = sop.checkEligibility(facts, this.config);
-      if (!elig.ok) return this._finish(base, elig.disposition, elig.reason, contact);
+      if (!elig.ok) {
+        base.L10_Status =
+          elig.disposition === DISPOSITION.MISSING_TAG
+            ? L10_STATUS.LEVEL_10_TAG_MISSING
+            : L10_STATUS.SAFETY_REVIEW_FAILED;
+        logger.info('eligibility_blocked', { row: contact.contactId, status: base.L10_Status, reason: elig.reason });
+        return this._finish(base, elig.disposition, elig.reason, contact);
+      }
 
       // GATE 2 — Campaign duplicate ledger. Keyed on the SHEET's contact id, which
       // is what _finish() records — the id scraped off the screen can differ run
@@ -249,8 +295,9 @@ export class Engine extends EventEmitter {
         const availTxt = wMatch.profitDial
           ? (wAvail.map((n) => n.replace(/\D/g, '')).includes(String(wMatch.profitDial).replace(/\D/g, '')) ? 'available in REI' : 'NOT in REI')
           : `no single match (${wMatch.status})`;
+        base.L10_Status = L10_STATUS.CONTACT_VERIFIED;
         return this._finish(base, DISPOSITION.NEEDS_REVIEW,
-          `Watch-only check: assigned ProfitDial ${wMatch.profitDial || '—'} (${availTxt}). No changes made, nothing sent.`, contact);
+          `CONTACT_VERIFIED (${base.L10_Reason}). Watch-only: assigned ProfitDial ${wMatch.profitDial || '—'} (${availTxt}). No changes made, nothing sent.`, contact);
       }
 
       // STEP 4 — Opt in the phone (SOP). Can be turned off (REQUIRE_OPTIN=false)
@@ -259,7 +306,11 @@ export class Engine extends EventEmitter {
         const optIn = await this.adapter.optInPhone(facts.contactId);
         base.L10_OptInStatus = optIn.status;
         const optCheck = sop.checkOptIn(optIn);
-        if (!optCheck.ok) return this._finish(base, optCheck.disposition, optCheck.reason, contact);
+        if (!optCheck.ok) {
+          base.L10_Status = L10_STATUS.OPT_IN_FAILED;
+          logger.info('opt_in_failed', { row: contact.contactId, reason: optCheck.reason });
+          return this._finish(base, optCheck.disposition, optCheck.reason, contact);
+        }
       } else {
         base.L10_OptInStatus = 'skipped';
       }
@@ -277,7 +328,11 @@ export class Engine extends EventEmitter {
           base.L10_ProfitDial = match.profitDial;
         }
         const pdCheck = sop.checkProfitDial({ match, availableNumbers, selectedReadback });
-        if (!pdCheck.ok) return this._finish(base, pdCheck.disposition, pdCheck.reason, contact);
+        if (!pdCheck.ok) {
+          base.L10_Status = L10_STATUS.PROFITDIAL_NOT_VERIFIED;
+          logger.info('profitdial_not_verified', { row: contact.contactId, reason: pdCheck.reason });
+          return this._finish(base, pdCheck.disposition, pdCheck.reason, contact);
+        }
       } else {
         base.L10_ProfitDial = '(REI default number)';
       }
@@ -316,6 +371,8 @@ export class Engine extends EventEmitter {
       const msgCheck = sop.checkRenderedMessage(rendered, template);
       if (!msgCheck.ok) return this._finish(base, msgCheck.disposition, msgCheck.reason, contact);
       base.message = rendered; // the exact text that was sent / prepared
+      base.L10_Status = L10_STATUS.READY_TO_SEND;
+      logger.info('ready_to_send', { row: contact.contactId, template: template.id, profitDial: base.L10_ProfitDial });
 
       // GATE — irreversible-send gate (env). Sandbox = simulated; live blocked.
       const gate = liveSendGate({ placeholderEnabled: anyPlaceholderEnabled() });
@@ -328,12 +385,19 @@ export class Engine extends EventEmitter {
       // STEP 8 — Enter + send + verify.
       await this.adapter.enterMessage(facts.contactId, rendered);
       const sent = await this.adapter.sendMessage(facts.contactId);
-      if (!sent.sent) return this._finish(base, DISPOSITION.SEND_VERIFY_FAILED, sent.reason || 'Send action failed', contact);
+      if (!sent.sent) {
+        base.L10_Status = L10_STATUS.SMS_SEND_FAILED;
+        return this._finish(base, DISPOSITION.SEND_VERIFY_FAILED, sent.reason || 'Send action failed', contact);
+      }
 
       const verify = await this.adapter.verifyMessageSent(facts.contactId, rendered);
       const vCheck = sop.checkSendVerification(verify);
       base.L10_SendVerified = Boolean(verify.verified);
-      if (!vCheck.ok) return this._finish(base, vCheck.disposition, vCheck.reason, contact);
+      if (!vCheck.ok) {
+        base.L10_Status = L10_STATUS.SMS_SEND_FAILED;
+        return this._finish(base, vCheck.disposition, vCheck.reason, contact);
+      }
+      base.L10_Status = L10_STATUS.SMS_SENT;
 
       // STEP 9 — Monitor: delivery + replies.
       const delivery = await this.adapter.readDeliveryStatus(facts.contactId);
@@ -358,6 +422,7 @@ export class Engine extends EventEmitter {
       // so the export can never drift from what was shown on screen.
       L10_ReiUrl: base.reiUrl || '',
       L10_Message: base.message || '',
+      L10_Status: base.L10_Status || L10_STATUS.PENDING,
     };
 
     // Record to the campaign ledger for any contact that reached a send attempt

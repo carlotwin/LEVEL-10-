@@ -101,6 +101,7 @@ function renderResults(results) {
       <tr class="detail" id="d${i}" style="display:none"><td></td><td colspan="5">
         ${r.message ? `<div class="msg">${esc(r.message)}</div>` : '<div class="small muted">No message prepared for this lead.</div>'}
         <div class="small"><b>ProfitDial:</b> ${esc(r.L10_ProfitDial || '—')} &nbsp;·&nbsp; <b>Opt-in:</b> ${esc(r.L10_OptInStatus || '—')} &nbsp;·&nbsp; <b>Delivery:</b> ${esc(r.delivery || '—')}</div>
+        ${r.L10_Status ? `<div class="small muted" style="margin-top:4px"><b>Status:</b> <code>${esc(r.L10_Status)}</code></div>` : ''}
         <div class="small muted" style="margin-top:4px"><b>Notes:</b> ${esc(r.L10_Reason || '')}</div>
       </td></tr>`;
     return `<tr class="lead-row" data-i="${i}">

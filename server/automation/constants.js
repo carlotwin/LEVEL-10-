@@ -29,6 +29,50 @@ export const DISPOSITION = Object.freeze({
   ERROR: 'Error',
 });
 
+// -----------------------------------------------------------------------------
+// TRACKING STATUSES (exact strings, as specified for the Level 10 tracker).
+//
+// These sit ALONGSIDE the dispositions above, which the dashboard and the KPI
+// report already speak. A status is the precise machine-readable state of a row;
+// STATUS_TO_DISPOSITION maps it onto the plain-language outcome the dashboard
+// shows, so both stay in sync without rewriting either.
+// -----------------------------------------------------------------------------
+export const L10_STATUS = Object.freeze({
+  PENDING: 'PENDING',
+  SEARCHING_BY_PHONE: 'SEARCHING_BY_PHONE',
+  NO_CONTACT_FOUND_BY_PHONE: 'NO_CONTACT_FOUND_BY_PHONE',
+  ONE_CONTACT_FOUND: 'ONE_CONTACT_FOUND',
+  MULTIPLE_CONTACTS_FOUND: 'MULTIPLE_CONTACTS_FOUND',
+  PHONE_MATCH_NAME_MATCH: 'PHONE_MATCH_NAME_MATCH',
+  PHONE_MATCH_NAME_MISMATCH: 'PHONE_MATCH_NAME_MISMATCH',
+  MULTIPLE_CONTACTS_MANUAL_REVIEW: 'MULTIPLE_CONTACTS_MANUAL_REVIEW',
+  CONTACT_VERIFIED: 'CONTACT_VERIFIED',
+  LEVEL_10_TAG_MISSING: 'LEVEL_10_TAG_MISSING',
+  SAFETY_REVIEW_FAILED: 'SAFETY_REVIEW_FAILED',
+  OPT_IN_REQUIRED: 'OPT_IN_REQUIRED',
+  OPT_IN_FAILED: 'OPT_IN_FAILED',
+  PROFITDIAL_NOT_VERIFIED: 'PROFITDIAL_NOT_VERIFIED',
+  READY_TO_SEND: 'READY_TO_SEND',
+  SMS_SENT: 'SMS_SENT',
+  SMS_SEND_FAILED: 'SMS_SEND_FAILED',
+  MANUAL_REVIEW_REQUIRED: 'MANUAL_REVIEW_REQUIRED',
+});
+
+// Status -> existing disposition, so the dashboard/KPI keep working unchanged.
+export const STATUS_TO_DISPOSITION = Object.freeze({
+  [L10_STATUS.NO_CONTACT_FOUND_BY_PHONE]: DISPOSITION.LEAD_NOT_FOUND,
+  [L10_STATUS.PHONE_MATCH_NAME_MISMATCH]: DISPOSITION.SHEET_CONFLICT,
+  [L10_STATUS.MULTIPLE_CONTACTS_MANUAL_REVIEW]: DISPOSITION.NEEDS_REVIEW,
+  [L10_STATUS.MANUAL_REVIEW_REQUIRED]: DISPOSITION.NEEDS_REVIEW,
+  [L10_STATUS.LEVEL_10_TAG_MISSING]: DISPOSITION.MISSING_TAG,
+  [L10_STATUS.SAFETY_REVIEW_FAILED]: DISPOSITION.NEEDS_REVIEW,
+  [L10_STATUS.OPT_IN_REQUIRED]: DISPOSITION.OPT_IN_FAILED,
+  [L10_STATUS.OPT_IN_FAILED]: DISPOSITION.OPT_IN_FAILED,
+  [L10_STATUS.PROFITDIAL_NOT_VERIFIED]: DISPOSITION.MISSING_PROFITDIAL,
+  [L10_STATUS.SMS_SENT]: DISPOSITION.TEXT_SENT,
+  [L10_STATUS.SMS_SEND_FAILED]: DISPOSITION.SEND_VERIFY_FAILED,
+});
+
 // Dispositions that count as a successful send (for KPIs).
 export const SENT_DISPOSITIONS = Object.freeze([
   DISPOSITION.TEXT_SENT,
@@ -96,6 +140,8 @@ export const EXPORT_COLUMNS = Object.freeze([
   'L10_SendVerified',
   'L10_ReplyClass',
   'L10_ProcessedAt',
+  // The precise machine-readable state of the row (see L10_STATUS).
+  'L10_Status',
   // Direct link to the contact in REI BlackBook, so a row can be opened and
   // checked by hand from the exported sheet.
   'L10_ReiUrl',

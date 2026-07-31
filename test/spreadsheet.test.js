@@ -115,8 +115,8 @@ test('the lead tab is chosen over an unrelated first tab', () => {
   assert.deepEqual(r.missing, []);
 });
 
-// --- search-term construction for the live REI lookup ----------------------
-test('live search tries every phone format, then name, then street — never a synthetic id', async () => {
+// --- search-term construction: PHONE ONLY -------------------------------
+test('live search uses the phone only — never the name, address or a row id', async () => {
   const { ReiBlackBookAdapter } = await import('../server/adapters/reibb.js');
   const a = new ReiBlackBookAdapter();
   const terms = a._searchTerms({
@@ -127,51 +127,29 @@ test('live search tries every phone format, then name, then street — never a s
     address: '2700 Humboldt Ave, Oakland, CA 94602',
   });
   const values = terms.map((t) => t.value);
-  assert.ok(values.includes('916-607-2808'), 'dashed');
-  assert.ok(values.includes('9166072808'), 'digits only');
-  assert.ok(values.includes('(916) 607-2808'), 'parenthesized');
-  assert.ok(values.includes('TONY LAM'), 'name');
-  assert.ok(values.includes('2700 Humboldt Ave'), 'street only');
-  assert.equal(values.includes('L10-7'), false, 'a synthetic row id is never searched in REI');
-  // NAME first: REI's contact search does not match every phone format (a dotted
-  // number returns "No Result Found" for a contact that exists), so leading with
-  // the phone wastes lookups. The phone still CONFIRMS the opened contact.
-  assert.equal(terms[0].label, 'name');
-  const labels = terms.map((t) => t.label);
-  assert.ok(labels.indexOf('name') < labels.indexOf('phone'), 'name is searched before phone');
-  assert.ok(labels.indexOf('address') < labels.indexOf('phone'), 'address is searched before phone');
-  // Dotted format goes last — observed to fail on this account.
-  const phoneValues = terms.filter((t) => t.label === 'phone').map((t) => t.value);
-  assert.equal(phoneValues[0], '(916) 607-2808', 'parenthesized first');
-  assert.equal(phoneValues[phoneValues.length - 1], '916.607.2808', 'dotted last');
+  // Every term is the SAME number in a different rendering.
+  assert.ok(terms.every((t) => t.label === 'phone'), 'only phone terms');
+  assert.equal(values[0], '9166072808', 'normalized 10-digit form first');
+  assert.ok(values.includes('(916) 607-2808'));
+  assert.ok(values.includes('916-607-2808'));
+  assert.ok(values.includes('916.607.2808'));
+  // The name/address/row id are NEVER searched.
+  assert.equal(values.includes('TONY LAM'), false, 'name is never a search term');
+  assert.equal(values.includes('2700 Humboldt Ave'), false, 'address is never a search term');
+  assert.equal(values.includes('L10-7'), false, 'synthetic row id is never searched');
 });
 
-test('a real contact id from the sheet IS searched', async () => {
+test('a row with no usable phone produces no search terms at all', async () => {
   const { ReiBlackBookAdapter } = await import('../server/adapters/reibb.js');
   const a = new ReiBlackBookAdapter();
-  const values = a._searchTerms({ contactId: 'REI-9931', syntheticId: false, phone: '510-206-1922' }).map((t) => t.value);
-  assert.ok(values.includes('REI-9931'));
+  for (const bad of ['', '555', 'n/a', null]) {
+    assert.deepEqual(a._searchTerms({ phone: bad, name: 'TONY LAM' }), [], `phone ${JSON.stringify(bad)}`);
+  }
 });
 
-// --- name verification against the sheet ----------------------------------
-test('namesMatch is tolerant about formatting, strict about identity', async () => {
+test('namesMatch delegates to the shared rule', async () => {
   const { namesMatch } = await import('../server/adapters/reibb.js');
-  // Same person, different formatting.
-  assert.equal(namesMatch('TONY LAM', 'Tony Lam'), true);
-  assert.equal(namesMatch('Lam, Tony', 'TONY LAM'), true);
-  assert.equal(namesMatch('TONY LAM JR', 'Tony Lam'), true, 'suffix ignored');
-  assert.equal(namesMatch('Tony R. Lam', 'TONY LAM'), true, 'middle initial ignored');
-  assert.equal(namesMatch('  tony   lam  ', 'Tony Lam'), true);
-  // Different people must NOT match.
-  assert.equal(namesMatch('LINDA HUNT', 'TONY LAM'), false);
-  assert.equal(namesMatch('TONY NGUYEN', 'TONY LAM'), false, 'shared first name is not enough');
-  // Blank / placeholder names never pass.
-  assert.equal(namesMatch('', 'TONY LAM'), false);
+  assert.equal(namesMatch('John Smith', 'SMITH JOHN LIVING TRUST'), true);
+  assert.equal(namesMatch('Michael Smith', 'JOHN SMITH'), false);
   assert.equal(namesMatch('Unknown', 'TONY LAM'), false);
-  assert.equal(namesMatch('TONY LAM', ''), false);
-});
-
-test('CONTACT_VERIFY defaults to phone+name and rejects junk values', async () => {
-  const { env } = await import('../server/config/env.js');
-  assert.ok(['phone', 'name', 'either', 'phone+name'].includes(env.CONTACT_VERIFY));
 });
