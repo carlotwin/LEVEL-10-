@@ -125,10 +125,21 @@ function buildLeadsFromRows(rows, cols) {
     // First name from its own column when the sheet has one, else the first
     // word of the owner/primary name.
     const first = val(r, cols.firstName) || name;
+    // Primary Name is skip-traced and can disagree with the county record, so all
+    // the names the sheet offers travel with the row (see compareAnyName).
+    const firstCol = val(r, cols.firstName);
+    const lastCol = String(r['Last Name'] ?? '').trim();
+    const ownerCol = String(r['Owner'] ?? '').trim();
+    const nameCandidates = [
+      ...new Set(
+        [name, ownerCol, [firstCol, lastCol].filter(Boolean).join(' ')].map((v) => String(v || '').trim()).filter(Boolean)
+      ),
+    ];
     return {
       contactId: String(contactId),
       syntheticId: !realId,
       name: String(name),
+      nameCandidates,
       firstName: first.split(/\s+/)[0] || '',
       address: val(r, cols.address),
       phones: [val(r, cols.phone)].filter(Boolean),

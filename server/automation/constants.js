@@ -25,6 +25,7 @@ export const DISPOSITION = Object.freeze({
   INVALID_MERGE_FIELD: 'Invalid Merge Field',
   TEMPLATE_BLOCKED: 'Template Blocked (placeholder in live)',
   SEND_VERIFY_FAILED: 'Send Verification Failed',
+  UNDELIVERED: 'Sent but Undelivered',
   BATCH_CAP_REACHED: 'Batch Cap Reached',
   ERROR: 'Error',
 });

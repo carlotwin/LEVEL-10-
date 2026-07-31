@@ -71,6 +71,9 @@ export class SentLedger {
     // 'uncertain' the send was clicked but confirmation failed — never auto-retry
     // 'blocked'   stopped before any send attempt; a clean retry is safe
     state = sendVerified ? 'sent' : 'blocked',
+    // Carrier outcome, read back from the thread. 'undelivered' still BLOCKS a
+    // resend (the message left our side) but does not count as a template use.
+    delivery = '',
     dateTime = new Date().toISOString(),
   }) {
     const key = makeKey(campaignBatch, reiContactId, phone);
@@ -85,6 +88,7 @@ export class SentLedger {
       sendVerified,
       disposition,
       state,
+      delivery,
     };
     this.map.set(key, entry);
     this._save();
@@ -102,6 +106,9 @@ export class SentLedger {
       if (e.campaignBatch !== campaignBatch) continue;
       if (!e.templateId) continue;
       if (e.sendVerified !== true || e.state !== 'sent') continue;
+      // The pilot saw 2 of 3 real sends come back Undelivered. Counting those
+      // would silently unbalance rotation across a large batch.
+      if (e.delivery === 'undelivered') continue;
       counts[e.templateId] = (counts[e.templateId] || 0) + 1;
     }
     return counts;
@@ -142,12 +149,17 @@ export class SentLedger {
     return null;
   }
 
-  /** The most recently CONFIRMED templateId for a campaign batch. */
+  /**
+   * The most recently DELIVERED templateId for a campaign batch.
+   * Same rule as templateUsage: an undelivered send did not reach anyone, so it
+   * must not count as "the last template used" when avoiding repeats either.
+   */
   lastTemplateId(campaignBatch) {
     let latest = null;
     for (const e of this.map.values()) {
       if (e.campaignBatch !== campaignBatch || !e.templateId) continue;
       if (e.sendVerified !== true || e.state !== 'sent') continue;
+      if (e.delivery === 'undelivered') continue;
       if (!latest || e.dateTime > latest.dateTime) latest = e;
     }
     return latest ? latest.templateId : null;

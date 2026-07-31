@@ -206,6 +206,9 @@ export class Engine extends EventEmitter {
       const sheetRow = {
         phone: (contact.phones || [])[0] || '',
         name: contact.name || '',
+        // Every name the sheet offers for this row (Primary Name, Owner,
+        // First+Last) — Primary Name alone can disagree with the county record.
+        nameCandidates: contact.nameCandidates && contact.nameCandidates.length ? contact.nameCandidates : [contact.name || ''],
         address: contact.address || '',
       };
       base.L10_Status = L10_STATUS.SEARCHING_BY_PHONE;
@@ -603,9 +606,36 @@ export class Engine extends EventEmitter {
       }
       base.L10_Status = L10_STATUS.SMS_SENT;
 
-      // STEP 9 — Monitor: delivery + replies.
+      // STEP 9 — Monitor: delivery + replies. REI resolves delivery ASYNCHRONOUSLY
+      // and marks failures "Undelivered" — the pilot saw that on 2 of 3 real sends.
+      // An undelivered message still blocks a resend (it left our side) but must
+      // not count as a successful use of that template.
       const delivery = await this.adapter.readDeliveryStatus(facts.contactId);
       base.delivery = delivery.delivery;
+      this.ledger.record({
+        campaignBatch: this.config.campaignBatch,
+        reiContactId: contact.contactId,
+        phone,
+        profitDial: base.L10_ProfitDial,
+        templateId: template.id,
+        sendVerified: true,
+        state: 'sent',
+        delivery: delivery.delivery,
+        disposition: delivery.delivery === 'undelivered' ? DISPOSITION.UNDELIVERED : DISPOSITION.TEXT_SENT,
+      });
+      if (delivery.delivery === 'undelivered') {
+        const reply0 = await this.adapter.readReplies(facts.contactId);
+        base.L10_ReplyClass = sop.classifyReply(reply0.text);
+        logger.warn('undelivered', { row: contact.contactId, profitDial: base.L10_ProfitDial, template: template.id });
+        return this._finish(
+          base,
+          DISPOSITION.UNDELIVERED,
+          `${L10_STATUS.SMS_SENT} but REI reports UNDELIVERED from ${base.L10_ProfitDial}. ` +
+            'The message left our side, so it will not be resent, and it does not count as a template use. ' +
+            'Investigate the sender number with the carrier before sending more.',
+          contact
+        );
+      }
       const reply = await this.adapter.readReplies(facts.contactId);
       base.L10_ReplyClass = sop.classifyReply(reply.text);
 

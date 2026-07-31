@@ -123,6 +123,30 @@ const setsEqual = (a, b) => a.size === b.size && [...a].every((t) => b.has(t));
  *
  * @returns {{result: string, reason: string, trust: boolean}}
  */
+/**
+ * Best name result across every name the spreadsheet offers for a row.
+ *
+ * "Primary Name" is a skip-traced phone-owner name and can disagree with the
+ * county record: the pilot found a row whose Owner said "Lew" while Primary Name
+ * said "Vanbrocklin", and REI itself said "Linda Lew". Comparing against only one
+ * of those columns fails a row that is genuinely the right person. MATCH from any
+ * single candidate wins; otherwise the least-bad result is returned.
+ */
+export function compareAnyName(sheetNames, reiName) {
+  const list = (Array.isArray(sheetNames) ? sheetNames : [sheetNames])
+    .map((n) => String(n ?? '').trim())
+    .filter(Boolean);
+  if (list.length === 0) return compareNames('', reiName);
+  let best = null;
+  for (const candidate of list) {
+    const r = compareNames(candidate, reiName);
+    if (r.result === NAME_RESULT.MATCH) return { ...r, matchedSheetName: candidate };
+    const rank = (x) => (x === NAME_RESULT.POSSIBLE ? 1 : 0);
+    if (!best || rank(r.result) > rank(best.result)) best = { ...r, matchedSheetName: candidate };
+  }
+  return best;
+}
+
 export function compareNames(sheetName, reiName) {
   const s = nameTokens(sheetName);
   const r = nameTokens(reiName);
@@ -269,7 +293,7 @@ export function chooseContact({ sheet, candidates }) {
         reason: `REI phone "${c.phone ?? '(unreadable)'}" does not match sheet phone ${sheetPhone}`,
       };
     }
-    const name = compareNames(sheet?.name, c.name);
+    const name = compareAnyName(sheet?.nameCandidates || sheet?.name, c.name);
     if (name.result === NAME_RESULT.MATCH) {
       const addr = compareAddresses(sheet?.address, c.address);
       if (addr === ADDRESS_RESULT.CONFLICT) {
@@ -321,7 +345,7 @@ export function chooseContact({ sheet, candidates }) {
   const scored = list.map((c) => ({
     c,
     phoneOk: phonesMatch(sheetPhone, c.phone),
-    name: compareNames(sheet?.name, c.name),
+    name: compareAnyName(sheet?.nameCandidates || sheet?.name, c.name),
     addr: compareAddresses(sheet?.address, c.address),
   }));
 
@@ -425,7 +449,7 @@ export function verifyOpenedContact({ sheet, detail, level10Tag }) {
   flags.phoneVerified = true;
 
   // 2. Name on the record must match the spreadsheet.
-  const name = compareNames(sheet?.name, detailName);
+  const name = compareAnyName(sheet?.nameCandidates || sheet?.name, detailName);
   if (name.result !== NAME_RESULT.MATCH) {
     return {
       status:

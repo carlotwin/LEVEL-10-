@@ -31,11 +31,16 @@
     "notesField": "",
     "chatMessages": ".activity-item, [class*='activity']",
     "pageMarker": "",
-    "optInStatus": "",
+    "optInStatus": "[role='dialog'] :text('Opt - In'), [role='dialog'] [role='combobox']",
     "optInButton": "",
     "optInConfirm": "",
     "optInSuccessMarker": "",
-    "chatTab": "[role='tab']:has-text('Chat'), text=Chat"
+    "chatTab": "[role='tab']:has-text('Chat'), text=Chat",
+    "editButton": "button[aria-label*='edit' i], [data-testid*='edit' i], button:has(svg[class*='pencil' i]), button:has(svg[class*='edit' i]), [class*='avatar' i] ~ button, [class*='chakra-avatar' i] + button",
+    "editModal": "[role='dialog']:has-text('Edit Contact Information'), [role='dialog']:has-text('Contact Information')",
+    "optInControl": "[role='dialog'] [role='combobox'], [role='dialog'] button:has-text('Opt'), [role='dialog'] [class*='select' i]:has-text('Opt')",
+    "optInOptionIn": "[role='option']:has-text('Opt'), li:has-text('Opt - In'), [role='menuitem']:has-text('Opt')",
+    "optInSave": "[role='dialog'] button:has-text('Update Info'), [role='dialog'] button:has-text('Update')"
   },
   "sms": {
     "optInButton": "",
@@ -45,21 +50,28 @@
   "chat": {
     "chatTab": "[role='tab']:has-text('Chat'), text=Chat",
     "editorFrame": "iframe.tox-edit-area__iframe, iframe[id*='tiny' i], iframe[title*='Rich Text' i]",
-    "profitDialSelect": "",
-    "profitDialOptions": "",
-    "profitDialSelectedValue": "",
+    "profitDialSelect": "button:has-text('From:'), [class*='from' i]:has-text('('), [class*='compose' i] button:has-text('(')",
+    "profitDialOptions": "[role='option'], [role='menuitem'], li, [class*='option' i]",
+    "profitDialSelectedValue": "text=/From:\\s*.*\\(\\d{3}\\)/, [class*='from' i]",
     "messageInput": "body#tinymce[contenteditable='true'], .mce-content-body[contenteditable='true'], [data-mce-placeholder*='Write Your Reply' i], [aria-placeholder*='Write Your Reply' i], textarea[placeholder*='Write Your Reply' i], [contenteditable='true'], div[role='textbox']",
     "sendButton": "[aria-label='Send Text' i], [title='Send Text' i], button:has-text('Send Text'), [data-testid*='send' i], [aria-label*='send' i], button[title*='send' i], button:has(svg[class*='send' i]), button:has(svg[class*='paper' i])",
     "threadArea": ".timeline, .activity-feed, .activity-history, .chat-thread, [class*='conversation'], [class*='activity']",
-    "deliveryStatus": "",
+    "deliveryStatus": ":text('PD #:'), text=Undelivered",
     "lastInboundMessage": ".activity-item:first-child, [class*='activity']:first-child, .chat-message:last-child",
     "messageThread": ".timeline, .activity-feed, .activity-history, .chat-thread, [class*='conversation'], [class*='activity']",
-    "outgoingMessage": ""
+    "outgoingMessage": ":text('PD #:'), [class*='message' i]:has-text('PD #:')",
+    "undeliveredMarker": "text=Undelivered, [class*='undelivered' i], :text('Undelivered')"
   },
   "_verifiedLive": [
     "contacts.searchInput",
     "contacts.resultRow",
     "contacts.openContact"
   ],
-  "_verifiedNote": "Keys in _verifiedLive were observed WORKING in the real REI BlackBook account. contacts.searchInput / contacts.resultRow / contacts.openContact: verified by the read-only runs (5/5 phone searches parsed; 3/3 eligible records opened at /contacts/<id>). contact.phoneRows and contact.tagChips are written from the live DOM probe but the selectors themselves have not yet been re-run. A sandbox test never qualifies."
+  "_verifiedNote": "Keys in _verifiedLive were observed WORKING in the real REI BlackBook account. contacts.searchInput / contacts.resultRow / contacts.openContact: verified by the read-only runs (5/5 phone searches parsed; 3/3 eligible records opened at /contacts/<id>). contact.phoneRows and contact.tagChips are written from the live DOM probe but the selectors themselves have not yet been re-run. A sandbox test never qualifies.",
+  "urls": {
+    "contactsList": "/contacts",
+    "contactDetail": "/contacts/%ID%",
+    "contactTab": "/contacts/%ID%?activeTab=%TAB%",
+    "manageNumbers": "/profitdial/settings/manage-numbers"
+  }
 }

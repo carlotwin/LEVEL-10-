@@ -428,3 +428,45 @@ test("REI's avatar initials must never survive into a name comparison", () => {
   });
   assert.equal(stripped.status, L10_STATUS.CONTACT_VERIFIED);
 });
+
+// ---------------------------------------------------------------------------
+// The sheet offers several names per row and "Primary Name" can be wrong.
+// Pilot finding: Owner said "Lew", Primary Name said "Vanbrocklin", REI said
+// "Linda Lew" — the same person, failed by comparing one column only.
+// ---------------------------------------------------------------------------
+test('a row verifies when ANY of the sheet name columns matches REI', async () => {
+  const { compareAnyName } = await import('../server/automation/contactMatch.js');
+  const candidates = ['LINDA VANBROCKLIN', 'Lew, Linda', 'Linda Lew'];
+  const r = compareAnyName(candidates, 'Linda Lew');
+  assert.equal(r.result, NAME_RESULT.MATCH);
+  assert.ok(['Lew, Linda', 'Linda Lew'].includes(r.matchedSheetName));
+
+  const verified = chooseContact({
+    sheet: {
+      phone: '925-937-2580',
+      name: 'LINDA VANBROCKLIN',
+      nameCandidates: candidates,
+      address: '3451 Rhoda Ave, Oakland, CA 94602',
+    },
+    candidates: [{ name: 'Linda Lew', phone: '(925) 937-2580', address: '3451 Rhoda Ave, Oakland, CA 94602', rowReference: 0 }],
+  });
+  assert.equal(verified.status, L10_STATUS.CONTACT_VERIFIED, verified.reason);
+});
+
+test('extra name columns never rescue a genuinely different person', async () => {
+  const { compareAnyName } = await import('../server/automation/contactMatch.js');
+  const r = compareAnyName(['JOHN SMITH', 'Smith, John', 'John Smith'], 'Michael Smith');
+  assert.equal(r.result, NAME_RESULT.NO_MATCH);
+
+  const blocked = chooseContact({
+    sheet: { phone: '510-000-1111', name: 'JOHN SMITH', nameCandidates: ['JOHN SMITH', 'Smith, John'], address: '1 A St' },
+    candidates: [{ name: 'Michael Smith', phone: '510-000-1111', address: '1 A St', rowReference: 0 }],
+  });
+  assert.equal(blocked.status, L10_STATUS.PHONE_MATCH_NAME_MISMATCH);
+});
+
+test('a multi-owner REI record still needs a human even with several sheet names', async () => {
+  const { compareAnyName } = await import('../server/automation/contactMatch.js');
+  const r = compareAnyName(['TONY LAM', 'Lam, Tony & Sukien'], 'Tony & Sukien Lam');
+  assert.notEqual(r.result, NAME_RESULT.MATCH);
+});

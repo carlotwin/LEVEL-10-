@@ -272,3 +272,45 @@ test('79: live sending is disabled by default', async () => {
   assert.equal(env.REQUIRE_PROFITDIAL, true);
   assert.equal(env.REQUIRE_LEVEL10_TAG, true);
 });
+
+// ---------------------------------------------------------------------------
+// UNDELIVERED — the pilot saw 2 of 3 real sends come back Undelivered, and REI
+// resolves that asynchronously. It must block a resend but not consume a template.
+// ---------------------------------------------------------------------------
+test('an undelivered send blocks a resend but does not consume a template', async () => {
+  const { SentLedger } = await import('../server/data/sentLedger.js');
+  const ledger = new SentLedger();
+  const batch = `undelivered-${process.hrtime.bigint()}`;
+  ledger.record({
+    campaignBatch: batch,
+    reiContactId: 'rei-9',
+    phone: '510-206-1922',
+    templateId: 'LEVEL10_TEMPLATE_2',
+    sendVerified: true,
+    state: 'sent',
+    delivery: 'undelivered',
+  });
+  // Not a template use...
+  assert.deepEqual(ledger.templateUsage(batch), {}, 'undelivered must not count toward rotation');
+  assert.equal(ledger.lastTemplateId(batch), null);
+  // ...but the message left our side, so never send again.
+  const blocked = ledger.isSendBlockedByPhone(batch, '(510) 206-1922');
+  assert.ok(blocked, 'an undelivered send must still block a resend');
+  assert.match(blocked.reason, /already sent/i);
+});
+
+test('a delivered send does consume a template', async () => {
+  const { SentLedger } = await import('../server/data/sentLedger.js');
+  const ledger = new SentLedger();
+  const batch = `delivered-${process.hrtime.bigint()}`;
+  ledger.record({
+    campaignBatch: batch,
+    reiContactId: 'rei-10',
+    phone: '510-332-9764',
+    templateId: 'LEVEL10_TEMPLATE_4',
+    sendVerified: true,
+    state: 'sent',
+    delivery: 'delivered',
+  });
+  assert.deepEqual(ledger.templateUsage(batch), { LEVEL10_TEMPLATE_4: 1 });
+});
