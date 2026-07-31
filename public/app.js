@@ -161,16 +161,15 @@ function connectSSE() {
 }
 
 // ---- actions ----
-const leadLimit = () => parseInt($('limit').value || '0', 10) || 0;
 $('btnLoadSample').onclick = async () => {
   const r = await api('/api/sandbox/load', { method: 'POST' });
   $('loadInfo').textContent = r.ok ? `Loaded ${r.scenarios} sample leads. Click Start.` : 'Error: ' + r.error;
 };
 $('pdFile').onchange = async (e) => {
-  const fd = new FormData(); fd.append('file', e.target.files[0]); fd.append('limit', leadLimit());
-  const r = await api(`/api/upload/profitdial?limit=${leadLimit()}`, { method: 'POST', body: fd });
+  const fd = new FormData(); fd.append('file', e.target.files[0]);
+  const r = await api('/api/upload/profitdial', { method: 'POST', body: fd });
   $('loadInfo').textContent = r.ok
-    ? `Loaded ${r.leadCount} of ${r.totalRows} leads from your sheet (${r.analysis.blankProfitDial} missing ProfitDial). Click Start.`
+    ? `Loaded ${r.leadCount} leads from your file (${r.analysis.blankProfitDial} missing ProfitDial). Click Start.`
     : 'Error: ' + r.error;
 };
 // ---- printable daily report ----
