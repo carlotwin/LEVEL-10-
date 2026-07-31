@@ -56,13 +56,9 @@
           <summary>Load your Level 10 sheet</summary>
           <div class="data-body">
             <p class="muted small" style="width:100%;margin:0 0 4px">
-              Your “Level 10 Properties with Contacts” sheet holds both the homeowners and their ProfitDial numbers — just give it once. No numbers to type.
+              Upload your “Level 10 Properties with Contacts” file (.xlsx). It has both the homeowners and their ProfitDial numbers — no numbers to type.
             </p>
-            <div class="gs">
-              <input type="text" id="gsUrl" class="txt" placeholder="Paste your Google Sheet link" />
-              <button id="btnGoogleSheet" class="btn primary">Load sheet</button>
-            </div>
-            <label class="file">…or upload the file (.xlsx)<input type="file" id="pdFile" accept=".xlsx,.xls,.csv" /></label>
+            <label class="file"><b>Upload leads file (.xlsx)</b><input type="file" id="pdFile" accept=".xlsx,.xls,.csv" /></label>
             <label class="file">Test first N leads (0 = all)<input type="number" id="limit" class="txt" style="max-width:110px" value="5" min="0" /></label>
             <button id="btnLoadSample" class="btn ghost">Load sample (demo)</button>
             <div id="loadInfo" class="muted small" style="width:100%"></div>

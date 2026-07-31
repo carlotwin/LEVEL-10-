@@ -173,14 +173,6 @@ $('pdFile').onchange = async (e) => {
     ? `Loaded ${r.leadCount} of ${r.totalRows} leads from your sheet (${r.analysis.blankProfitDial} missing ProfitDial). Click Start.`
     : 'Error: ' + r.error;
 };
-$('btnGoogleSheet').onclick = async () => {
-  const url = $('gsUrl').value.trim();
-  if (!url) return alert('Paste your Google Sheet link first.');
-  const r = await api('/api/ingest/googlesheet', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url, limit: leadLimit() }) });
-  $('loadInfo').textContent = r.ok
-    ? `Loaded ${r.leadCount} of ${r.rowCount} leads from your sheet. Click Start.`
-    : (r.error || 'Error');
-};
 // ---- printable daily report ----
 $('btnPrint').onclick = async () => {
   const [k, cfg, state] = await Promise.all([api('/api/kpi'), api('/api/config'), api('/api/state')]);
