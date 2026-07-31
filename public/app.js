@@ -29,7 +29,11 @@ const OUTCOME = {
   'Template Blocked (placeholder in live)': { label: 'Message not approved', cls: 'bad' },
 };
 const outcome = (d) => OUTCOME[d] || { label: d, cls: 'skip' };
-const msgName = (id) => (id ? id.replace(/^PH-/, 'Message ') : '');
+const msgName = (id) => {
+  if (!id) return '';
+  if (/^T\d+$/.test(id)) return 'Template ' + id.slice(1);
+  return id.replace(/^PH-/, 'Message ');
+};
 const isSent = (d) => d === 'Simulated Sent' || d === 'Text Sent';
 
 // ---- config / header ----

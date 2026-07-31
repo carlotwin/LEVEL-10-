@@ -11,51 +11,49 @@ import {
   TEMPLATES,
 } from '../server/automation/message.js';
 
+const IDS = TEMPLATES.filter((t) => t.enabled).map((t) => t.id);
+
 test('integrity check passes for untampered pool', () => {
   assert.equal(assertMessageIntegrity(), true);
   assert.equal(computeChecksum(), computeChecksum());
 });
 
-test('placeholder pool is flagged and eligible only in sandbox', () => {
-  assert.equal(anyPlaceholderEnabled(), true);
+test('approved pool has no placeholders and is eligible in live', () => {
+  assert.equal(anyPlaceholderEnabled(), false);
   assert.ok(eligibleTemplates({ sandbox: true }).length >= 5);
-  // In live mode, placeholders are NEVER eligible.
-  assert.equal(eligibleTemplates({ sandbox: false }).length, 0);
+  assert.equal(eligibleTemplates({ sandbox: false }).length, IDS.length);
 });
 
 test('allocation prefers least-used template (balanced)', () => {
-  const usage = { 'PH-1': 3, 'PH-2': 0, 'PH-3': 5, 'PH-4': 2, 'PH-5': 4 };
-  const { template } = allocateTemplate({ sandbox: true, usageCounts: usage, lastTemplateId: null, seed: 'abc' });
-  assert.equal(template.id, 'PH-2'); // the only least-used
+  const usage = Object.fromEntries(IDS.map((id) => [id, 3]));
+  usage[IDS[1]] = 0; // make the 2nd the only least-used
+  const { template } = allocateTemplate({ sandbox: false, usageCounts: usage, lastTemplateId: null, seed: 'abc' });
+  assert.equal(template.id, IDS[1]);
 });
 
 test('allocation avoids immediate repeat when alternatives exist', () => {
-  const usage = {}; // all zero -> full tie set
-  const first = allocateTemplate({ sandbox: true, usageCounts: usage, lastTemplateId: 'PH-1', seed: 'x' }).template.id;
-  assert.notEqual(first, 'PH-1');
+  const first = allocateTemplate({ sandbox: false, usageCounts: {}, lastTemplateId: IDS[0], seed: 'x' }).template.id;
+  assert.notEqual(first, IDS[0]);
 });
 
 test('allocation is deterministic for a given seed', () => {
-  const a = allocateTemplate({ sandbox: true, usageCounts: {}, lastTemplateId: null, seed: 'contact-42' }).template.id;
-  const b = allocateTemplate({ sandbox: true, usageCounts: {}, lastTemplateId: null, seed: 'contact-42' }).template.id;
+  const a = allocateTemplate({ sandbox: false, usageCounts: {}, lastTemplateId: null, seed: 'contact-42' }).template.id;
+  const b = allocateTemplate({ sandbox: false, usageCounts: {}, lastTemplateId: null, seed: 'contact-42' }).template.id;
   assert.equal(a, b);
 });
 
-test('allocation is not an obvious 1,2,3 sequence and balances over a run', () => {
+test('allocation balances over a run and avoids obvious repeats', () => {
   const usage = {};
-  const lastId = { v: null };
+  let last = null;
   const picks = [];
-  for (let i = 0; i < 50; i++) {
-    const { template } = allocateTemplate({ sandbox: true, usageCounts: usage, lastTemplateId: lastId.v, seed: 'c' + i });
+  for (let i = 0; i < 60; i++) {
+    const { template } = allocateTemplate({ sandbox: false, usageCounts: usage, lastTemplateId: last, seed: 'c' + i });
     usage[template.id] = (usage[template.id] || 0) + 1;
-    lastId.v = template.id;
+    last = template.id;
     picks.push(template.id);
   }
-  const counts = Object.values(usage);
-  const max = Math.max(...counts);
-  const min = Math.min(...counts);
-  assert.ok(max - min <= 1, `balanced within 1 (got spread ${min}..${max})`);
-  // no long identical runs
+  const counts = IDS.map((id) => usage[id] || 0);
+  assert.ok(Math.max(...counts) - Math.min(...counts) <= 1, 'balanced within 1');
   let maxRun = 1, run = 1;
   for (let i = 1; i < picks.length; i++) {
     run = picks[i] === picks[i - 1] ? run + 1 : 1;
@@ -64,19 +62,22 @@ test('allocation is not an obvious 1,2,3 sequence and balances over a run', () =
   assert.ok(maxRun <= 2, 'no obvious repeating run');
 });
 
-test('live mode throws when no approved templates enabled', () => {
-  assert.throws(() => allocateTemplate({ sandbox: false, usageCounts: {}, lastTemplateId: null, seed: 'x' }), /No eligible/);
+test('merge fields: renders first_name and property_address', () => {
+  const t1 = TEMPLATES.find((t) => t.id === 'T1');
+  assert.equal(inspectMergeFields(t1.body).valid, true);
+  const out = renderTemplate(t1, { firstName: 'Maria', address: '100 Alpha St, Oakland, CA' });
+  assert.match(out, /Maria/);
+  assert.match(out, /100 Alpha St/);
+  assert.doesNotMatch(out, /\{\{/);
 });
 
-test('merge field validation and rendering', () => {
-  const tpl = TEMPLATES.find((t) => t.id === 'PH-1');
-  assert.equal(inspectMergeFields(tpl.body).valid, true);
-  assert.match(renderTemplate(tpl, { firstName: 'Maria' }), /Maria/);
-  assert.throws(() => renderTemplate(tpl, { firstName: '' }), /INVALID_MERGE_FIELD|first_name/);
+test('merge fields: fail closed when first name or address missing', () => {
+  const t1 = TEMPLATES.find((t) => t.id === 'T1');
+  assert.throws(() => renderTemplate(t1, { firstName: '', address: '100 Alpha St' }), /INVALID_MERGE_FIELD|first_name/);
+  assert.throws(() => renderTemplate(t1, { firstName: 'Maria', address: '' }), /INVALID_MERGE_FIELD|property_address/);
 });
 
-test('bad template with unapproved merge field is rejected', () => {
-  const bad = TEMPLATES.find((t) => t.id === 'PH-BAD');
-  assert.equal(inspectMergeFields(bad.body).valid, false);
-  assert.throws(() => renderTemplate(bad, { firstName: 'X' }));
+test('only approved merge fields are allowed', () => {
+  assert.equal(inspectMergeFields('Hi {{first_name}} at {{property_address}}').valid, true);
+  assert.equal(inspectMergeFields('Hi {{firstname}} {{offer_amount}}').valid, false);
 });

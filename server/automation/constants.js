@@ -99,4 +99,4 @@ export const EXPORT_COLUMNS = Object.freeze([
 ]);
 
 // Merge fields the templates are allowed to reference.
-export const ALLOWED_MERGE_FIELDS = Object.freeze(['first_name']);
+export const ALLOWED_MERGE_FIELDS = Object.freeze(['first_name', 'property_address']);
