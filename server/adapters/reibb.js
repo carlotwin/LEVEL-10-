@@ -367,22 +367,29 @@ export class ReiBlackBookAdapter extends Adapter {
       if (v && !terms.some((t) => t.value === v)) terms.push({ label, value: v });
     };
 
-    const digits = digitsOnly(query.phone);
-    const ten = digits.length >= 10 ? digits.slice(-10) : '';
-    if (ten) {
-      push('phone', `${ten.slice(0, 3)}-${ten.slice(3, 6)}-${ten.slice(6)}`);
-      push('phone', ten);
-      push('phone', `(${ten.slice(0, 3)}) ${ten.slice(3, 6)}-${ten.slice(6)}`);
-      push('phone', `${ten.slice(0, 3)}.${ten.slice(3, 6)}.${ten.slice(6)}`);
-    }
-    push('phone-as-given', query.phone);
-    // Street before name: many REI contacts have "Unknown" as the name, so a name
-    // search is the weakest key here. Street portion only — REI rarely matches the
-    // full "city, ST zip" string.
+    // NAME FIRST. REI's contact search does not match every phone rendering — a
+    // dotted number ("916.607.2808") returns "No Result Found" for a contact that
+    // is definitely there. The name is what reliably finds the record; the phone's
+    // job is to CONFIRM the opened contact, which happens after the match either
+    // way. Searching by a format REI cannot match just wastes a lookup.
+    push('name', query.name);
+
+    // Street portion only — REI rarely matches the full "city, ST zip" string.
     const street = String(query.address ?? '').split(',')[0];
     push('address', street);
     push('address-full', query.address);
-    push('name', query.name);
+
+    // Phone last, in the formats REI is most likely to accept. Dots go last:
+    // observed to fail on this account.
+    const digits = digitsOnly(query.phone);
+    const ten = digits.length >= 10 ? digits.slice(-10) : '';
+    if (ten) {
+      push('phone', `(${ten.slice(0, 3)}) ${ten.slice(3, 6)}-${ten.slice(6)}`);
+      push('phone', `${ten.slice(0, 3)}-${ten.slice(3, 6)}-${ten.slice(6)}`);
+      push('phone', ten);
+      push('phone', `${ten.slice(0, 3)}.${ten.slice(3, 6)}.${ten.slice(6)}`);
+    }
+    push('phone-as-given', query.phone);
     if (query.contactId && !query.syntheticId) push('contact-id', query.contactId);
     return terms;
   }

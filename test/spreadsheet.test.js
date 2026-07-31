@@ -133,11 +133,17 @@ test('live search tries every phone format, then name, then street — never a s
   assert.ok(values.includes('TONY LAM'), 'name');
   assert.ok(values.includes('2700 Humboldt Ave'), 'street only');
   assert.equal(values.includes('L10-7'), false, 'a synthetic row id is never searched in REI');
-  // Phone first — it is the strongest key we have from the sheet. Street before
-  // name, because many REI contacts are named "Unknown".
-  assert.equal(terms[0].label, 'phone');
+  // NAME first: REI's contact search does not match every phone format (a dotted
+  // number returns "No Result Found" for a contact that exists), so leading with
+  // the phone wastes lookups. The phone still CONFIRMS the opened contact.
+  assert.equal(terms[0].label, 'name');
   const labels = terms.map((t) => t.label);
-  assert.ok(labels.indexOf('address') < labels.indexOf('name'), 'street is tried before name');
+  assert.ok(labels.indexOf('name') < labels.indexOf('phone'), 'name is searched before phone');
+  assert.ok(labels.indexOf('address') < labels.indexOf('phone'), 'address is searched before phone');
+  // Dotted format goes last — observed to fail on this account.
+  const phoneValues = terms.filter((t) => t.label === 'phone').map((t) => t.value);
+  assert.equal(phoneValues[0], '(916) 607-2808', 'parenthesized first');
+  assert.equal(phoneValues[phoneValues.length - 1], '916.607.2808', 'dotted last');
 });
 
 test('a real contact id from the sheet IS searched', async () => {
