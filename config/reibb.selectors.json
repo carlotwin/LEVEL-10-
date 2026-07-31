@@ -1,15 +1,14 @@
 {
   "_README": "REI BlackBook selectors. Most are CONFIRMED/VERIFY from the account's own automation (build 58f8bd4). This app's native send flow = open contact -> Chat tab -> type (TinyMCE iframe) -> Send Text; it does NOT natively do a separate Opt-In or ProfitDial from-number pick, so those keys are blank until captured via `npx playwright codegen`. The engine fails closed: if REQUIRE_OPTIN / REQUIRE_PROFITDIAL are on and their selectors are missing, the contact goes to Needs Review (never sent without them).",
-
   "login": {
     "emailInput": "input[type='email'], input[name='email'], input[name='username'], input[type='text']",
     "passwordInput": "input[type='password'], input[name='password']",
     "submitButton": "button[type='submit'], button:has-text('Log In'), button:has-text('Login'), button:has-text('Sign In'), input[type='submit']",
     "loggedInMarker": "text=Contacts"
   },
-
   "contacts": {
-    "navContacts": "a[href*='contact' i], nav a:has-text('Contacts'), aside a:has-text('Contacts'), [role='navigation'] a:has-text('Contacts'), a:has-text('Contacts')",
+    "navContacts": "a:has-text('Smart Contacts'), a[href*='smart-contact' i], a[href*='contact' i], nav a:has-text('Contacts'), aside a:has-text('Contacts'), [role='navigation'] a:has-text('Contacts'), a:has-text('Contacts')",
+    "pageMarker": "input[placeholder*='Search By Name' i], input[placeholder*='Name, Phone' i]",
     "tagFilterOpen": "button:has-text('Tags'), text=Tags",
     "tagSearchInput": "input[placeholder='Search...']",
     "tagFilterOption": "text=%TAG%",
@@ -17,9 +16,9 @@
     "searchInput": "input[placeholder*='Search By Name' i], input[placeholder*='Search by name' i], input[placeholder*='Name, Phone' i], input[placeholder*='Search' i], input[type='search'], input[aria-label*='search' i], input[name*='search' i], .search input",
     "resultRow": "table tbody tr, .list-row, [role='row']",
     "resultRowByText": "text=%QUERY%",
-    "openContact": "table tbody tr td a, .list-row a, [role='row'] a"
+    "openContact": "table tbody tr td a, .list-row a, [role='row'] a",
+    "noResults": "text=No Result Found, text=No results found, text=No Results Found"
   },
-
   "contact": {
     "nameField": "h1, h2",
     "addressField": "",
@@ -29,13 +28,11 @@
     "notesField": "",
     "chatMessages": ".activity-item, [class*='activity']"
   },
-
   "sms": {
     "optInButton": "",
     "optInConfirm": "",
     "optInSuccessMarker": ""
   },
-
   "chat": {
     "chatTab": "[role='tab']:has-text('Chat'), text=Chat",
     "editorFrame": "iframe.tox-edit-area__iframe, iframe[id*='tiny' i], iframe[title*='Rich Text' i]",

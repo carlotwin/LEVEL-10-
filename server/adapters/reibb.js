@@ -42,10 +42,12 @@ const SLOWMO_MS = Number.parseInt(process.env.SLOWMO_MS ?? '0', 10) || 0;
 // load and nothing else. Set REIBB_CONTACTS_URL to skip probing entirely.
 const CONTACTS_PATH_CANDIDATES = Object.freeze([
   '/contacts',
+  '/smart-contacts',
+  '/smartcontacts',
   '/services/contacts',
+  '/services/smartcontacts',
   '/crm/contacts',
   '/contacts/list',
-  '/services/contact/list',
   '/app/contacts',
 ]);
 
@@ -191,6 +193,21 @@ export class ReiBlackBookAdapter extends Adapter {
   }
 
   /**
+   * Are we actually on the Contacts (Smart Contacts) list?
+   *
+   * Two independent signals, either is enough:
+   *   - the URL mentions contacts, or
+   *   - a Contacts-specific marker is on screen (the "Search By Name, Phone..."
+   *     placeholder, which Deals and the other list views do not have).
+   * Without this check, any page with a search box looks like Contacts.
+   */
+  async _onContactsPage() {
+    if (/contact/i.test(this.page.url() || '')) return true;
+    const marker = this.sel.contacts.pageMarker;
+    return marker ? this._present(marker, 1500) : false;
+  }
+
+  /**
    * Get to the Contacts list and return the frame holding its search box.
    *
    * Clicking `text=Contacts` is not reliable: it can match a heading, a stat
@@ -206,9 +223,16 @@ export class ReiBlackBookAdapter extends Adapter {
   async _openContactsSearch() {
     const { contacts } = this.sel;
 
-    const check = async (timeout) => this._frameFor(contacts.searchInput, timeout);
+    // A search box is NOT proof of the right page: this account lands on Deals
+    // after login, Deals has its own "Search" box, and typing a phone into it
+    // returns "No Result Found" from a deal search. So the page identity is
+    // checked first, and only then is a search box accepted.
+    const check = async (timeout) => {
+      if (!(await this._onContactsPage())) return null;
+      return this._frameFor(contacts.searchInput, timeout);
+    };
 
-    // Already there (or the box is present) — cheapest case.
+    // Already on Contacts — cheapest case.
     let frame = await check(2500);
     if (frame) return frame;
 
@@ -381,6 +405,12 @@ export class ReiBlackBookAdapter extends Adapter {
       await frame.fill(contacts.searchInput, term.value);
       await frame.press(contacts.searchInput, 'Enter').catch(() => {});
       await this.page.waitForTimeout(1500);
+      // REI renders an explicit empty state. Recording it separates "REI says it
+      // has nobody matching this" from "the automation could not drive the page".
+      if (contacts.noResults && (await this._present(contacts.noResults, 1200))) {
+        searched.push(`${term.label}:"${term.value}"→No Result Found`);
+        continue;
+      }
       searched.push(`${term.label}:"${term.value}"`);
 
       // Open the first result. Prefer a row whose text contains the term, but
