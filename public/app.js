@@ -162,6 +162,25 @@ function connectSSE() {
   });
   es.addEventListener('row', () => refreshKpi());
   es.addEventListener('done', () => refreshKpi());
+  es.addEventListener('verify-start', (e) => {
+    const d = JSON.parse(e.data);
+    $('verifyInfo').textContent = `Checking ${d.rows} lead(s) against REI — read-only.`;
+  });
+  es.addEventListener('verify-row', (e) => renderVerifyRow(JSON.parse(e.data)));
+  es.addEventListener('verify-done', (e) => {
+    const { summary } = JSON.parse(e.data);
+    $('btnVerify').disabled = false;
+    $('verifyInfo').textContent =
+      `Done. Phone search returned rows for ${summary.searchReturnedRows}/${summary.rows}. ` +
+      `Contacts verified: ${summary.contactsVerified}. Needs a human: ${summary.manualReview + summary.nameMismatches}. ` +
+      `Opt-in control found on ${summary.optInControlFound}/${summary.opened} opened. ` +
+      `Sender list found on ${summary.senderSelectorFound}/${summary.opened}, assigned number listed for ${summary.assignedSenderPresent}. ` +
+      `\nWrite actions attempted: ${summary.writeActionsAttempted}. Nothing was sent, opted in, selected or changed.`;
+  });
+  es.addEventListener('verify-error', (e) => {
+    $('btnVerify').disabled = false;
+    $('verifyInfo').textContent = 'Check failed: ' + JSON.parse(e.data).error;
+  });
 }
 
 // ---- actions ----
@@ -255,3 +274,71 @@ $('btnStop').onclick = () => api('/api/stop', { method: 'POST' });
 
 loadConfig();
 connectSSE();
+
+
+// ---------------------------------------------------------------------------
+// READ-ONLY REI CHECK
+//
+// Same checks the CLI verification runs, driven from the dashboard. The server
+// calls only read methods, so this cannot send, opt anyone in, pick a sender or
+// change a record — which is why it is safe to expose as a button.
+// ---------------------------------------------------------------------------
+const verifyRows = new Map();
+
+function renderVerifyRow(f) {
+  verifyRows.set(f.row, f);
+  const tbl = $('verifyTable');
+  tbl.style.display = '';
+  const tb = tbl.querySelector('tbody');
+  const yn = (v) => (v ? '<span class="tag ok">yes</span>' : '<span class="tag skip">no</span>');
+  const rows = [...verifyRows.values()].sort((a, b) => a.row - b.row);
+  tb.innerHTML = rows
+    .map((r) => {
+      const cands = (r.candidates || []).map((c) => `${esc(c.name || '(no name)')} · ${esc(c.phone || '')}`).join('<br>');
+      const verified = r.reverify === 'CONTACT_VERIFIED';
+      const check = r.reverify
+        ? `<span class="tag ${verified ? 'ok' : 'warn'}">${esc(r.reverify)}</span>`
+        : `<span class="tag skip">${esc(r.decision || '—')}</span>`;
+      const detail = r.detail
+        ? `<div class="small muted">name "${esc(r.detail.name || '(blank)')}"<br>` +
+          `phones ${esc((r.detail.phones || []).join(', ') || 'none')}<br>` +
+          `tags ${esc((r.detail.tags || []).join(', ') || 'none')}</div>`
+        : '';
+      const senderNote = r.senderSelectorAvailable
+        ? `${(r.sendersVisible || []).length} numbers` +
+          (r.assignedSenderPresent === true
+            ? ', assigned one listed'
+            : r.assignedSenderPresent === false
+              ? ', <b>assigned one NOT listed</b>'
+              : '')
+        : '';
+      return `<tr>
+        <td>${r.row}</td>
+        <td>${esc(r.sheet?.name || '')}<div class="small muted">${esc(r.sheet?.phone || '')}</div></td>
+        <td class="small">${esc(r.searchStatus || '—')}<div class="small muted">${esc(r.searchTrail || '')}</div></td>
+        <td class="small">${cands || '—'}</td>
+        <td>${yn(r.opened)}</td>
+        <td>${check}${detail}<div class="small muted">${esc(r.reverifyReason || r.decisionReason || '')}</div></td>
+        <td>${yn(r.optInAvailable)}${r.optInAvailable ? `<div class="small muted">${r.smsEnabled ? 'already opted in' : 'not opted in'}</div>` : ''}</td>
+        <td>${yn(r.senderSelectorAvailable)}<div class="small muted">${senderNote}</div></td>
+      </tr>`;
+    })
+    .join('');
+}
+
+$('btnVerify').onclick = async () => {
+  const limit = parseInt($('verifyLimit').value || '5', 10) || 5;
+  verifyRows.clear();
+  $('verifyTable').querySelector('tbody').innerHTML = '';
+  $('verifyInfo').textContent = 'Opening REI… a browser window will appear. Nothing will be sent or changed.';
+  $('btnVerify').disabled = true;
+  const r = await api('/api/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ limit }),
+  });
+  if (!r.ok) {
+    $('verifyInfo').textContent = 'Cannot check: ' + r.error;
+    $('btnVerify').disabled = false;
+  }
+};

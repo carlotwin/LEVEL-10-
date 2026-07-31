@@ -22,6 +22,7 @@ import {
   detectColumnsForRows,
 } from './data/spreadsheet.js';
 import { fetchGoogleSheetRows, parseSheetUrl } from './data/googleSheet.js';
+import { runReadOnlyVerification, summarize } from './automation/verifyLive.js';
 import { logger } from './logger.js';
 import { uploadsDir } from './data/paths.js';
 import { CONTACTS, PROFITDIAL_ROWS, PD_COLS } from '../config/sandbox/seed.js';
@@ -309,6 +310,72 @@ app.post('/api/upload/contacts', upload.single('file'), (req, res) => {
 });
 
 // ---- Controls ----
+// ---------------------------------------------------------------------------
+// READ-ONLY LIVE VERIFICATION, from the dashboard.
+//
+// Runs the same checks as `npm run verify:live` but driven by a button, streaming
+// each row over SSE so the browser fills in as it goes. It calls only READ methods
+// on the live adapter — never optInPhone, selectProfitDial, enterMessage or
+// sendMessage — so no REI record can be modified regardless of the app's mode.
+// ---------------------------------------------------------------------------
+let verifyRunning = false;
+
+app.post('/api/verify', async (req, res) => {
+  if (verifyRunning) return res.status(409).json({ ok: false, error: 'A verification run is already in progress.' });
+
+  const src = engine._uploadedPd;
+  if (!src || !src.rows?.length) {
+    return res.status(400).json({
+      ok: false,
+      error: 'Load your Level 10 sheet first — verification reads the same rows the run would.',
+    });
+  }
+  const missing = ['REIBB_LOGIN_URL', 'REIBB_EMAIL', 'REIBB_PASSWORD'].filter((k) => !process.env[k]);
+  if (missing.length) {
+    return res.status(400).json({
+      ok: false,
+      error: `Cannot reach REI: ${missing.join(', ')} missing from .env. Add your REI login and restart.`,
+    });
+  }
+
+  const limit = Math.min(Math.max(parseInt(req.body?.limit ?? '5', 10) || 5, 1), 50);
+  verifyRunning = true;
+  res.json({ ok: true, started: true, rows: limit });
+
+  // Run detached; progress and the final report arrive over SSE.
+  (async () => {
+    const { ReiBlackBookAdapter } = await import('./adapters/reibb.js');
+    const adapter = new ReiBlackBookAdapter();
+    broadcast('verify-start', { rows: limit });
+    try {
+      await adapter.init();
+      const findings = await runReadOnlyVerification({
+        adapter,
+        rows: src.rows,
+        cols: src.cols,
+        limit,
+        level10Tag: env.LEVEL10_TAG,
+        onRow: (f) => broadcast('verify-row', f),
+      });
+      broadcast('verify-done', { findings, summary: summarize(findings) });
+      logger.info('verify_live_done', summarize(findings));
+    } catch (e) {
+      logger.error('verify_live_failed', { message: e.message });
+      // Turn the two common setup failures into something actionable in the UI.
+      let hint = e.message;
+      if (/Executable doesn't exist|playwright install/i.test(e.message)) {
+        hint = 'The browser is not installed. Run: npx playwright install chromium';
+      } else if (/timeout|waiting for selector|loggedInMarker/i.test(e.message)) {
+        hint = 'Could not log in to REI. Check REIBB_EMAIL / REIBB_PASSWORD in .env — the browser window shows where it stopped.';
+      }
+      broadcast('verify-error', { error: hint });
+    } finally {
+      await adapter.close?.().catch?.(() => {});
+      verifyRunning = false;
+    }
+  })();
+});
+
 app.post('/api/start', async (req, res) => {
   try {
     await engine.start();

@@ -41,7 +41,7 @@ if (missing.length) {
 
 const { env } = await import('../server/config/env.js');
 const { ReiBlackBookAdapter } = await import('../server/adapters/reibb.js');
-const { chooseContact, verifyOpenedContact } = await import('../server/automation/contactMatch.js');
+const { runReadOnlyVerification, summarize } = await import('../server/automation/verifyLive.js');
 const { loadLevel10File, detectColumnsForRows } = await import('../server/data/spreadsheet.js');
 
 // ---------------------------------------------------------------------------
@@ -126,137 +126,80 @@ console.log(`  Sheet: tab "${sheet.tab}", headers row ${sheet.headerRow}`);
 console.log(`  Columns: name="${cols.name}" phone="${cols.phone}" address="${cols.address}" profitDial="${cols.profitDial}"\n`);
 
 const adapter = new ReiBlackBookAdapter();
-const findings = [];
 try {
   try {
     await adapter.init();
   } catch (e) {
-    // A failed login or browser launch is a setup problem, not a finding. Say so
-    // plainly instead of printing a stack trace.
+    // A failed login or browser launch is a setup problem, not a finding.
     console.error(`\n  Could not open REI BlackBook: ${e.message}`);
     console.error('  Check REIBB_LOGIN_URL / REIBB_EMAIL / REIBB_PASSWORD in .env.');
     console.error('  If Chromium is missing, run: npx playwright install chromium\n');
     process.exit(1);
   }
 
-  for (const [i, row] of rows.entries()) {
-    const sheetRow = {
-      name: String(row[cols.name] ?? '').trim(),
-      phone: String(row[cols.phone] ?? '').trim(),
-      address: String(row[cols.address] ?? '').trim(),
-    };
-    const f = { row: i + 1, sheet: sheetRow };
-    console.log(`\n  ─── ${i + 1}/${rows.length}  ${sheetRow.name} · ${sheetRow.phone}`);
+  const line = (d) =>
+    `           <${d.tag}${d.id ? ' id=' + d.id : ''}${d.cls ? ' class=' + d.cls : ''}` +
+    `${d.role ? ' role=' + d.role : ''}${d.aria ? ' aria-label="' + d.aria + '"' : ''}` +
+    `${d.testid ? ' data-testid=' + d.testid : ''}${d.href ? ' href="' + d.href + '"' : ''}> ${d.text}`;
 
-    // 1 + 2. Phone search and result parsing.
-    const search = await adapter.findContact(sheetRow);
-    f.searchStatus = search.status;
-    f.candidateCount = (search.candidates || []).length;
-    f.searchTrail = (search.searched || []).join(' → ');
-    f.parsedCandidates = (search.candidates || []).map((c) => ({ name: c.name, phone: c.phone, address: c.address }));
-    console.log(`      1. phone search : ${f.searchStatus} (${f.searchTrail || 'no attempts'})`);
-    console.log(`      2. row parsing  : ${f.candidateCount} candidate(s) ${JSON.stringify(f.parsedCandidates)}`);
-    if (search.stage) console.log(`         stage        : ${search.stage}`);
-    if (search.screenshot) console.log(`         screenshot   : ${search.screenshot}`);
+  const findings = await runReadOnlyVerification({
+    adapter,
+    rows: sheet.rows,
+    cols,
+    limit: 5,
+    level10Tag: env.LEVEL10_TAG,
+    onRow: (f) => {
+      console.log(`\n  ─── ${f.row}  ${f.sheet.name} · ${f.sheet.phone}`);
+      console.log(`      1. phone search : ${f.searchStatus} (${f.searchTrail || 'no attempts'})`);
+      console.log(`      2. row parsing  : ${f.candidates.length} candidate(s) ${JSON.stringify(f.candidates)}`);
+      if (f.stage) console.log(`         stage        : ${f.stage}`);
+      console.log(`         decision     : ${f.decision} — ${f.decisionReason}`);
+      if (f.opened) {
+        console.log(`      3. open contact : opened (REI id ${f.detail?.contactId || '?'})`);
+        console.log(`      4. detail reads : name="${f.detail?.name || '(blank)'}" phones=${JSON.stringify(f.detail?.phones || [])}`);
+        console.log(`                        address="${f.detail?.address || '(blank)'}" tags=${JSON.stringify(f.detail?.tags || [])}`);
+        console.log(`         re-verify    : ${f.reverify} ${JSON.stringify(f.reverifyFlags || {})}`);
+        console.log(`      5. opt-in       : control ${f.optInAvailable ? 'FOUND' : 'not found'}, smsEnabled=${f.smsEnabled}${f.optInRaw ? ` ("${f.optInRaw}")` : ''}`);
+        console.log(`      6. sender select: ${f.senderSelectorAvailable ? 'FOUND' : 'not found'}, ${f.sendersVisible.length} number(s), assigned ${f.sheet.profitDial} present: ${f.assignedSenderPresent}`);
+        console.log('      7. read-back    : SKIPPED — selecting a sender changes the record');
+      } else if (f.decision === 'CONTACT_VERIFIED') {
+        console.log(`      3. open contact : FAILED — ${f.openReason || 'unknown'}`);
+      }
+      if (f.probe) {
+        console.log('\n         ── DETAIL PAGE PROBE (read-only) ──');
+        console.log(`         url: ${f.probe.url}`);
+        console.log(`         title: ${f.probe.title || '(none)'}`);
+        console.log('         headings:');
+        (f.probe.headings || []).forEach((d) => console.log(line(d)));
+        console.log('         elements containing the expected NAME:');
+        (f.probe.nameHits || []).forEach((d) => console.log(line(d)));
+        console.log('         elements containing the expected ADDRESS:');
+        (f.probe.addressHits || []).forEach((d) => console.log(line(d)));
+        console.log('         largest visible text:');
+        (f.probe.biggest || []).forEach((d) => console.log(`${line(d)}   [${d.size}px]`));
+        if (f.probe.html) console.log(`         page saved: ${f.probe.html}`);
+      }
+      if (f.error) console.log(`         ERROR: ${f.error}`);
+    },
+  });
 
-    const decision = chooseContact({ sheet: sheetRow, candidates: search.candidates || [] });
-    f.decision = decision.status;
-    f.decisionReason = decision.reason;
-    console.log(`         decision     : ${decision.status} — ${decision.reason}`);
-    if (!decision.chosen) {
-      findings.push(f);
-      continue;
-    }
-
-    // 3. Open the contact.
-    const opened = await adapter.openContact(decision.chosen);
-    f.opened = Boolean(opened.opened);
-    console.log(`      3. open contact : ${f.opened ? 'opened' : `FAILED — ${opened.reason}`}`);
-    if (!opened.opened) {
-      findings.push(f);
-      continue;
-    }
-
-    // 4. Detail-page reads.
-    const detail = await adapter.readContactFacts(opened.contactId);
-    f.detail = {
-      name: detail.name || '(blank)',
-      phones: detail.phones || [],
-      address: detail.address || '(blank)',
-      tags: detail.tags || [],
-      url: detail.reiUrl || '',
-    };
-    const recheck = verifyOpenedContact({ sheet: sheetRow, detail, level10Tag: env.LEVEL10_TAG });
-    f.reverify = recheck.status;
-    f.reverifyFlags = recheck.flags;
-    console.log(`      4. detail reads : name="${f.detail.name}" phones=${JSON.stringify(f.detail.phones)}`);
-    console.log(`                        address="${f.detail.address}" tags=${JSON.stringify(f.detail.tags)}`);
-    console.log(`         re-verify    : ${recheck.status} ${JSON.stringify(recheck.flags)}`);
-
-    // When the record could not be read, probe the page and print what IS there,
-    // so the correct selectors can be written from evidence.
-    if (recheck.status !== 'CONTACT_VERIFIED') {
-      const probe = await adapter.probeContactPage(`row${i + 1}-${sheetRow.phone.replace(/\D/g, '')}`, {
-        // Hunt for the values we already expect — the surest way to find which
-        // element holds the name when the page has no heading.
-        name: (search.candidates?.[0]?.name || sheetRow.name),
-        address: (search.candidates?.[0]?.address || sheetRow.address),
-      });
-      f.probe = probe;
-      console.log('\n         ── DETAIL PAGE PROBE (read-only) ──');
-      console.log(`         url: ${probe.url}`);
-      const line = (d) =>
-        `           <${d.tag}${d.id ? ' id=' + d.id : ''}${d.cls ? ' class=' + d.cls : ''}` +
-        `${d.role ? ' role=' + d.role : ''}${d.aria ? ' aria-label="' + d.aria + '"' : ''}` +
-        `${d.testid ? ' data-testid=' + d.testid : ''}${d.href ? ' href="' + d.href + '"' : ''}> ${d.text}`;
-      console.log(`         title: ${probe.title || '(none)'}`);
-      console.log('         headings:');
-      (probe.headings || []).forEach((d) => console.log(line(d)));
-      console.log('         elements containing the expected NAME:');
-      (probe.nameHits || []).forEach((d) => console.log(line(d)));
-      console.log('         elements containing the expected ADDRESS:');
-      (probe.addressHits || []).forEach((d) => console.log(line(d)));
-      console.log('         largest visible text:');
-      (probe.biggest || []).forEach((d) => console.log(`${line(d)}   [${d.size}px]`));
-      console.log('         phone-looking elements:');
-      (probe.phones || []).forEach((d) => console.log(line(d)));
-      console.log('         tag-looking elements:');
-      (probe.tags || []).forEach((d) => console.log(line(d)));
-      if (probe.html) console.log(`         page saved: ${probe.html}`);
-      console.log('');
-    }
-
-    // 5. Opt In control — located only, never clicked.
-    f.optInAvailable = await adapter.optInAvailable(opened.contactId);
-    const sms = await adapter.getSmsStatus(opened.contactId);
-    f.smsEnabled = sms?.smsEnabled === true;
-    console.log(`      5. opt-in       : control ${f.optInAvailable ? 'FOUND' : 'not found'}, status reads smsEnabled=${f.smsEnabled}`);
-
-    // 6. ProfitDial sender selector — located only, never selected.
-    await adapter.openChatTab?.();
-    f.senderSelectorAvailable = await adapter.profitDialSelectorAvailable(opened.contactId);
-    f.sendersVisible = await adapter.getProfitDialNumbers(opened.contactId).catch(() => []);
-    console.log(`      6. sender select: ${f.senderSelectorAvailable ? 'FOUND' : 'not found'}, numbers read: ${JSON.stringify(f.sendersVisible)}`);
-
-    // 7. Read-back requires selecting a number, which modifies the record.
-    console.log('      7. read-back    : SKIPPED — selecting a sender changes the record; not done in a read-only run');
-
-    findings.push(f);
+  const s = summarize(findings);
+  console.log('\n\n  ══ SUMMARY ══');
+  console.log('  row  search                       cands  opened  re-verify                  optIn  sender');
+  for (const f of findings) {
+    console.log(
+      `  ${String(f.row).padEnd(4)} ${String(f.searchStatus || '—').padEnd(28)} ${String(f.candidates.length).padEnd(6)} ` +
+        `${(f.opened ? 'yes' : 'NO').padEnd(7)} ${String(f.reverify || '—').padEnd(26)} ` +
+        `${(f.optInAvailable ? 'yes' : 'NO').padEnd(6)} ${f.senderSelectorAvailable ? 'yes' : 'NO'}`
+    );
   }
+  console.log(`\n  search returned rows : ${s.searchReturnedRows}/${s.rows}`);
+  console.log(`  contacts verified    : ${s.contactsVerified}`);
+  console.log(`  manual review        : ${s.manualReview}   name mismatches: ${s.nameMismatches}`);
+  console.log(`  opt-in control found : ${s.optInControlFound}/${s.opened}`);
+  console.log(`  sender selector found: ${s.senderSelectorFound}/${s.opened}   assigned number listed: ${s.assignedSenderPresent}`);
+  console.log(`  WRITE ACTIONS        : ${s.writeActionsAttempted}`);
+  console.log('  No message was sent. No opt-in performed. No sender selected. No tag written.\n');
 } finally {
   await adapter.close();
 }
-
-// ---- summary ---------------------------------------------------------------
-const yes = (b) => (b ? 'yes' : 'NO');
-console.log('\n\n  ══ SUMMARY ══');
-console.log('  row  search                       candidates  opened  re-verify                  optIn  sender');
-for (const f of findings) {
-  console.log(
-    `  ${String(f.row).padEnd(4)} ${String(f.searchStatus).padEnd(28)} ${String(f.candidateCount ?? 0).padEnd(11)} ` +
-      `${yes(f.opened).padEnd(7)} ${String(f.reverify || '—').padEnd(26)} ${yes(f.optInAvailable).padEnd(6)} ${yes(f.senderSelectorAvailable)}`
-  );
-}
-const searched = findings.filter((f) => f.candidateCount > 0).length;
-console.log(`\n  Phone search returned rows for ${searched}/${findings.length} record(s).`);
-console.log('  No message was sent. No opt-in performed. No sender selected. No tag written.\n');
