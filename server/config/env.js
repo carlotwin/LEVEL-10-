@@ -12,7 +12,24 @@
 //
 // The gates are INDEPENDENT and compose by AND. No single flag turns on real
 // texting. Every gate defaults to the safe value.
+//
+// .env IS LOADED HERE, deliberately.
+//
+// `import` statements are hoisted in ES modules, so a caller that does
+//     import { loadEnv } from './loadenv.js';
+//     loadEnv();                       // <- body code, runs LAST
+//     import { env } from './config/env.js';
+// has already evaluated this module — and read process.env — before loadEnv()
+// ever runs. That silently ignored every .env value: the boot banner (reading
+// process.env after loadEnv) said the REI login was configured while `env` held
+// an empty string, and the adapter refused with "REIBB_LOGIN_URL is not
+// configured". Loading .env as the first thing this module does makes any import
+// order safe, because nothing can read process.env before this point.
 // =============================================================================
+import { loadEnv } from '../loadenv.js';
+
+// L10_ENV_FILE lets a test point at a temp file instead of the project's .env.
+loadEnv(process.env.L10_ENV_FILE || undefined); // never overwrites an already-set var
 
 function readBool(name, def = false) {
   const raw = process.env[name];

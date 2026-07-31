@@ -85,10 +85,7 @@ app.get('/api/config', (req, res) => {
       requireProfitDial: env.REQUIRE_PROFITDIAL,
     },
     // Can the REI check actually run? Answered at page load, not after a click.
-    rei: {
-      ready: REI_KEYS.every((k) => Boolean(process.env[k])),
-      missing: REI_KEYS.filter((k) => !process.env[k]),
-    },
+    rei: reiReadiness(),
     autoLoad,
   });
 });
@@ -110,6 +107,21 @@ function buildId() {
 }
 
 const REI_KEYS = ['REIBB_LOGIN_URL', 'REIBB_EMAIL', 'REIBB_PASSWORD'];
+
+/**
+ * Is the REI login configured? Read through `env` — the SAME object the adapter
+ * checks — not process.env. Reading different sources is how the banner came to
+ * say "ready" while the adapter refused with "REIBB_LOGIN_URL is not configured".
+ */
+function reiReadiness() {
+  const values = {
+    REIBB_LOGIN_URL: env.REIBB_LOGIN_URL,
+    REIBB_EMAIL: process.env.REIBB_EMAIL || '',
+    REIBB_PASSWORD: process.env.REIBB_PASSWORD || '',
+  };
+  const missing = REI_KEYS.filter((k) => !values[k]);
+  return { ready: missing.length === 0, missing };
+}
 
 // What the boot-time auto-load did, so the dashboard can show it on first paint.
 let autoLoad = { tried: false, loaded: 0, source: '', candidates: [], error: '' };
@@ -385,8 +397,8 @@ app.post('/api/verify', async (req, res) => {
       error: 'Load your Level 10 sheet first — verification reads the same rows the run would.',
     });
   }
-  const missing = ['REIBB_LOGIN_URL', 'REIBB_EMAIL', 'REIBB_PASSWORD'].filter((k) => !process.env[k]);
-  if (missing.length) {
+  const { ready, missing } = reiReadiness();
+  if (!ready) {
     return res.status(400).json({
       ok: false,
       error: `Cannot reach REI: ${missing.join(', ')} missing from .env. Add your REI login and restart.`,
@@ -495,11 +507,11 @@ app.listen(PORT, () => {
   } else if (autoLoad.error) {
     console.log(`  Sheet: ${autoLoad.error}`);
   }
-  const reiMissing = REI_KEYS.filter((k) => !process.env[k]);
+  const rei = reiReadiness();
   console.log(
-    reiMissing.length
-      ? `  REI check: NOT ready — add ${reiMissing.join(', ')} to .env`
-      : '  REI check: ready — click "Check against REI" in the dashboard'
+    rei.ready
+      ? '  REI check: ready — click "Check against REI" in the dashboard'
+      : `  REI check: NOT ready — add ${rei.missing.join(', ')} to .env`
   );
   console.log('');
 });
