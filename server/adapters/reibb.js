@@ -222,17 +222,28 @@ export class ReiBlackBookAdapter extends Adapter {
 
       if (contacts.noResultsMarker && (await this._present(contacts.noResultsMarker, 800))) continue;
 
-      // Open the first contact result; fall back to a direct /contacts/<id> goto.
+      // Open the first contact result by CLICKING it, same as every tab
+      // switch — this SPA does not reliably deep-link via a fresh page.goto()
+      // to a /contacts/<id> URL; a hard reload can land on whatever contact
+      // it last had loaded instead of the one in the URL. Only fall back to
+      // goto(href) if the click genuinely fails to find/hit the link.
       if (!/\/contacts\/\d+/i.test(this.page.url())) {
-        const href = await this.page
-          .evaluate(() =>
-            Array.from(document.querySelectorAll("a[href*='/contacts/']"))
-              .map((a) => a.href)
-              .find((h) => /\/contacts\/\d+/i.test(h)) || ''
-          )
-          .catch(() => '');
-        if (href) await this.page.goto(href, { waitUntil: 'domcontentloaded' }).catch(() => {});
-        else await this.page.locator(contacts.resultRowLink).first().click().catch(() => {});
+        const clicked = await this.page
+          .locator(contacts.resultRowLink)
+          .first()
+          .click({ timeout: 4000 })
+          .then(() => true)
+          .catch(() => false);
+        if (!clicked) {
+          const href = await this.page
+            .evaluate(() =>
+              Array.from(document.querySelectorAll("a[href*='/contacts/']"))
+                .map((a) => a.href)
+                .find((h) => /\/contacts\/\d+/i.test(h)) || ''
+            )
+            .catch(() => '');
+          if (href) await this.page.goto(href, { waitUntil: 'domcontentloaded' }).catch(() => {});
+        }
       }
       await this.page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
       await this.page.waitForTimeout(1000);
