@@ -54,12 +54,29 @@ test('eligibility blocks: invalid + multiple phones', () => {
   assert.equal(sop.checkEligibility({ ...okFacts(), phones: ['5105550101', '5105557777'] }, config).disposition, DISPOSITION.MULTIPLE_PHONES);
 });
 
-test('name safety: joint owners and trusts go to review; clean names pass', () => {
-  assert.equal(sop.checkNameSafety({ name: 'Tony & Sukien Lam', firstName: 'Tony' }).disposition, DISPOSITION.NEEDS_REVIEW);
-  assert.equal(sop.checkNameSafety({ name: 'Smith Family Trust', firstName: 'Smith' }).disposition, DISPOSITION.NEEDS_REVIEW);
+test('name safety: pure company/trust entities with no individual owner still block', () => {
+  assert.equal(sop.checkNameSafety({ name: 'Smith Family Trust' }).disposition, DISPOSITION.NEEDS_REVIEW);
   assert.equal(sop.checkNameSafety({ name: 'Acme LLC' }).disposition, DISPOSITION.NEEDS_REVIEW);
   assert.equal(sop.checkNameSafety({ name: '', firstName: '' }).disposition, DISPOSITION.NEEDS_REVIEW);
   assert.deepEqual(sop.checkNameSafety({ name: 'Maria Lopez', firstName: 'Maria' }), { ok: true });
+});
+
+test('name safety: joint owners and personal trusts pass using only the first-listed individual', () => {
+  assert.deepEqual(sop.checkNameSafety({ name: 'Tony & Sukien Lam' }), { ok: true });
+  assert.deepEqual(sop.checkNameSafety({ name: 'ALMODOVAR, SERGIO E & ELIZABETH V' }), { ok: true });
+  assert.deepEqual(sop.checkNameSafety({ name: 'BANK, DAVID M TR & CHAVEZ, CESAR D TR' }), { ok: true });
+});
+
+test('deriveFirstName: only the first-listed individual, never a last name or company', () => {
+  assert.equal(sop.deriveFirstName('Tony & Sukien Lam').firstName, 'Tony');
+  assert.equal(sop.deriveFirstName('Tony and Sukien').firstName, 'Tony');
+  assert.equal(sop.deriveFirstName('John / Mary Smith').firstName, 'John');
+  assert.equal(sop.deriveFirstName('ALMODOVAR, SERGIO E & ELIZABETH V').firstName, 'Sergio');
+  assert.equal(sop.deriveFirstName('BANK, DAVID M TR & CHAVEZ, CESAR D TR').firstName, 'David');
+  assert.equal(sop.deriveFirstName('LEE,ROBERT W').firstName, 'Robert');
+  assert.equal(sop.deriveFirstName('Smith Family Trust').ok, false);
+  assert.equal(sop.deriveFirstName('Acme LLC').ok, false);
+  assert.equal(sop.deriveFirstName('').ok, false);
 });
 
 test('already-processed ledger hit blocks', () => {

@@ -43,6 +43,10 @@ export const env = Object.freeze({
   REQUIRE_PROFITDIAL: readBool('REQUIRE_PROFITDIAL', true), // SOP Step 5/6; off = REI sends from default number
   HEADLESS: readBool('HEADLESS', false),
   MAX_SENDS_PER_RUN: readInt('MAX_SENDS_PER_RUN', 10),
+  // First-production-test pilot cap: pause after this many leads are
+  // ATTEMPTED (any outcome, not just sends) so a new upload can be verified a
+  // handful of contacts at a time before running the whole file. 0 = off.
+  PILOT_BATCH_LIMIT: readInt('PILOT_BATCH_LIMIT', 0),
   PORT: readInt('PORT', 3000),
 
   // --- campaign ---

@@ -17,7 +17,6 @@ import {
   BLOCKING_PHRASES,
   POSITIVE_WORDS,
   NEGATIVE_WORDS,
-  NAME_REVIEW_KEYWORDS,
 } from './constants.js';
 
 const pass = () => ({ ok: true });
@@ -95,19 +94,94 @@ export function checkEligibility(facts, config) {
 }
 
 // -----------------------------------------------------------------------------
-// GATE 1b — Owner-name safety. Joint owners ("X & Y"), trusts, and company/estate
-// names have no safe single first name to merge → route to manual review rather
-// than guess (per the pilot handoff spec).
+// GATE 1b — Owner-name safety.
+//
+// Preserve the FULL original owner/homeowner name for verification, display,
+// and export. For the SMS merge field, use only the first-listed individual's
+// first name — do not combine two names, do not use a last name or company
+// name as the first name, and never override a separate safety/opt-in/
+// duplicate/property-mismatch block. When the first-listed individual can't
+// be confidently identified (pure company/trust name, unreadable, etc.),
+// route to manual review rather than guess.
 // -----------------------------------------------------------------------------
+const NAME_TOP_LEVEL_SEPARATOR_RE = /\s*&\s*|\s+and\s+|\s*\/\s*/i;
+const MIDDLE_INITIAL_RE = /^[A-Za-z]\.?$/;
+const NAME_BLOCK_TOKENS = new Set(['trust', 'trustee', 'tr', 'llc', 'estate', 'owner', 'unknown', 'inc', 'co']);
+const COMPANY_ONLY_HINTS = ['llc', 'l l c', 'inc', 'incorporated', 'corp', 'corporation', 'company', 'properties', 'holdings', 'group', 'partners', 'llp', 'trust'];
+
+/**
+ * Extract the first-listed individual's first name from an owner/homeowner
+ * name that may contain joint owners ("Tony & Sukien Lam"), recorder-style
+ * "Last,First Middle" formatting ("LEE,ROBERT W"), or a personal trust
+ * ("BANK, DAVID M TR & CHAVEZ, CESAR D TR" -> "David"). Never combines two
+ * names, never uses a last name, and never uses a bare company name.
+ * Returns { firstName, ok, reason }. ok:false means "can't confidently tell" —
+ * callers must route to manual review rather than guess.
+ */
+export function deriveFirstName(rawName) {
+  const full = String(rawName ?? '').trim();
+  if (!full) return { firstName: '', ok: false, reason: 'No owner name to personalize the message' };
+
+  // Keep only the FIRST-listed owner (before &, "and", or /).
+  const firstSegment = full.split(NAME_TOP_LEVEL_SEPARATOR_RE)[0].trim();
+  const commaIdx = firstSegment.indexOf(',');
+
+  if (commaIdx < 0) {
+    // No "Last, First" structure — a bare company/entity name has no comma
+    // either, so guard against reading its first word as a person's name.
+    const lowSeg = firstSegment.toLowerCase();
+    if (COMPANY_ONLY_HINTS.some((h) => lowSeg.includes(h))) {
+      return { firstName: '', ok: false, reason: `"${full}" looks like a company/entity name, not an individual` };
+    }
+  }
+
+  // "Last, First Middle [suffix]" -> take the part after the comma; else
+  // assume "First [Middle] Last" and take the leading token.
+  const namePart = commaIdx >= 0 ? firstSegment.slice(commaIdx + 1).trim() : firstSegment;
+
+  const tokens = namePart
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter((t) => {
+      const low = t.toLowerCase().replace(/\.$/, '');
+      if (MIDDLE_INITIAL_RE.test(t)) return false; // drop middle initials
+      if (NAME_BLOCK_TOKENS.has(low)) return false; // drop trust/company suffix words
+      return true;
+    });
+
+  const candidate = tokens[0] || '';
+  if (!candidate || candidate.length < 2) {
+    return { firstName: '', ok: false, reason: `Could not confidently identify the first-listed individual's first name in "${full}"` };
+  }
+  const firstName = candidate[0].toUpperCase() + candidate.slice(1).toLowerCase();
+  return { firstName, ok: true };
+}
+
 export function checkNameSafety(facts) {
   const name = String(facts.name || `${facts.firstName || ''} ${facts.lastName || ''}`).trim();
   if (!name) return block(DISPOSITION.NEEDS_REVIEW, 'No owner name to personalize the message');
-  if (/[&]| and /i.test(name)) return block(DISPOSITION.NEEDS_REVIEW, `Joint owners ("${name}") — manual review, cannot pick one first name`);
-  const lower = ` ${name.toLowerCase()} `;
-  const hit = NAME_REVIEW_KEYWORDS.find((k) => lower.includes(k));
-  if (hit) return block(DISPOSITION.NEEDS_REVIEW, `Owner name looks like a trust/company ("${name}") — manual review`);
-  const first = String(facts.firstName || name.split(/\s+/)[0] || '').trim();
-  if (!first || first.length < 2) return block(DISPOSITION.NEEDS_REVIEW, 'No usable first name for the message');
+  const derived = deriveFirstName(name);
+  if (!derived.ok) return block(DISPOSITION.NEEDS_REVIEW, derived.reason);
+  return pass();
+}
+
+// -----------------------------------------------------------------------------
+// GATE 0 — Required fields from the UPLOADED FILE ITSELF, checked before ever
+// spending a live REI search on this row. A lead ready for processing must
+// have a name, phone, and property address in the uploaded row; anything
+// missing routes to manual review without touching REI at all.
+// -----------------------------------------------------------------------------
+export function checkRequiredFields(lead) {
+  const missing = [];
+  if (!String(lead?.name || '').trim()) missing.push('owner/homeowner name');
+  if (!(lead?.phones && lead.phones[0])) missing.push('phone');
+  if (!String(lead?.address || '').trim()) missing.push('property address');
+  if (missing.length) {
+    return block(
+      DISPOSITION.NEEDS_REVIEW,
+      `MANUAL REVIEW REQUIRED — missing required field(s) in uploaded file: ${missing.join(', ')} (not searched, not sent)`
+    );
+  }
   return pass();
 }
 

@@ -14,7 +14,8 @@ import { Engine } from './automation/engine.js';
 import { buildKpi } from './data/kpi.js';
 import { templatePoolSummary, anyPlaceholderEnabled, EXPECTED_CHECKSUM } from './automation/message.js';
 import { analyzeSheet } from './automation/profitdial.js';
-import { importContacts, readTabFromFile, exportResults } from './data/spreadsheet.js';
+import { deriveFirstName } from './automation/sop.js';
+import { importContacts, readTabFromFile, exportResults, resolveLevel10Columns, normalizeHeaderKey } from './data/spreadsheet.js';
 import { fetchGoogleSheetRows, parseSheetUrl } from './data/googleSheet.js';
 import { logger } from './logger.js';
 import { uploadsDir, dataDir } from './data/paths.js';
@@ -40,7 +41,7 @@ function broadcast(event, data) {
   const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
   for (const res of clients) res.write(payload);
 }
-for (const ev of ['state', 'row', 'done', 'error', 'batch-cap']) {
+for (const ev of ['state', 'row', 'done', 'error', 'batch-cap', 'pilot-cap']) {
   engine.on(ev, (data) => broadcast(ev, data ?? engine.snapshot()));
 }
 
@@ -74,27 +75,35 @@ app.get('/api/config', (req, res) => {
   });
 });
 
-// The confirmed column mapping for the Level 10 "With Contacts" sheet.
-function pdColsFromEnv() {
-  return {
+// The Level 10 sheet's column mapping: the configured (.env) name if the
+// sheet actually has it, else a likely alias (Owner/Homeowner/Seller Name,
+// Full Address/Property Address, Phone/Mobile, ProfitDial/Profit
+// Dial/Assigned Number, etc.) resolved against the sheet's REAL headers.
+// Never silently confuses ProfitDial with Primary Phone/Mail/Purchase Date.
+function pdColsFromEnv(headers) {
+  return resolveLevel10Columns(headers, {
     profitDial: env.PD_COL_PROFITDIAL,
     address: env.PD_COL_ADDRESS,
     phone: env.PD_COL_PHONE,
     name: env.PD_COL_NAME,
     contactId: env.PD_COL_CONTACT_ID,
-  };
+  });
 }
 
 // Turn ProfitDial spreadsheet rows into the lead worklist. ONE sheet is both the
 // list of Level 10 homeowners AND the source of their ProfitDial numbers.
 function buildLeadsFromRows(rows, cols) {
   return rows.map((r, i) => {
-    const name = (cols.name && r[cols.name]) || r['Owner'] || '';
+    const name = (cols.name && r[cols.name]) || '';
     const contactId = (cols.contactId && r[cols.contactId]) || `L10-${i + 1}`;
+    // A dedicated "First Name" column (if the sheet has one) is a cleaner
+    // merge-field source than re-deriving it from a combined owner name.
+    const firstNameCol = Object.keys(r).find((k) => normalizeHeaderKey(k) === 'first name');
+    const derivedFirst = deriveFirstName(String((firstNameCol && r[firstNameCol]) || name));
     return {
       contactId: String(contactId),
       name: String(name),
-      firstName: String(r['FIrst Name'] || r['First Name'] || name).split(/\s+/)[0] || '',
+      firstName: derivedFirst.ok ? derivedFirst.firstName : '',
       address: cols.address ? String(r[cols.address] || '') : '',
       phones: [cols.phone ? String(r[cols.phone] || '') : ''].filter(Boolean),
       reiUrl: '',
@@ -149,16 +158,21 @@ app.post('/api/sandbox/load', (req, res) => {
 });
 
 // ---- Load the Level 10 sheet (leads + ProfitDial) from an uploaded file ----
+// If the configured tab ("With Contacts" by default) isn't found and the file
+// has multiple sheets, this never silently guesses -- it returns
+// SHEET_AMBIGUOUS with the real sheet names so the caller can resubmit with
+// an explicit `tab`.
 app.post('/api/upload/profitdial', upload.single('file'), (req, res) => {
   try {
-    const { rows, tab } = readTabFromFile(req.file.path, env.PD_SHEET_TAB);
-    const cols = pdColsFromEnv();
+    const requestedTab = req.body?.tab || req.query?.tab || env.PD_SHEET_TAB;
+    const { rows, tab } = readTabFromFile(req.file.path, requestedTab);
+    const cols = pdColsFromEnv(Object.keys(rows[0] || {}));
     engine._uploadedPd = { rows, cols };
     const limit = parseInt(req.query.limit ?? req.body?.limit ?? '0', 10) || 0;
     const r = loadLevel10FromRows(rows, cols, { source: req.file.originalname, tab, limit });
-    res.json({ ok: true, tab: env.PD_SHEET_TAB, ...r });
+    res.json({ ok: true, tab, ...r });
   } catch (e) {
-    res.status(400).json({ ok: false, error: e.message });
+    res.status(400).json({ ok: false, error: e.message, code: e.code, sheetNames: e.sheetNames });
   } finally {
     if (req.file) fs.unlink(req.file.path, () => {});
   }
@@ -171,7 +185,7 @@ app.post('/api/ingest/googlesheet', async (req, res) => {
     if (url && !sheetId) ({ sheetId, gid } = parseSheetUrl(url));
     if (gid == null || gid === '') gid = req.body?.gid ?? '';
     const { rows, sourceUrl } = await fetchGoogleSheetRows({ sheetId, gid, token });
-    const cols = pdColsFromEnv();
+    const cols = pdColsFromEnv(Object.keys(rows[0] || {}));
     engine._uploadedPd = { rows, cols };
     const lim = parseInt(limit ?? '0', 10) || 0;
     const r = loadLevel10FromRows(rows, cols, { source: sourceUrl, tab: env.PD_SHEET_TAB, limit: lim });

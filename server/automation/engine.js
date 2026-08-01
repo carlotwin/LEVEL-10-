@@ -41,11 +41,13 @@ export class Engine extends EventEmitter {
     this._pauseRequested = false;
     this._stopRequested = false;
     this._sendsThisRun = 0;
+    this._attemptsThisRun = 0;
     this.config = {
       level10Tag: env.LEVEL10_TAG,
       textStates: env.TEXT_STATES,
       campaignBatch: env.CAMPAIGN_BATCH,
       maxSends: env.MAX_SENDS_PER_RUN,
+      pilotLimit: env.PILOT_BATCH_LIMIT,
       requireOptIn: env.REQUIRE_OPTIN,
       requireProfitDial: env.REQUIRE_PROFITDIAL,
     };
@@ -101,6 +103,7 @@ export class Engine extends EventEmitter {
     this._pauseRequested = false;
     this._stopRequested = false;
     this._sendsThisRun = 0;
+    this._attemptsThisRun = 0;
     this.store.setStatus('running');
     this.emitState();
     this._loop = this._run().catch((e) => {
@@ -152,10 +155,23 @@ export class Engine extends EventEmitter {
         this.emitState();
         return;
       }
+      // Pilot cap: pause after N leads are ATTEMPTED (any outcome), not just
+      // sends -- lets a newly uploaded file be verified a handful of contacts
+      // at a time. Resetting per Start/Resume click means each explicit
+      // approval unlocks the next pilotLimit-sized batch, never the rest of
+      // the file unattended.
+      if (this.config.pilotLimit > 0 && this._attemptsThisRun >= this.config.pilotLimit) {
+        logger.warn('pilot_cap_reached', { cap: this.config.pilotLimit });
+        this.store.setStatus('paused');
+        this.emit('pilot-cap', { cap: this.config.pilotLimit });
+        this.emitState();
+        return;
+      }
 
       const contact = this.contacts[i];
       const result = await this._processContact(contact);
       this.store.recordResult(i, result);
+      this._attemptsThisRun += 1;
       if (SENT_DISPOSITIONS.includes(result.L10_Disposition)) this._sendsThisRun += 1;
       logger.row(contact.contactId, result.L10_Disposition, { reason: result.L10_Reason });
       this.emit('row', { index: i, result });
@@ -194,9 +210,30 @@ export class Engine extends EventEmitter {
       // Integrity re-check before doing anything irreversible.
       assertMessageIntegrity();
 
+      // GATE 0 — Required fields from the uploaded row itself. An incomplete
+      // row (no name/phone/address) is never searched in REI at all.
+      const fieldsCheck = sop.checkRequiredFields(contact);
+      if (!fieldsCheck.ok) return this._finish(base, fieldsCheck.disposition, fieldsCheck.reason, contact);
+
+      // GATE 0b — The uploaded file must itself carry a single, usable
+      // ProfitDial for this row before we spend a live search on it (the
+      // later ProfitDial gate re-verifies this against REI once opened).
+      const preMatch = matchProfitDial(
+        { contactId: contact.contactId, address: contact.address, phone: (contact.phones || [])[0] },
+        this.pdIndex
+      );
+      if (preMatch.status !== 'ok') {
+        return this._finish(
+          base,
+          DISPOSITION.MISSING_PROFITDIAL,
+          `MANUAL REVIEW REQUIRED — no usable ProfitDial in the uploaded file for this row (${preMatch.reason || preMatch.status}); not searched, not sent`,
+          contact
+        );
+      }
+
       // STEP 3 — Open one contact (locate it in the filtered Level 10 list).
       const found = await this.adapter.findContact({ contactId: contact.contactId, phone: (contact.phones || [])[0] });
-      if (!found.found) return this._finish(base, DISPOSITION.LEAD_NOT_FOUND, 'Contact not found in REI BlackBook', contact);
+      if (!found.found) return this._finish(base, DISPOSITION.LEAD_NOT_FOUND, found.reason || 'Contact not found in REI BlackBook', contact);
 
       // Gather facts from the opened contact (tags, phones, notes, chat history).
       const facts = await this.adapter.readContactFacts(found.contactId);
@@ -354,6 +391,8 @@ export class Engine extends EventEmitter {
       total: st.contactsMeta.count,
       sendsThisRun: this._sendsThisRun,
       maxSends: this.config.maxSends,
+      attemptsThisRun: this._attemptsThisRun,
+      pilotLimit: this.config.pilotLimit,
       results: st.results.filter(Boolean),
     };
   }

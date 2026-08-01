@@ -7,6 +7,74 @@
 import XLSX from 'xlsx';
 import { EXPORT_COLUMNS } from '../automation/constants.js';
 
+// -----------------------------------------------------------------------------
+// Header normalization + alias matching for the Level 10 sheet (leads +
+// ProfitDial in one file). Configured PD_COL_* names are tried first (exact,
+// then normalized); if the sheet's real header doesn't match, fall back to
+// a likely alias. Never confuses ProfitDial with Primary Phone/Mail/Purchase
+// Date -- those terms don't appear in the ProfitDial alias list.
+// -----------------------------------------------------------------------------
+export const LEVEL10_HEADER_ALIASES = Object.freeze({
+  name: ['owner', 'owner name', 'homeowner', 'homeowner name', 'seller name', 'first name'],
+  address: ['full address', 'property address', 'address', 'property'],
+  phone: ['phone', 'phone number', 'primary phone', 'mobile', 'mobile phone'],
+  profitDial: [
+    'assigned profitdial',
+    'profitdial',
+    'profit dial',
+    'primary profitdial',
+    'primary profit dial',
+    'assigned number',
+    'sender number',
+  ],
+});
+
+export function normalizeHeaderKey(raw) {
+  return String(raw ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Find the real header in `headers` for one logical field. Tries the
+ * configured name (exact, then normalized), then each alias (normalized).
+ * Returns '' if nothing matches -- callers treat that field as missing.
+ */
+export function resolveHeader(headers, configuredName, aliases = []) {
+  const candidates = (headers || []).map((h) => ({ raw: h, norm: normalizeHeaderKey(h) }));
+  if (configuredName) {
+    const exact = candidates.find((c) => c.raw === configuredName);
+    if (exact) return exact.raw;
+    const normConfigured = normalizeHeaderKey(configuredName);
+    const normMatch = candidates.find((c) => c.norm === normConfigured);
+    if (normMatch) return normMatch.raw;
+  }
+  for (const alias of aliases) {
+    const match = candidates.find((c) => c.norm === alias);
+    if (match) return match.raw;
+  }
+  return '';
+}
+
+/**
+ * Resolve the Level 10 sheet's real column names for name/address/phone/
+ * ProfitDial, given the actual headers present and the configured (.env)
+ * names. contactId is only used if the configured column is actually present
+ * (there is no alias list for it -- most Level 10 sheets have no ID column).
+ */
+export function resolveLevel10Columns(headers, envCols = {}) {
+  return {
+    name: resolveHeader(headers, envCols.name, LEVEL10_HEADER_ALIASES.name),
+    address: resolveHeader(headers, envCols.address, LEVEL10_HEADER_ALIASES.address),
+    phone: resolveHeader(headers, envCols.phone, LEVEL10_HEADER_ALIASES.phone),
+    profitDial: resolveHeader(headers, envCols.profitDial, LEVEL10_HEADER_ALIASES.profitDial),
+    contactId: envCols.contactId && (headers || []).includes(envCols.contactId) ? envCols.contactId : '',
+  };
+}
+
 /** Read a workbook from a file path. Returns the XLSX workbook object. */
 export function readWorkbook(filePath) {
   return XLSX.readFile(filePath, { cellDates: false });
@@ -18,11 +86,29 @@ export function sheetNames(wb) {
 }
 
 /**
- * Read a specific tab (by exact name, else first sheet) into rows of
- * header->string maps. Trailing fully-empty rows are dropped.
+ * Read a specific tab into rows of header->string maps. Trailing fully-empty
+ * rows are dropped.
+ *
+ * Sheet selection is NEVER silent when it matters: if the requested tab name
+ * isn't present, a single-sheet workbook is used as-is, but a multi-sheet
+ * workbook throws SHEET_AMBIGUOUS (with the real sheet names) rather than
+ * guessing at the first sheet, which could quietly load the wrong data.
  */
 export function readTab(wb, tabName) {
-  const name = tabName && wb.Sheets[tabName] ? tabName : wb.SheetNames[0];
+  const names = wb.SheetNames;
+  let name;
+  if (tabName && wb.Sheets[tabName]) {
+    name = tabName;
+  } else if (names.length === 1) {
+    name = names[0];
+  } else {
+    const err = new Error(
+      `Worksheet "${tabName || ''}" was not found. This file has multiple sheets (${names.join(', ')}) — specify which one to use.`
+    );
+    err.code = 'SHEET_AMBIGUOUS';
+    err.sheetNames = names;
+    throw err;
+  }
   const ws = wb.Sheets[name];
   const json = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
   const rows = json

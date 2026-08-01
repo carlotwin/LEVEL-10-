@@ -25,6 +25,7 @@ import { Adapter } from './adapter-interface.js';
 import { env } from '../config/env.js';
 import { dataDir } from '../data/paths.js';
 import { logger } from '../logger.js';
+import { deriveFirstName } from '../automation/sop.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -175,12 +176,18 @@ export class ReiBlackBookAdapter extends Adapter {
     }
   }
 
-  // Format a phone number the way REI's search box expects: dashed, no
-  // parens (e.g. "510-653-9161"). Returns '' if we don't have 10 digits.
-  _dashedPhone(raw) {
-    const d = String(raw || '').replace(/\D/g, '');
+  // Try the phone in every format REI's search box might expect. Returns a
+  // deduped, non-empty list; the raw-as-written value is always tried first.
+  _phoneFormats(raw) {
+    const asWritten = String(raw ?? '').trim();
+    const d = asWritten.replace(/\D/g, '');
     const ten = d.length > 10 ? d.slice(-10) : d;
-    return ten.length === 10 ? `${ten.slice(0, 3)}-${ten.slice(3, 6)}-${ten.slice(6)}` : '';
+    if (ten.length !== 10) return [asWritten].filter(Boolean);
+    const a = ten.slice(0, 3);
+    const b = ten.slice(3, 6);
+    const c = ten.slice(6);
+    const formats = [asWritten, ten, `${a}-${b}-${c}`, `(${a}) ${b}-${c}`, `${a}.${b}.${c}`];
+    return formats.filter((v, i, arr) => v && arr.indexOf(v) === i);
   }
 
   // Click the search box, clear it, type the term, press Enter. Confirmed
@@ -205,14 +212,17 @@ export class ReiBlackBookAdapter extends Adapter {
     return ok;
   }
 
-  // Confirmed flow: go to /contacts, search by PHONE first (dashed format —
-  // this is the CRM's primary lookup key per the real navigation spec), fall
-  // back to address/name if the phone doesn't match. Open the first
-  // /contacts/<id> result, with a direct-URL fallback if the click didn't
+  // Confirmed flow: go to /contacts, search by PHONE ONLY — try every format
+  // REI's search box might expect (as written, digits-only, dashed,
+  // parenthesized, dotted). Never fall back to name/address search: if the
+  // phone doesn't match in any format, this contact is "NO RESULT BY PHONE"
+  // and must go to manual review, not a name-based guess. Opens the first
+  // result by CLICKING it, with a direct-URL fallback if the click didn't
   // navigate.
   async findContact(query) {
     const { contacts } = this.sel;
-    const terms = [this._dashedPhone(query.phone), query.address, query.name].filter(Boolean);
+    const terms = this._phoneFormats(query.phone);
+    if (!terms.length) return { found: false, reason: 'No phone number to search REI BlackBook with' };
 
     await this.page.goto(this._contactsUrl(), { waitUntil: 'domcontentloaded' }).catch(() => {});
     await this.page.waitForTimeout(1200);
@@ -255,7 +265,7 @@ export class ReiBlackBookAdapter extends Adapter {
         return { found: true, contactId: id, matchedBy: term, reiUrl: this.page.url() };
       }
     }
-    return { found: false };
+    return { found: false, reason: 'NO RESULT BY PHONE — no REI BlackBook contact matched this phone number in any format' };
   }
 
   _contactTabUrl(tab) {
@@ -318,12 +328,18 @@ export class ReiBlackBookAdapter extends Adapter {
     const chatHistory = await this._readChatHistory();
     await this._gotoTab('about'); // leave the contact on About for optInPhone()
 
+    // Only the first-listed individual's first name goes in the SMS merge
+    // field (e.g. "Tony & Sukien Lam" -> "Tony"); the full name above is kept
+    // for verification/display/export. checkNameSafety (sop.js) blocks the
+    // contact to manual review if this can't be confidently derived.
+    const derivedFirst = deriveFirstName(name);
+
     return {
       found: true,
       contactId,
       reiUrl: this.page.url(), // direct link to this contact for the dashboard
       name,
-      firstName: name.split(/\s+/)[0] || '',
+      firstName: derivedFirst.ok ? derivedFirst.firstName : '',
       lastName: name.split(/\s+/).slice(1).join(' '),
       address,
       state: '',

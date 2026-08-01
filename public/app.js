@@ -158,15 +158,50 @@ function connectSSE() {
   });
   es.addEventListener('row', () => refreshKpi());
   es.addEventListener('done', () => refreshKpi());
+  es.addEventListener('pilot-cap', (e) => {
+    const { cap } = JSON.parse(e.data);
+    $('progressText').textContent = `FIRST ${cap} COMPLETE — READY FOR REVIEW. Check the results below, then click Resume to continue.`;
+  });
 }
 
 // ---- actions ----
-$('pdFile').onchange = async (e) => {
-  const fd = new FormData(); fd.append('file', e.target.files[0]);
+// Guards against a stale upload response landing after a NEWER upload has
+// already started: only the response matching the most recent upload is
+// ever applied. Also fully replaces the previous file's leads -- never
+// appends -- and disables Start while parsing.
+let uploadRunId = 0;
+async function uploadLevel10File(file, tab) {
+  const runId = ++uploadRunId;
+  $('btnStart').disabled = true;
+  $('loadInfo').textContent = `Reading ${file.name}…`;
+
+  const fd = new FormData();
+  fd.append('file', file);
+  if (tab) fd.append('tab', tab);
   const r = await api('/api/upload/profitdial', { method: 'POST', body: fd });
-  $('loadInfo').textContent = r.ok
-    ? `Loaded ${r.leadCount} leads from your file (${r.analysis.blankProfitDial} missing ProfitDial). Click Start.`
-    : 'Error: ' + r.error;
+
+  if (runId !== uploadRunId) return; // a newer upload has already started; discard
+
+  if (!r.ok) {
+    if (r.code === 'SHEET_AMBIGUOUS' && Array.isArray(r.sheetNames) && r.sheetNames.length) {
+      const chosen = prompt(
+        `This file has multiple sheets: ${r.sheetNames.join(', ')}.\nType the exact sheet name to use ("With Contacts" not found):`
+      );
+      if (chosen && chosen.trim()) {
+        await uploadLevel10File(file, chosen.trim());
+        return;
+      }
+    }
+    $('loadInfo').textContent = 'Error: ' + r.error;
+    setControls('idle', false); // 0 leads until a file loads successfully
+    return;
+  }
+  $('loadInfo').textContent = `Loaded ${r.leadCount} leads from ${file.name} (sheet "${r.tab}", ${r.analysis.blankProfitDial} missing ProfitDial). Click Start.`;
+  setControls('idle', r.leadCount > 0);
+}
+$('pdFile').onchange = (e) => {
+  const file = e.target.files[0];
+  if (file) uploadLevel10File(file);
 };
 // ---- printable daily report ----
 $('btnPrint').onclick = async () => {

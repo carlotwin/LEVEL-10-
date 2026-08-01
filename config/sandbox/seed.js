@@ -70,7 +70,11 @@ export const CONTACTS = [
     behavior: { delivery: 'delivered', reply: 'Yes, how much are you offering?' },
   }),
   // 2: contact not found
-  c('notfound-1', 'Contact not found', { found: false }),
+  c('notfound-1', 'Contact not found', {
+    found: false,
+    address: '102 Beta St, Oakland, CA 94601',
+    phones: ['510-555-0102'],
+  }),
   // 3: missing Level 10 tag
   c('notag-1', 'Missing Level 10 tag', { address: '103 Gamma St, Oakland, CA 94601', tags: ['Some Other Tag'] }),
   // 4: spreadsheet mismatch (valid contact, absent from ProfitDial sheet)
@@ -97,10 +101,13 @@ export const CONTACTS = [
   c('pdunavail-1', 'ProfitDial unavailable in REI', { address: '115 Xi St, Oakland, CA 94601', phones: ['510-555-0115'], behavior: { availableProfitDial: [POOL_A] } }),
   // 16: ProfitDial readback mismatch
   c('pdmismatch-1', 'ProfitDial readback mismatch', { address: '116 Omicron St, Oakland, CA 94601', phones: ['510-555-0116'], behavior: { readback: 'wrong' } }),
-  // 17: invalid merge field (missing property address for {{property_address}})
-  c('mergebad-1', 'Invalid merge field (missing property address)', { firstName: 'Chris', name: 'Chris Sample', address: '', phones: ['510-555-0117'] }),
-  // 17b: joint owners -> manual review (cannot pick one first name)
-  c('jointowner-1', 'Joint owners (manual review)', { firstName: 'Tony', name: 'Tony & Sukien Lam', address: '130 Joint St, Oakland, CA 94601', phones: ['510-555-0130'] }),
+  // 17: missing property address in the uploaded row -- caught by the GATE 0
+  // pre-flight check now (before ever searching REI), not the later merge-
+  // field gate. The blank-address INVALID_MERGE_FIELD path itself is still
+  // covered directly by a pure unit test in test/message.test.js.
+  c('mergebad-1', 'Missing property address (manual review, not searched)', { firstName: 'Chris', name: 'Chris Sample', address: '', phones: ['510-555-0117'] }),
+  // 17b: joint owners -> uses only the first-listed individual's first name
+  c('jointowner-1', 'Joint owners (uses first-listed first name: Tony)', { firstName: 'Tony', name: 'Tony & Sukien Lam', address: '130 Joint St, Oakland, CA 94601', phones: ['510-555-0130'] }),
   // 18: placeholder template blocked from live mode (valid in sandbox)
   c('placeholder-live-1', 'Placeholder template blocked in live mode', { address: '118 Rho St, Oakland, CA 94601', phones: ['510-555-0118'] }),
   // 19: already processed (pre-seeded into ledger for this batch)
@@ -128,6 +135,10 @@ function pdRow(address, phone, name, profitDial) {
 
 export const PROFITDIAL_ROWS = [
   pdRow('100 Alpha St, Oakland, CA 94601', '510-555-0101', 'Maria Sample', POOL_A),
+  // notfound-1: a valid, complete spreadsheet row -- the file itself is fine,
+  // REI just doesn't have this contact (tests the live-search "not found" path,
+  // not the pre-flight required-fields/ProfitDial gate).
+  pdRow('102 Beta St, Oakland, CA 94601', '510-555-0102', 'Pat Sample', POOL_A),
   pdRow('103 Gamma St, Oakland, CA 94601', '510-555-0103', 'Pat Sample', POOL_A),
   // mismatch-1 intentionally ABSENT
   // dup-1: two identical rows (duplicate contact), same PD
