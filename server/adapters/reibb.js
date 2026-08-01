@@ -140,6 +140,41 @@ export class ReiBlackBookAdapter extends Adapter {
     }
   }
 
+  // A selector value in config may be a single string OR an array of candidate
+  // selectors tried in order (first one that yields a result wins). Arrays are
+  // required for candidates that mix Playwright engines: a comma-joined string
+  // like "text=/From:/i, button:has-text('From')" is NOT a selector union in
+  // Playwright -- the text engine swallows the rest of the string -- so those
+  // never matched anything. Pure-CSS unions (commas inside one css selector)
+  // are still fine as a single string.
+  _cands(sel) {
+    return (Array.isArray(sel) ? sel : [sel]).filter(Boolean);
+  }
+
+  /** First candidate selector that is present; returns the selector or null. */
+  async _presentAny(sel, timeout = this.timeout) {
+    for (const s of this._cands(sel)) {
+      if (await this._present(s, timeout)) return s;
+    }
+    return null;
+  }
+
+  async _textAny(sel) {
+    for (const s of this._cands(sel)) {
+      const t = await this._text(s);
+      if (t) return t;
+    }
+    return '';
+  }
+
+  async _allTextAny(sel) {
+    for (const s of this._cands(sel)) {
+      const arr = await this._allText(s);
+      if (arr.length) return arr;
+    }
+    return [];
+  }
+
   // ---------------------------------------------------------------------------
   // Interface: locate / read
   // ---------------------------------------------------------------------------
@@ -230,7 +265,7 @@ export class ReiBlackBookAdapter extends Adapter {
     for (const term of terms) {
       if (!(await this._searchContacts(term))) continue;
 
-      if (contacts.noResultsMarker && (await this._present(contacts.noResultsMarker, 800))) continue;
+      if (await this._presentAny(contacts.noResultsMarker, 800)) continue;
 
       // Open the first contact result by CLICKING it, same as every tab
       // switch — this SPA does not reliably deep-link via a fresh page.goto()
@@ -280,8 +315,9 @@ export class ReiBlackBookAdapter extends Adapter {
   // the wrong person. Only the very first open of a contact (from the search
   // results) is a real navigation; every tab switch after that is a click.
   async _clickTab(tabSelector) {
-    if (!tabSelector || !(await this._present(tabSelector, 3000))) return false;
-    await this.page.click(tabSelector).catch(() => {});
+    const found = await this._presentAny(tabSelector, 3000);
+    if (!found) return false;
+    await this.page.click(found).catch(() => {});
     await this.page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
     await this.page.waitForTimeout(500);
     return true;
@@ -298,30 +334,30 @@ export class ReiBlackBookAdapter extends Adapter {
   // never read, silently disabling that safety check in live mode).
   async _readActivities() {
     await this._gotoTab('activities');
-    return this._allText(this.sel.contact.activitiesList);
+    return this._allTextAny(this.sel.contact.activitiesList);
   }
 
   // Notes tab: free-text manual notes may say not to contact this lead.
   async _readNotes() {
     await this._gotoTab('notes');
-    if (await this._present(this.sel.contact.notesEmptyMarker, 1500)) return '';
-    return (await this._allText(this.sel.contact.notesList)).join(' \n ');
+    if (await this._presentAny(this.sel.contact.notesEmptyMarker, 1500)) return '';
+    return (await this._allTextAny(this.sel.contact.notesList)).join(' \n ');
   }
 
   // Chat tab: prior thread may contain a STOP reply that never made it into
   // Activities.
   async _readChatHistory() {
     await this.openChatTab();
-    return this._allText(this.sel.chat.threadArea);
+    return this._allTextAny(this.sel.chat.threadArea);
   }
 
   async readContactFacts(contactId) {
     const c = this.sel.contact;
     // We land on About by default right after opening the contact.
-    const name = await this._text(c.nameField);
-    const address = await this._text(c.addressField);
-    const phones = await this._allText(c.phoneRows);
-    const tags = await this._allText(c.tagChips);
+    const name = await this._textAny(c.nameField);
+    const address = await this._textAny(c.addressField);
+    const phones = await this._allTextAny(c.phoneRows);
+    const tags = await this._allTextAny(c.tagChips);
 
     const activityLog = await this._readActivities();
     const notes = await this._readNotes();
@@ -368,21 +404,31 @@ export class ReiBlackBookAdapter extends Adapter {
   // Interface: actions
   // ---------------------------------------------------------------------------
   async optInPhone() {
-    // Real flow: click the phone icon next to the phone number on the About
-    // tab (left sidebar, Primary Details). Exactly two outcomes, and they are
-    // NOT interchangeable:
-    //   - "Phone Opted-Out" tooltip  -> permanent opt-out, hard stop.
-    //   - "Opt-In Contact" modal     -> not yet asked; confirm to opt in.
-    // There is no third state and no label until you click.
+    // Real flow: the phone icon next to the phone number on the About tab
+    // (left sidebar, Primary Details). Three states, all distinct:
+    //   - ALREADY opted in -> a green phone-with-check icon. Detected WITHOUT
+    //     clicking (read-only), so we never re-open a modal on a phone that is
+    //     already good to go.
+    //   - "Phone Opted-Out" tooltip -> permanent opt-out, hard stop.
+    //   - "Opt-In Contact" modal    -> not yet asked; confirm to opt in.
     const c = this.sel.contact;
 
-    if (!(await this._present(c.phoneOptInIcon, 4000))) {
+    // Already opted in? Only an EXPLICIT affirmative marker counts here
+    // (title/aria-label/text saying opted-in) -- deliberately not loose class
+    // matching, because a false positive would let a non-opted-in number reach
+    // the send step, which the SOP forbids.
+    if (await this._presentAny(c.phoneOptedInMarker, 1500)) {
+      return { status: 'opted_in', smsEnabled: true, reason: 'Phone was already opted in (no change made)' };
+    }
+
+    const icon = await this._presentAny(c.phoneOptInIcon, 4000);
+    if (!icon) {
       return { status: 'failed', smsEnabled: false, reason: 'Could not find the phone opt-in icon next to the phone number' };
     }
-    await this.page.click(c.phoneOptInIcon).catch(() => {});
+    await this.page.click(icon).catch(() => {});
     await this.page.waitForTimeout(600);
 
-    if (await this._present(c.phoneOptedOutTooltip, 2000)) {
+    if (await this._presentAny(c.phoneOptedOutTooltip, 2000)) {
       await this.page.keyboard.press('Escape').catch(() => {});
       return {
         status: 'opted_out',
@@ -391,15 +437,23 @@ export class ReiBlackBookAdapter extends Adapter {
       };
     }
 
-    if (await this._present(c.optInModalMarker, 2000)) {
-      if (await this._present(c.optInModalConfirmButton, 2000)) {
-        await this.page.click(c.optInModalConfirmButton).catch(() => {});
-        await this.page.waitForTimeout(800);
-        return { status: 'opted_in', smsEnabled: true };
+    if (await this._presentAny(c.optInModalMarker, 2000)) {
+      const confirm = await this._presentAny(c.optInModalConfirmButton, 2000);
+      if (confirm) {
+        await this.page.click(confirm).catch(() => {});
+        await this.page.waitForTimeout(1200);
+        // Never trust the click alone -- require a visible opted-in marker.
+        if (await this._presentAny(c.phoneOptedInMarker, 3000)) {
+          return { status: 'opted_in', smsEnabled: true };
+        }
+        return {
+          status: 'failed',
+          smsEnabled: false,
+          reason: 'Clicked opt-in but REI did not visibly confirm the phone is opted in',
+        };
       }
-      if (await this._present(c.optInModalCancelButton, 1000)) {
-        await this.page.click(c.optInModalCancelButton).catch(() => {});
-      }
+      const cancel = await this._presentAny(c.optInModalCancelButton, 1000);
+      if (cancel) await this.page.click(cancel).catch(() => {});
       return {
         status: 'failed',
         smsEnabled: false,
@@ -425,13 +479,32 @@ export class ReiBlackBookAdapter extends Adapter {
   // accumulating unique labels by trailing phone number, until either the
   // wanted number is found or two consecutive scrolls surface nothing new
   // (reached the end of the list). ~8-10 scroll/read cycles is normal.
+  // Open the compose surface. Confirmed from a real screenshot: sending is done
+  // through a "Send Text" MODAL (title "Send Text", a "From" dropdown, a "Write
+  // Message"/"Add Text Here..." box, and Cancel / "Send Text" buttons). The
+  // inline "Write Your Reply..." bar at the bottom of the Chat tab also exists.
+  // Prefer the modal when it is present/openable, since that is the flow the
+  // From-number picker belongs to.
+  async _openComposer() {
+    const { chat } = this.sel;
+    await this.openChatTab();
+    if (await this._presentAny(chat.sendTextModalMarker, 1200)) return 'modal';
+    const opener = await this._presentAny(chat.sendTextModalOpen, 2000);
+    if (opener) {
+      await this.page.click(opener).catch(() => {});
+      await this.page.waitForTimeout(800);
+      if (await this._presentAny(chat.sendTextModalMarker, 2500)) return 'modal';
+    }
+    return 'inline';
+  }
+
   async _scrollFromList(wantDigits = null, maxIterations = 20) {
     const { chat } = this.sel;
     const seen = new Map(); // digits10 -> label text
     let stableRounds = 0;
     let lastSize = -1;
     for (let i = 0; i < maxIterations; i++) {
-      const labels = await this._allText(chat.fromOptions);
+      const labels = await this._allTextAny(chat.fromOptions);
       for (const l of labels) {
         const d = this._digits10(l);
         if (d.length === 10) seen.set(d, l);
@@ -451,11 +524,12 @@ export class ReiBlackBookAdapter extends Adapter {
   }
 
   async getProfitDialNumbers() {
-    // Chat compose bar "From:" control -> long virtualized list of sender numbers.
+    // Compose surface "From" control -> long virtualized list of sender numbers.
     const { chat } = this.sel;
-    await this.openChatTab();
-    if (!(await this._present(chat.fromControl, 4000))) return [];
-    await this.page.click(chat.fromControl).catch(() => {});
+    await this._openComposer();
+    const from = await this._presentAny(chat.fromControl, 4000);
+    if (!from) return [];
+    await this.page.click(from).catch(() => {});
     await this.page.waitForTimeout(600);
     const seen = await this._scrollFromList();
     await this.page.keyboard.press('Escape').catch(() => {});
@@ -465,60 +539,74 @@ export class ReiBlackBookAdapter extends Adapter {
   async selectProfitDial(contactId, number) {
     // Match by TRAILING phone number, not the campaign label (e.g. "Postcard
     // Ugly Houses - East Bay (510) 916-3995" — the source spreadsheet only
-    // gives the number).
+    // gives the number). NOTE: the compose surface defaults to some other
+    // sender (e.g. "Realtor (510) 800-1607"), so this selection is mandatory
+    // and is verified by digit-for-digit readback in sop.checkProfitDial.
     const { chat } = this.sel;
-    await this.openChatTab();
-    if (!(await this._present(chat.fromControl, 4000))) {
-      return { selected: false, readback: '', reason: 'ProfitDial "From:" control not found' };
+    await this._openComposer();
+    const from = await this._presentAny(chat.fromControl, 4000);
+    if (!from) {
+      return { selected: false, readback: '', reason: 'ProfitDial "From" control not found on the compose surface' };
     }
     const want = this._digits10(number);
-    await this.page.click(chat.fromControl).catch(() => {});
+    await this.page.click(from).catch(() => {});
     await this.page.waitForTimeout(600);
 
     const seen = await this._scrollFromList(want);
     if (!seen.has(want)) {
       await this.page.keyboard.press('Escape').catch(() => {});
-      return { selected: false, readback: '', reason: 'Assigned ProfitDial number not found after scrolling the full From: list' };
+      return { selected: false, readback: '', reason: 'Assigned ProfitDial number not found after scrolling the full From list' };
     }
     const label = seen.get(want);
-    const opt = this.page.locator(chat.fromOptions).filter({ hasText: label }).first();
-    await opt.click().catch(() => {});
+    let clicked = false;
+    for (const s of this._cands(chat.fromOptions)) {
+      const opt = this.page.locator(s).filter({ hasText: label }).first();
+      if (await opt.click({ timeout: 2500 }).then(() => true).catch(() => false)) {
+        clicked = true;
+        break;
+      }
+    }
+    if (!clicked) {
+      return { selected: false, readback: '', reason: 'Found the assigned ProfitDial in the list but could not click it' };
+    }
     await this.page.waitForTimeout(500);
-    const readback = await this._text(chat.fromSelectedText);
+    const readback = await this._textAny(chat.fromSelectedText);
     return { selected: true, readback };
   }
 
   async enterMessage(contactId, text) {
     const { chat } = this.sel;
-    await this.openChatTab();
-    // The reply box is TinyMCE, usually inside an iframe. Type real keystrokes
-    // (pressSequentially) or the Send button won't enable.
-    if (chat.editorFrame) {
-      for (const fsel of chat.editorFrame.split(',').map((s) => s.trim()).filter(Boolean)) {
-        if (await this._present(fsel, 1500)) {
-          const body = this.page.frameLocator(fsel).locator('body');
-          await body.click();
+    await this._openComposer();
+    // The message box may be a plain textarea ("Add Text Here..." in the Send
+    // Text modal) or TinyMCE inside an iframe (the inline reply bar). Type real
+    // keystrokes (pressSequentially) either way, or the Send button won't enable.
+    for (const fsel of this._cands(chat.editorFrame)) {
+      if (await this._present(fsel, 1500)) {
+        const body = this.page.frameLocator(fsel).locator('body');
+        if (await body.click({ timeout: 2500 }).then(() => true).catch(() => false)) {
           await body.pressSequentially(text, { delay: 15 });
           return { entered: true };
         }
       }
     }
-    // Fallback: contenteditable / textarea directly on the page.
-    if (await this._present(chat.messageInput, 3000)) {
-      const el = this.page.locator(chat.messageInput).first();
-      await el.click();
-      await el.pressSequentially(text, { delay: 15 });
-      return { entered: true };
+    for (const s of this._cands(chat.messageInput)) {
+      if (!(await this._present(s, 2000))) continue;
+      const el = this.page.locator(s).first();
+      if (await el.click({ timeout: 2500 }).then(() => true).catch(() => false)) {
+        await el.pressSequentially(text, { delay: 15 });
+        return { entered: true };
+      }
     }
-    return { entered: false };
+    return { entered: false, reason: 'Could not find the message box on the compose surface' };
   }
 
   async sendMessage() {
     // Reaching here means env.liveSendGate already allowed it.
     const { chat } = this.sel;
-    if (!(await this._present(chat.sendButton, 3000))) return { sent: false, reason: 'Send button not found' };
-    await this.page.click(chat.sendButton);
-    await this.page.waitForTimeout(1000);
+    const btn = await this._presentAny(chat.sendButton, 3000);
+    if (!btn) return { sent: false, reason: 'Send button not found' };
+    await this.page.click(btn);
+    await this.page.waitForTimeout(1500);
     return { sent: true };
   }
 
@@ -526,7 +614,7 @@ export class ReiBlackBookAdapter extends Adapter {
     // This app confirms by re-reading the thread for the exact text just sent.
     const { chat } = this.sel;
     const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
-    const hay = norm((await this._allText(chat.threadArea)).join(' '));
+    const hay = norm((await this._allTextAny(chat.threadArea)).join(' '));
     if (!hay) return { verified: false, reason: 'Could not read the conversation thread' };
     if (text && !hay.includes(norm(text))) {
       return { verified: false, reason: 'Sent text not found in the thread after sending' };
@@ -535,11 +623,11 @@ export class ReiBlackBookAdapter extends Adapter {
   }
 
   async readDeliveryStatus() {
-    // Spec 2.5: status updates asynchronously. Red "Undelivered" = failed; a
-    // plain sent bubble = delivered. Poll a few times for the Undelivered flag.
+    // Status updates asynchronously. Red "Undelivered" = failed; a plain sent
+    // bubble = delivered. Poll a few times for the Undelivered flag.
     const { chat } = this.sel;
     for (let i = 0; i < 5; i++) {
-      if (chat.deliveryUndelivered && (await this._present(chat.deliveryUndelivered, 1500))) {
+      if (await this._presentAny(chat.deliveryUndelivered, 1500)) {
         return { delivery: 'failed' };
       }
       await this.page.waitForTimeout(2000);
@@ -548,6 +636,6 @@ export class ReiBlackBookAdapter extends Adapter {
   }
 
   async readReplies() {
-    return { text: await this._text(this.sel.chat.lastInboundMessage) };
+    return { text: await this._textAny(this.sel.chat.lastInboundMessage) };
   }
 }

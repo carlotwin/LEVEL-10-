@@ -14,7 +14,7 @@
     "resultRow": "table tbody tr, .list-row, [role='row']",
     "resultRowLink": "table tbody tr td a, .list-row a, [role='row'] a, a[href*='/contacts/']",
     "resultsCount": "text=/Showing\\s+\\d+-\\d+\\s+of\\s+\\d+/i",
-    "noResultsMarker": "text=/no result/i, text=/did not match/i, text=/no records/i",
+    "noResultsMarker": ["text=/no result/i", "text=/did not match/i", "text=/no records/i"],
     "tagFilterOpen": "button:has-text('Tags'), [aria-label*='tags' i]",
     "tagSearchInput": "input[placeholder*='tag' i]",
     "tagFilterOption": "[role='option']:has-text('%TAG%'), label:has-text('%TAG%'), li:has-text('%TAG%')",
@@ -25,18 +25,35 @@
 
   "contact": {
     "_status": "Contact detail = /contacts/<id>?activeTab=about|chat|activities|notes. Tabs: About | Chat | Activities | Notes | Tasks | Files | Workflows | Properties.",
-    "aboutTab": "[role='tab']:has-text('About'), text=About",
-    "activitiesTab": "[role='tab']:has-text('Activities'), text=Activities",
-    "notesTab": "[role='tab']:has-text('Notes'), text=Notes",
+    "_tabs_status": "Split into ARRAYS on purpose: a comma-joined string mixing engines (\"[role='tab']:has-text('About'), text=About\") is NOT a selector union in Playwright -- the trailing text engine swallows the rest -- so those silently never matched. Each candidate is now tried in order.",
+    "aboutTab": ["[role='tab']:has-text('About')", "text=/^About$/"],
+    "activitiesTab": ["[role='tab']:has-text('Activities')", "text=/^Activities$/"],
+    "notesTab": ["[role='tab']:has-text('Notes')", "text=/^Notes$/"],
     "_nameField_status": "Confirmed from a real screenshot: the 'Contacts (NN)' panel on the About tab has a labeled 'Name' field with the value in the next element. The previous generic h1/h2 guess was matching an unrelated page element (most likely a hidden 'Log Out' menu item) and reading that as the contact's name.",
     "nameField": "text=/^Name$/ >> xpath=following::*[1]",
     "addressField": "text=/Property Address|Mailing Address/i >> xpath=following::*[1]",
-    "phoneRows": "a[href^='tel:']",
+    "_phoneRows_status": "Confirmed from a real screenshot: the About tab's 'Contacts (NN)' panel has a labeled 'Phone (Mobile)' field with the number in the next element; the left sidebar shows the same number next to a phone glyph. The old a[href^='tel:'] guess matched nothing, which read back as NO phone and produced a false 'Invalid Phone' block. Kept as a later fallback. Deliberately narrow (mobile only) so ProfitDial numbers elsewhere on the page can't be mistaken for extra contact phones (which would trip the multiple-phones block).",
+    "phoneRows": [
+      "text=/^Phone \\(Mobile\\)$/ >> xpath=following::*[1]",
+      "a[href^='tel:']"
+    ],
     "tagChips": ".tag-item, .tag, [class*='tag-'], [class*='Tag'] .badge, .badge, .chip, .label, .pill, [class*='chip'], [class*='pill'], [class*='badge']",
     "engagementTextSent": "text=/Text Sent/i",
 
-    "_optIn_status": "NEEDS-DOM: icon-only control next to the phone number in the left sidebar (Primary Details). Click it -> either 'Phone Opted-Out' tooltip (permanent, hard stop) or an 'Opt-In Contact' modal (not yet asked). There is no separate label until clicked.",
-    "phoneOptInIcon": "a[href^='tel:'] ~ button, a[href^='tel:'] ~ svg, a[href^='tel:'] ~ i, a[href^='tel:'] + *, [class*='phone-icon' i], [class*='phoneIcon' i], [aria-label*='opt' i][aria-label*='phone' i]",
+    "_optIn_status": "Icon-only control next to the phone number in the left sidebar (Primary Details). THREE states, not two: a green phone-with-check icon means ALREADY opted in (detected read-only via phoneOptedInMarker, without clicking); otherwise clicking gives either a 'Phone Opted-Out' tooltip (permanent, hard stop) or an 'Opt-In Contact' modal (not yet asked). phoneOptedInMarker is intentionally restricted to explicit title/aria-label/text evidence -- NOT loose class matching -- because a false positive there would let a non-opted-in number reach the send step, which the SOP forbids.",
+    "phoneOptedInMarker": [
+      "[title*='Opted-In' i]",
+      "[title*='Opted In' i]",
+      "[aria-label*='Opted-In' i]",
+      "[aria-label*='Opted In' i]",
+      "text=/Phone Opted-?In/i"
+    ],
+    "phoneOptInIcon": [
+      "[aria-label*='opt' i][aria-label*='phone' i]",
+      "[class*='phone-icon' i]",
+      "[class*='phoneIcon' i]",
+      "a[href^='tel:'] ~ button, a[href^='tel:'] ~ svg, a[href^='tel:'] ~ i, a[href^='tel:'] + *"
+    ],
     "phoneOptedOutTooltip": "text=/Phone Opted-Out/i",
     "optInModalMarker": "text=/Opt-In Contact/i",
     "optInModalConfirmButton": "button:has-text('Opt-In'), button:has-text('Opt In'), button:has-text('Confirm'), button:has-text('Save'), button:has-text('Yes')",
@@ -51,15 +68,44 @@
   },
 
   "chat": {
-    "_status": "Chat tab. Compose bar has a 'From:' picker — a long VIRTUALIZED list (100+ entries, no search box; must scroll incrementally, expect ~8-10 scroll/read cycles). TinyMCE reply box (often in an iframe). 'Send Text' button. Delivery shows async: plain = sent/delivered, red 'Undelivered' = carrier failure.",
-    "chatTab": "[role='tab']:has-text('Chat'), text=Chat",
-    "fromControl": "text=/From:/i, button:has-text('From'), [class*='from-number'], [class*='fromNumber'], [class*='sender' i]",
+    "_status": "CONFIRMED from a real screenshot: sending happens in a 'Send Text' MODAL -- title 'Send Text', a labeled 'From' dropdown (shows e.g. 'Realtor (510) 800-1607' by DEFAULT, which is NOT the assigned ProfitDial, so selecting it is mandatory), a 'Write Message' area whose box reads 'Add Text Here...', a 'Personalize' dropdown, an optional 'Schedule' toggle, and 'Show Preview' / 'Cancel' / 'Send Text' buttons. The Chat tab ALSO has an inline 'Write Your Reply...' bar with its own 'From:' label at the bottom. The adapter prefers the modal and falls back to the inline bar. The From list is long/virtualized with no search box, so it is scrolled incrementally.",
+    "chatTab": ["[role='tab']:has-text('Chat')", "text=/^Chat$/"],
+    "sendTextModalMarker": ["[role='dialog']:has-text('Send Text')", "text=/^Send Text$/"],
+    "sendTextModalOpen": [
+      "button:has-text('Send Text')",
+      "[aria-label*='send text' i]",
+      "[title*='send text' i]"
+    ],
+    "fromControl": [
+      "[role='dialog'] :text('From') >> xpath=following::*[self::select or @role='combobox' or contains(@class,'select')][1]",
+      "[role='dialog'] select",
+      "[role='dialog'] [role='combobox']",
+      "text=/^From:?$/ >> xpath=following::*[self::select or @role='combobox' or contains(@class,'select')][1]",
+      "[class*='from-number'], [class*='fromNumber'], [class*='sender' i]"
+    ],
     "fromListContainer": "[role='listbox'], .dropdown-menu, [class*='menu' i], [class*='options' i], [class*='select-panel' i]",
-    "fromOptions": "[role='option'], li[class*='option'], .dropdown-item, [class*='menu'] li",
-    "fromSelectedText": "text=/From:/i",
-    "editorFrame": "iframe.tox-edit-area__iframe, iframe[id*='tiny' i], iframe[title*='Rich Text' i]",
-    "messageInput": "body#tinymce[contenteditable='true'], .mce-content-body[contenteditable='true'], [data-mce-placeholder*='Write Your Reply' i], [aria-placeholder*='Write Your Reply' i], textarea[placeholder*='Write Your Reply' i], [contenteditable='true'], div[role='textbox']",
-    "sendButton": "[aria-label='Send Text' i], [title='Send Text' i], button:has-text('Send Text'), [data-testid*='send' i], [aria-label*='send' i], button[title*='send' i], button:has(svg[class*='send' i]), button:has(svg[class*='paper' i])",
+    "fromOptions": ["[role='option']", "option", "li[class*='option'], .dropdown-item, [class*='menu'] li"],
+    "fromSelectedText": [
+      "[role='dialog'] :text('From') >> xpath=following::*[self::select or @role='combobox' or contains(@class,'select')][1]",
+      "text=/^From:/i"
+    ],
+    "editorFrame": ["iframe.tox-edit-area__iframe", "iframe[id*='tiny' i]", "iframe[title*='Rich Text' i]"],
+    "messageInput": [
+      "[role='dialog'] textarea",
+      "textarea[placeholder*='Add Text Here' i]",
+      "[placeholder*='Add Text Here' i]",
+      "body#tinymce[contenteditable='true'], .mce-content-body[contenteditable='true']",
+      "[data-mce-placeholder*='Write Your Reply' i], [aria-placeholder*='Write Your Reply' i], textarea[placeholder*='Write Your Reply' i]",
+      "[contenteditable='true'], div[role='textbox']"
+    ],
+    "sendButton": [
+      "[role='dialog'] button:has-text('Send Text')",
+      "button:has-text('Send Text')",
+      "[aria-label*='send text' i], [title*='send text' i]",
+      "[data-testid*='send' i], [aria-label*='send' i], button[title*='send' i]",
+      "button:has(svg[class*='send' i]), button:has(svg[class*='paper' i])"
+    ],
+    "cancelButton": ["[role='dialog'] button:has-text('Cancel')", "button:has-text('Cancel')"],
     "threadArea": ".timeline, .activity-feed, .activity-history, .chat-thread, [class*='conversation'], [class*='activity'], [class*='message']",
     "deliveryUndelivered": "text=/Undelivered/i",
     "lastInboundMessage": ".activity-item:first-child, [class*='activity']:first-child, .chat-message:last-child"
