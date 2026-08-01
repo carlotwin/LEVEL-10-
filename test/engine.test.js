@@ -8,11 +8,18 @@ import path from 'node:path';
 import fs from 'node:fs';
 
 // Pin EVERY env var this test's logic depends on -- never rely on whatever a
-// real .env file on disk happens to contain (e.g. a developer's local
-// REIBB_*/LEVEL10_TAG customizations must not change what this test expects).
+// real .env file OR an inherited shell environment happens to contain. In
+// particular: WATCH-REI.bat runs `set WATCH_ONLY=true` etc. directly in the
+// current cmd.exe window (no setlocal/subprocess isolation), so those values
+// persist for the rest of that terminal session and get inherited by any
+// later `npm test` run in the same window. Explicitly pinning every relevant
+// flag here means this test's outcome can never depend on terminal history.
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'l10-engine-test-'));
 process.env.LEVEL10_DATA_DIR = tmp;
 process.env.SANDBOX = 'true';
+process.env.WATCH_ONLY = 'false';
+process.env.ALLOW_LIVE_SEND = 'false';
+process.env.HEADLESS = 'true';
 process.env.PILOT_BATCH_LIMIT = '3';
 process.env.MAX_SENDS_PER_RUN = '0';
 process.env.CAMPAIGN_BATCH = 'engine-test-batch';
