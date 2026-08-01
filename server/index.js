@@ -165,12 +165,12 @@ app.post('/api/sandbox/load', (req, res) => {
 app.post('/api/upload/profitdial', upload.single('file'), (req, res) => {
   try {
     const requestedTab = req.body?.tab || req.query?.tab || env.PD_SHEET_TAB;
-    const { rows, tab } = readTabFromFile(req.file.path, requestedTab);
-    const cols = pdColsFromEnv(Object.keys(rows[0] || {}));
+    const { rows, tab, headers } = readTabFromFile(req.file.path, requestedTab);
+    const cols = pdColsFromEnv(headers);
     engine._uploadedPd = { rows, cols };
     const limit = parseInt(req.query.limit ?? req.body?.limit ?? '0', 10) || 0;
     const r = loadLevel10FromRows(rows, cols, { source: req.file.originalname, tab, limit });
-    res.json({ ok: true, tab, ...r });
+    res.json({ ok: true, tab, headers, columnsUsed: cols, ...r });
   } catch (e) {
     res.status(400).json({ ok: false, error: e.message, code: e.code, sheetNames: e.sheetNames });
   } finally {

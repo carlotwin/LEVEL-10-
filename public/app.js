@@ -196,7 +196,9 @@ async function uploadLevel10File(file, tab) {
     setControls('idle', false); // 0 leads until a file loads successfully
     return;
   }
-  $('loadInfo').textContent = `Loaded ${r.leadCount} leads from ${file.name} (sheet "${r.tab}", ${r.analysis.blankProfitDial} missing ProfitDial). Click Start.`;
+  const c = r.columnsUsed || {};
+  const colsTxt = `Name column: "${c.name || '(not found)'}" · Address: "${c.address || '(not found)'}" · Phone: "${c.phone || '(not found)'}" · ProfitDial: "${c.profitDial || '(not found)'}"`;
+  $('loadInfo').innerHTML = `Loaded ${r.leadCount} leads from ${file.name} (sheet "${r.tab}", ${r.analysis.blankProfitDial} missing ProfitDial). Click Start.<br><span class="muted small">${colsTxt}</span>`;
   setControls('idle', r.leadCount > 0);
 }
 $('pdFile').onchange = (e) => {

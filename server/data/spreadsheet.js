@@ -110,6 +110,10 @@ export function readTab(wb, tabName) {
     throw err;
   }
   const ws = wb.Sheets[name];
+  // The true header row, independent of any individual data row's sparsity
+  // (Object.keys() of a sampled data row can miss columns that happen to be
+  // blank in that specific row).
+  const headerRow = (XLSX.utils.sheet_to_json(ws, { header: 1, raw: false })[0] || []).map((h) => String(h ?? '').trim());
   const json = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
   const rows = json
     .map((r) => {
@@ -118,7 +122,7 @@ export function readTab(wb, tabName) {
       return out;
     })
     .filter((r) => Object.values(r).some((v) => v !== ''));
-  return { tab: name, rows };
+  return { tab: name, rows, headers: headerRow.filter(Boolean) };
 }
 
 /** Convenience: read a tab straight from a path. */
