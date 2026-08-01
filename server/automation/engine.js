@@ -218,15 +218,18 @@ export class Engine extends EventEmitter {
       // GATE 0b — The uploaded file must itself carry a single, usable
       // ProfitDial for this row before we spend a live search on it (the
       // later ProfitDial gate re-verifies this against REI once opened).
+      // Reports the REAL reason (duplicate rows, blank cell, conflicting
+      // assignments, ...), not a generic "missing" for every case.
       const preMatch = matchProfitDial(
         { contactId: contact.contactId, address: contact.address, phone: (contact.phones || [])[0] },
         this.pdIndex
       );
       if (preMatch.status !== 'ok') {
+        const preCheck = sop.profitDialMatchBlock(preMatch);
         return this._finish(
           base,
-          DISPOSITION.MISSING_PROFITDIAL,
-          `MANUAL REVIEW REQUIRED — no usable ProfitDial in the uploaded file for this row (${preMatch.reason || preMatch.status}); not searched, not sent`,
+          preCheck.disposition,
+          `MANUAL REVIEW REQUIRED (pre-flight, not searched) — ${preCheck.reason}`,
           contact
         );
       }

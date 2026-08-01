@@ -107,6 +107,21 @@ test('profitdial gate: fail-closed on every non-ok status', () => {
   assert.equal(sop.checkProfitDial({ ...base, match: { status: 'multiple_assignments' } }).disposition, DISPOSITION.MULTIPLE_PROFITDIAL);
 });
 
+test('profitDialMatchBlock reports the REAL reason per status, not a generic catch-all', () => {
+  // Regression test: the engine's pre-flight (file-only) check used to always
+  // report DISPOSITION.MISSING_PROFITDIAL regardless of the actual match
+  // status, which hid duplicate-row/multiple-assignment problems behind a
+  // misleading "No ProfitDial assigned" label.
+  const dup = sop.profitDialMatchBlock({ status: 'multiple_records', recordCount: 2 });
+  assert.equal(dup.disposition, DISPOSITION.NEEDS_REVIEW);
+  assert.match(dup.reason, /duplicate rows/i);
+
+  assert.equal(sop.profitDialMatchBlock({ status: 'missing' }).disposition, DISPOSITION.MISSING_PROFITDIAL);
+  assert.equal(sop.profitDialMatchBlock({ status: 'multiple_assignments' }).disposition, DISPOSITION.MULTIPLE_PROFITDIAL);
+  assert.equal(sop.profitDialMatchBlock({ status: 'not_found' }).disposition, DISPOSITION.NEEDS_REVIEW);
+  assert.equal(sop.profitDialMatchBlock({ status: 'conflict', reason: 'address mismatch' }).disposition, DISPOSITION.SHEET_CONFLICT);
+});
+
 test('profitdial gate: unavailable in REI', () => {
   const r = sop.checkProfitDial({
     match: { status: 'ok', profitDial: '(925) 515-2335' },

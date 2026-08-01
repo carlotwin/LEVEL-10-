@@ -208,6 +208,30 @@ export function checkOptIn(optInResult) {
   return block(DISPOSITION.OPT_IN_FAILED, optInResult.reason || 'Phone could not be opted in / not SMS-enabled');
 }
 
+// Maps a non-'ok' profitdial.js match status to its disposition + an accurate
+// reason. Shared by the live Gate 4 check below and the engine's pre-flight
+// (file-only) check, so both report the SAME real cause (duplicate rows,
+// blank cell, conflicting assignments, ...) instead of a generic catch-all.
+export function profitDialMatchBlock(match) {
+  switch (match.status) {
+    case 'not_found':
+      return block(DISPOSITION.NEEDS_REVIEW, match.reason || 'Contact not found in ProfitDial spreadsheet');
+    case 'multiple_records':
+      return block(
+        DISPOSITION.NEEDS_REVIEW,
+        match.reason || `Contact matches ${match.recordCount} spreadsheet rows — ambiguous (duplicate rows in the file)`
+      );
+    case 'missing':
+      return block(DISPOSITION.MISSING_PROFITDIAL, match.reason || 'Matched row has no assigned ProfitDial number');
+    case 'multiple_assignments':
+      return block(DISPOSITION.MULTIPLE_PROFITDIAL, match.reason || 'Contact has multiple distinct ProfitDial assignments');
+    case 'conflict':
+      return block(DISPOSITION.SHEET_CONFLICT, match.reason || 'Spreadsheet record conflicts with REI contact');
+    default:
+      return block(DISPOSITION.NEEDS_REVIEW, `Unknown ProfitDial match status: ${match.status}`);
+  }
+}
+
 // -----------------------------------------------------------------------------
 // GATE 4 — ProfitDial matching + availability + readback (requirement #5).
 // `match` comes from profitdial.js (pure). `availableInRei` and `readback`
@@ -215,23 +239,7 @@ export function checkOptIn(optInResult) {
 // -----------------------------------------------------------------------------
 export function checkProfitDial({ match, availableNumbers, selectedReadback }) {
   if (!match) return block(DISPOSITION.NEEDS_REVIEW, 'No ProfitDial match result');
-
-  switch (match.status) {
-    case 'ok':
-      break; // continue to availability/readback checks
-    case 'not_found':
-      return block(DISPOSITION.NEEDS_REVIEW, 'Contact not found in ProfitDial spreadsheet');
-    case 'multiple_records':
-      return block(DISPOSITION.NEEDS_REVIEW, `Contact matches ${match.recordCount} spreadsheet rows — ambiguous`);
-    case 'missing':
-      return block(DISPOSITION.MISSING_PROFITDIAL, 'Matched row has no assigned ProfitDial number');
-    case 'multiple_assignments':
-      return block(DISPOSITION.MULTIPLE_PROFITDIAL, 'Contact has multiple distinct ProfitDial assignments');
-    case 'conflict':
-      return block(DISPOSITION.SHEET_CONFLICT, match.reason || 'Spreadsheet record conflicts with REI contact');
-    default:
-      return block(DISPOSITION.NEEDS_REVIEW, `Unknown ProfitDial match status: ${match.status}`);
-  }
+  if (match.status !== 'ok') return profitDialMatchBlock(match);
 
   const assigned = digitsOnly(match.profitDial);
   if (assigned.length < 10) return block(DISPOSITION.MISSING_PROFITDIAL, 'Assigned ProfitDial is not a valid number');
