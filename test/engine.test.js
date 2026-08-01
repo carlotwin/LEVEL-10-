@@ -7,12 +7,19 @@ import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs';
 
+// Pin EVERY env var this test's logic depends on -- never rely on whatever a
+// real .env file on disk happens to contain (e.g. a developer's local
+// REIBB_*/LEVEL10_TAG customizations must not change what this test expects).
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'l10-engine-test-'));
 process.env.LEVEL10_DATA_DIR = tmp;
 process.env.SANDBOX = 'true';
 process.env.PILOT_BATCH_LIMIT = '3';
 process.env.MAX_SENDS_PER_RUN = '0';
 process.env.CAMPAIGN_BATCH = 'engine-test-batch';
+process.env.LEVEL10_TAG = 'Level 10 Properties';
+process.env.TEXT_STATES = 'CA,California';
+process.env.REQUIRE_OPTIN = 'true';
+process.env.REQUIRE_PROFITDIAL = 'true';
 
 const { Engine } = await import('../server/automation/engine.js');
 
@@ -57,7 +64,11 @@ test('pilot batch cap pauses after N ATTEMPTED leads (not just N sends), and Res
   assert.equal(first.status, 'paused');
   assert.equal(first.cursor, 3);
   assert.equal(first.attemptsThisRun, 3);
-  assert.equal(first.results.filter((r) => r.L10_Disposition === 'Simulated Sent').length, 3);
+  const sentCount = first.results.filter((r) => r.L10_Disposition === 'Simulated Sent').length;
+  if (sentCount !== 3) {
+    console.error('DEBUG non-sent results:', JSON.stringify(first.results.map((r) => ({ id: r.contactId, disposition: r.L10_Disposition, reason: r.L10_Reason })), null, 2));
+  }
+  assert.equal(sentCount, 3);
 
   await engine.resume();
   await engine._loop;
