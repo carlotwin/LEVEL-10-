@@ -72,6 +72,16 @@ test('opt-in gate', () => {
   assert.equal(sop.checkOptIn({ status: 'failed', smsEnabled: false }).disposition, DISPOSITION.OPT_IN_FAILED);
 });
 
+test('opt-in gate: REI "Phone Opted-Out" is a permanent stop, not a retryable failure', () => {
+  const r = sop.checkOptIn({ status: 'opted_out', smsEnabled: false, reason: 'Phone shows "Phone Opted-Out"' });
+  assert.equal(r.disposition, DISPOSITION.OPTED_OUT);
+});
+
+test('eligibility blocks: STOP found only in the REI Activities tab history', () => {
+  const r = sop.checkEligibility({ ...okFacts(), activityLog: ['Homeowner replied STOP via SMS'] }, config);
+  assert.equal(r.disposition, DISPOSITION.OPTED_OUT);
+});
+
 test('profitdial gate: fail-closed on every non-ok status', () => {
   const base = { availableNumbers: ['(510) 916-3995'], selectedReadback: '5109163995' };
   assert.equal(sop.checkProfitDial({ ...base, match: { status: 'not_found' } }).disposition, DISPOSITION.NEEDS_REVIEW);

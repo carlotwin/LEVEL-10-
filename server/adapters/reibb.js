@@ -175,24 +175,50 @@ export class ReiBlackBookAdapter extends Adapter {
     }
   }
 
-  // Confirmed flow (docs/REI-SMARTCONTACTS-PHONE-SEARCH.md from the Revival AI
-  // repo): go to /contacts, search by ADDRESS then digits-only PHONE, open the
-  // first /contacts/<id> result, with a direct-URL fallback if the click didn't
-  // navigate. Address is the primary key (many contacts are "Unknown").
+  // Format a phone number the way REI's search box expects: dashed, no
+  // parens (e.g. "510-653-9161"). Returns '' if we don't have 10 digits.
+  _dashedPhone(raw) {
+    const d = String(raw || '').replace(/\D/g, '');
+    const ten = d.length > 10 ? d.slice(-10) : d;
+    return ten.length === 10 ? `${ten.slice(0, 3)}-${ten.slice(3, 6)}-${ten.slice(6)}` : '';
+  }
+
+  // Click the search box, clear it, type the term, press Enter. Confirmed
+  // real-world bug: on a freshly loaded Contacts page the first attempt often
+  // doesn't register (box stays empty). Callers retry once on failure.
+  async _searchContactsOnce(term) {
+    const { contacts } = this.sel;
+    if (!(await this._present(contacts.searchInput, 4000))) return false;
+    const input = this.page.locator(contacts.searchInput).first();
+    await input.click().catch(() => {});
+    await input.fill('').catch(() => {});
+    await input.fill(String(term)).catch(() => {});
+    await input.press('Enter').catch(() => {});
+    await this.page.waitForTimeout(1300);
+    const val = await input.inputValue().catch(() => '');
+    return val === String(term);
+  }
+
+  async _searchContacts(term) {
+    let ok = await this._searchContactsOnce(term);
+    if (!ok) ok = await this._searchContactsOnce(term); // known-bug retry
+    return ok;
+  }
+
+  // Confirmed flow: go to /contacts, search by PHONE first (dashed format —
+  // this is the CRM's primary lookup key per the real navigation spec), fall
+  // back to address/name if the phone doesn't match. Open the first
+  // /contacts/<id> result, with a direct-URL fallback if the click didn't
+  // navigate.
   async findContact(query) {
     const { contacts } = this.sel;
-    const digits = (s) => String(s || '').replace(/\D/g, '');
-    const terms = [query.address, digits(query.phone), query.name].filter(Boolean);
+    const terms = [this._dashedPhone(query.phone), query.address, query.name].filter(Boolean);
 
     await this.page.goto(this._contactsUrl(), { waitUntil: 'domcontentloaded' }).catch(() => {});
     await this.page.waitForTimeout(1200);
 
     for (const term of terms) {
-      if (!(await this._present(contacts.searchInput, 4000))) continue;
-      await this.page.fill(contacts.searchInput, '');
-      await this.page.fill(contacts.searchInput, String(term));
-      await this.page.keyboard.press('Enter');
-      await this.page.waitForTimeout(1400);
+      if (!(await this._searchContacts(term))) continue;
 
       if (contacts.noResultsMarker && (await this._present(contacts.noResultsMarker, 800))) continue;
 
@@ -206,6 +232,7 @@ export class ReiBlackBookAdapter extends Adapter {
           )
           .catch(() => '');
         if (href) await this.page.goto(href, { waitUntil: 'domcontentloaded' }).catch(() => {});
+        else await this.page.locator(contacts.resultRowLink).first().click().catch(() => {});
       }
       await this.page.waitForTimeout(1000);
 
@@ -224,9 +251,48 @@ export class ReiBlackBookAdapter extends Adapter {
     return base ? `${base}?activeTab=${tab}` : null;
   }
 
+  async _gotoTab(tab) {
+    const url = this._contactTabUrl(tab);
+    if (!url) return;
+    await this.page.goto(url, { waitUntil: 'domcontentloaded' }).catch(() => {});
+    await this.page.waitForTimeout(600);
+  }
+
+  // Activities tab: STOP/DNC/complaint history must be checked before doing
+  // anything else with this contact (per the real SOP — this was previously
+  // never read, silently disabling that safety check in live mode).
+  async _readActivities() {
+    await this._gotoTab('activities');
+    return this._allText(this.sel.contact.activitiesList);
+  }
+
+  // Notes tab: free-text manual notes may say not to contact this lead.
+  async _readNotes() {
+    await this._gotoTab('notes');
+    if (await this._present(this.sel.contact.notesEmptyMarker, 1500)) return '';
+    return (await this._allText(this.sel.contact.notesList)).join(' \n ');
+  }
+
+  // Chat tab: prior thread may contain a STOP reply that never made it into
+  // Activities.
+  async _readChatHistory() {
+    await this.openChatTab();
+    return this._allText(this.sel.chat.threadArea);
+  }
+
   async readContactFacts(contactId) {
     const c = this.sel.contact;
+    // We land on About by default right after opening the contact.
     const name = await this._text(c.nameField);
+    const address = await this._text(c.addressField);
+    const phones = await this._allText(c.phoneRows);
+    const tags = await this._allText(c.tagChips);
+
+    const activityLog = await this._readActivities();
+    const notes = await this._readNotes();
+    const chatHistory = await this._readChatHistory();
+    await this._gotoTab('about'); // leave the contact on About for optInPhone()
+
     return {
       found: true,
       contactId,
@@ -234,13 +300,14 @@ export class ReiBlackBookAdapter extends Adapter {
       name,
       firstName: name.split(/\s+/)[0] || '',
       lastName: name.split(/\s+/).slice(1).join(' '),
-      address: await this._text(c.addressField),
+      address,
       state: '',
-      phones: await this._allText(c.phoneRows),
-      tags: await this._allText(c.tagChips),
-      notes: '',
-      chatHistory: [],
-      optOut: false, // derived by sop.js from the tag chips
+      phones,
+      tags,
+      notes,
+      chatHistory,
+      activityLog,
+      optOut: false, // derived by sop.js from tags/notes/chatHistory/activityLog
     };
   }
 
@@ -269,47 +336,50 @@ export class ReiBlackBookAdapter extends Adapter {
   // Interface: actions
   // ---------------------------------------------------------------------------
   async optInPhone() {
-    // Spec 2.3: pencil -> "Edit Contact Information" modal -> Primary Phone
-    // Opt-In combobox (needs a retry to open) -> "Opt - In" -> Update Info; then
-    // re-open the modal and confirm it now reads "Opt - In".
-    const { editContact } = this.sel;
-    const digits = (s) => String(s || '').replace(/\D/g, '');
+    // Real flow: click the phone icon next to the phone number on the About
+    // tab (left sidebar, Primary Details). Exactly two outcomes, and they are
+    // NOT interchangeable:
+    //   - "Phone Opted-Out" tooltip  -> permanent opt-out, hard stop.
+    //   - "Opt-In Contact" modal     -> not yet asked; confirm to opt in.
+    // There is no third state and no label until you click.
+    const c = this.sel.contact;
 
-    const openModal = async () => {
-      if (!(await this._present(editContact.editButton, 4000))) return false;
-      await this.page.click(editContact.editButton);
-      return this._present(editContact.modalMarker, 4000);
-    };
-    const setOptIn = async () => {
-      // Custom combobox: try up to 3 times to expand, then pick "Opt - In".
-      for (let i = 0; i < 3; i++) {
-        if (await this._present(editContact.optInControl, 2000)) {
-          await this.page.click(editContact.optInControl).catch(() => {});
-          await this.page.waitForTimeout(300);
-          if (await this._present(editContact.optInOption, 1500)) {
-            await this.page.click(editContact.optInOption).catch(() => {});
-            return true;
-          }
-        }
-      }
-      return false;
-    };
-
-    if (!(await openModal())) return { status: 'failed', smsEnabled: false, reason: 'Could not open Edit Contact modal' };
-    const picked = await setOptIn();
-    if (!picked) return { status: 'failed', smsEnabled: false, reason: 'Could not set the Opt-In dropdown to "Opt - In"' };
-    if (await this._present(editContact.updateButton, 3000)) await this.page.click(editContact.updateButton);
-    await this.page.waitForTimeout(1000);
-
-    // Re-open and confirm (never trust the click alone — spec rule).
-    if (!(await openModal())) return { status: 'opted_in', smsEnabled: true, reason: 'Set opt-in but could not reopen to confirm' };
-    const confirmed = await this._present(editContact.optInSelectedText, 2500);
-    if (editContact.cancelButton && (await this._present(editContact.cancelButton, 1000))) {
-      await this.page.click(editContact.cancelButton).catch(() => {});
+    if (!(await this._present(c.phoneOptInIcon, 4000))) {
+      return { status: 'failed', smsEnabled: false, reason: 'Could not find the phone opt-in icon next to the phone number' };
     }
-    return confirmed
-      ? { status: 'opted_in', smsEnabled: true }
-      : { status: 'failed', smsEnabled: false, reason: 'Opt-In not confirmed after saving' };
+    await this.page.click(c.phoneOptInIcon).catch(() => {});
+    await this.page.waitForTimeout(600);
+
+    if (await this._present(c.phoneOptedOutTooltip, 2000)) {
+      await this.page.keyboard.press('Escape').catch(() => {});
+      return {
+        status: 'opted_out',
+        smsEnabled: false,
+        reason: 'Phone shows "Phone Opted-Out" in REI BlackBook — permanent, never send',
+      };
+    }
+
+    if (await this._present(c.optInModalMarker, 2000)) {
+      if (await this._present(c.optInModalConfirmButton, 2000)) {
+        await this.page.click(c.optInModalConfirmButton).catch(() => {});
+        await this.page.waitForTimeout(800);
+        return { status: 'opted_in', smsEnabled: true };
+      }
+      if (await this._present(c.optInModalCancelButton, 1000)) {
+        await this.page.click(c.optInModalCancelButton).catch(() => {});
+      }
+      return {
+        status: 'failed',
+        smsEnabled: false,
+        reason: 'Opt-In Contact modal opened but its confirm button was not found — verify contact.optInModalConfirmButton in config/reibb.selectors.json',
+      };
+    }
+
+    return {
+      status: 'failed',
+      smsEnabled: false,
+      reason: 'Clicking the phone icon showed neither the "Opted-Out" tooltip nor the "Opt-In Contact" modal — verify contact.phoneOptInIcon in config/reibb.selectors.json',
+    };
   }
 
   // Extract 10-digit numbers from a list of ProfitDial option labels.
@@ -318,22 +388,52 @@ export class ReiBlackBookAdapter extends Adapter {
     return d.length >= 10 ? d.slice(-10) : d;
   }
 
+  // The "From:" list is VIRTUALIZED (100+ entries, no search box) — only the
+  // options currently scrolled into view exist in the DOM. Scroll in chunks,
+  // accumulating unique labels by trailing phone number, until either the
+  // wanted number is found or two consecutive scrolls surface nothing new
+  // (reached the end of the list). ~8-10 scroll/read cycles is normal.
+  async _scrollFromList(wantDigits = null, maxIterations = 20) {
+    const { chat } = this.sel;
+    const seen = new Map(); // digits10 -> label text
+    let stableRounds = 0;
+    let lastSize = -1;
+    for (let i = 0; i < maxIterations; i++) {
+      const labels = await this._allText(chat.fromOptions);
+      for (const l of labels) {
+        const d = this._digits10(l);
+        if (d.length === 10) seen.set(d, l);
+      }
+      if (wantDigits && seen.has(wantDigits)) break;
+      if (seen.size === lastSize) {
+        stableRounds += 1;
+        if (stableRounds >= 2) break;
+      } else {
+        stableRounds = 0;
+      }
+      lastSize = seen.size;
+      await this.page.mouse.wheel(0, 300).catch(() => {});
+      await this.page.waitForTimeout(250);
+    }
+    return seen;
+  }
+
   async getProfitDialNumbers() {
-    // Spec 2.4: Chat compose bar "From:" control -> long list of sender numbers.
+    // Chat compose bar "From:" control -> long virtualized list of sender numbers.
     const { chat } = this.sel;
     await this.openChatTab();
     if (!(await this._present(chat.fromControl, 4000))) return [];
     await this.page.click(chat.fromControl).catch(() => {});
     await this.page.waitForTimeout(600);
-    const labels = await this._allText(chat.fromOptions);
+    const seen = await this._scrollFromList();
     await this.page.keyboard.press('Escape').catch(() => {});
-    // Each label ends with the phone number; return the labels (matching is by
-    // trailing digits in selectProfitDial / sop).
-    return labels.filter((l) => this._digits10(l).length === 10);
+    return [...seen.values()];
   }
 
   async selectProfitDial(contactId, number) {
-    // Spec 2.4: match by TRAILING phone number, not the campaign label.
+    // Match by TRAILING phone number, not the campaign label (e.g. "Postcard
+    // Ugly Houses - East Bay (510) 916-3995" — the source spreadsheet only
+    // gives the number).
     const { chat } = this.sel;
     await this.openChatTab();
     if (!(await this._present(chat.fromControl, 4000))) {
@@ -343,18 +443,17 @@ export class ReiBlackBookAdapter extends Adapter {
     await this.page.click(chat.fromControl).catch(() => {});
     await this.page.waitForTimeout(600);
 
-    const opts = await this.page.locator(chat.fromOptions).all().catch(() => []);
-    for (const o of opts) {
-      const label = (await o.innerText().catch(() => '')) || '';
-      if (this._digits10(label) === want) {
-        await o.click().catch(() => {});
-        await this.page.waitForTimeout(500);
-        const readback = await this._text(chat.fromSelectedText);
-        return { selected: true, readback };
-      }
+    const seen = await this._scrollFromList(want);
+    if (!seen.has(want)) {
+      await this.page.keyboard.press('Escape').catch(() => {});
+      return { selected: false, readback: '', reason: 'Assigned ProfitDial number not found after scrolling the full From: list' };
     }
-    await this.page.keyboard.press('Escape').catch(() => {});
-    return { selected: false, readback: '', reason: 'Assigned ProfitDial number not found in the From: list' };
+    const label = seen.get(want);
+    const opt = this.page.locator(chat.fromOptions).filter({ hasText: label }).first();
+    await opt.click().catch(() => {});
+    await this.page.waitForTimeout(500);
+    const readback = await this._text(chat.fromSelectedText);
+    return { selected: true, readback };
   }
 
   async enterMessage(contactId, text) {

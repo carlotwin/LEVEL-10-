@@ -1,5 +1,5 @@
 {
-  "_README": "REI BlackBook selectors, mapped from the Level 10 pilot handoff spec (manual 5-contact run on my.reiblackbook.com). Text/label selectors preferred; icon-only controls are marked NEEDS-DOM and are tolerant guesses (capture exact via `npx playwright codegen`). The engine fails closed: any required element not found -> Needs Review, never a send. Confirmed by spec: REI HAS an Opt-In control (pencil -> Edit Contact modal) and a ProfitDial 'From:' picker (~130 numbers; match by trailing number).",
+  "_README": "REI BlackBook selectors, mapped from the confirmed real navigation spec (documented manual walkthrough of my.reiblackbook.com, 2026-08). Text/label selectors preferred; icon-only controls are marked NEEDS-DOM and are tolerant guesses (capture exact via `npx playwright codegen` against the real account). The engine fails closed: any required element not found -> Needs Review, never a send. Confirmed by spec: search is by PHONE (dashed format, e.g. 510-653-9161) with a known first-attempt-often-fails bug (redo click+type+Enter once); the phone-opt-in control is an icon next to the phone number on the About tab (click -> either an 'Opted-Out' tooltip [hard stop] or an 'Opt-In Contact' modal); the ProfitDial 'From:' list is a long VIRTUALIZED dropdown with no search box (must scroll incrementally); Activities + Notes tabs must be checked for STOP/DNC history before doing anything else.",
 
   "login": {
     "emailInput": "input[type='email'], input[name='email'], input[name='username'], input[type='text']",
@@ -13,41 +13,53 @@
     "searchInput": "input[placeholder*='Search By Name' i], input[placeholder*='Search' i], input[type='search'], input[aria-label*='search' i], .search input",
     "resultRow": "table tbody tr, .list-row, [role='row']",
     "resultRowLink": "table tbody tr td a, .list-row a, [role='row'] a, a[href*='/contacts/']",
-    "noResultsMarker": "text=/no result/i, text=/did not match/i, text=/no records/i"
+    "resultsCount": "text=/Showing\\s+\\d+-\\d+\\s+of\\s+\\d+/i",
+    "noResultsMarker": "text=/no result/i, text=/did not match/i, text=/no records/i",
+    "tagFilterOpen": "button:has-text('Tags'), [aria-label*='tags' i]",
+    "tagSearchInput": "input[placeholder*='tag' i]",
+    "tagFilterOption": "[role='option']:has-text('%TAG%'), label:has-text('%TAG%'), li:has-text('%TAG%')",
+    "tagApply": "button:has-text('Apply')",
+    "optInStatusFilterOpen": "button:has-text('Opt-In Status'), [aria-label*='opt-in status' i]",
+    "optInStatusPhoneOption": "text=/Phone no\\.? Opt-In/i"
   },
 
   "contact": {
-    "_status": "contact detail = /contacts/<id>?activeTab=about|chat|activities|notes",
+    "_status": "Contact detail = /contacts/<id>?activeTab=about|chat|activities|notes. Tabs: About | Chat | Activities | Notes | Tasks | Files | Workflows | Properties.",
+    "aboutTab": "[role='tab']:has-text('About'), text=About",
+    "activitiesTab": "[role='tab']:has-text('Activities'), text=Activities",
+    "notesTab": "[role='tab']:has-text('Notes'), text=Notes",
     "nameField": "h1, h2, [class*='contact-name'], [class*='ContactName']",
-    "addressField": "text=Property Address >> xpath=following::*[1]",
+    "addressField": "text=/Property Address|Mailing Address/i >> xpath=following::*[1]",
     "phoneRows": "a[href^='tel:']",
     "tagChips": ".tag-item, .tag, [class*='tag-'], [class*='Tag'] .badge, .badge, .chip, .label, .pill, [class*='chip'], [class*='pill'], [class*='badge']",
-    "engagementTextSent": "text=/Text Sent/i"
-  },
+    "engagementTextSent": "text=/Text Sent/i",
 
-  "editContact": {
-    "_status": "Opt-In modal (spec 2.3). Pencil/edit icon near the avatar is NEEDS-DOM; the modal + Update Info button are text-confirmable. Opt-In dropdown is a custom combobox (needs a retry to open); options render as 'Opt - In' / 'Opt - Out'.",
-    "editButton": "[aria-label*='edit' i], [title*='edit' i], button:has(svg[class*='pencil' i]), button:has(i[class*='pencil' i]), button:has(i[class*='edit' i]), .contact-header button:has(svg)",
-    "modalMarker": "text=Edit Contact Information",
-    "optInControl": "text=Primary Phone >> xpath=following::*[@role='combobox' or contains(@class,'select')][1]",
-    "optInOption": "[role='option']:has-text('Opt - In'), [role='option']:has-text('Opt-In'), li:has-text('Opt - In'), text=Opt - In",
-    "optInSelectedText": "text=/Opt\\s*-?\\s*In/i",
-    "updateButton": "button:has-text('Update Info'), button:has-text('Update')",
-    "cancelButton": "button:has-text('Cancel')"
+    "_optIn_status": "NEEDS-DOM: icon-only control next to the phone number in the left sidebar (Primary Details). Click it -> either 'Phone Opted-Out' tooltip (permanent, hard stop) or an 'Opt-In Contact' modal (not yet asked). There is no separate label until clicked.",
+    "phoneOptInIcon": "a[href^='tel:'] ~ button, a[href^='tel:'] ~ svg, a[href^='tel:'] ~ i, a[href^='tel:'] + *, [class*='phone-icon' i], [class*='phoneIcon' i], [aria-label*='opt' i][aria-label*='phone' i]",
+    "phoneOptedOutTooltip": "text=/Phone Opted-Out/i",
+    "optInModalMarker": "text=/Opt-In Contact/i",
+    "optInModalConfirmButton": "button:has-text('Opt-In'), button:has-text('Opt In'), button:has-text('Confirm'), button:has-text('Save'), button:has-text('Yes')",
+    "optInModalCancelButton": "button:has-text('Cancel'), button:has-text('Close')",
+
+    "_activities_status": "Red flags: STOP / DNC / complaint / opt-out / angry-response notes anywhere in the history. A clean record shows only tag-change entries.",
+    "activitiesList": ".activity-history li, .activity-list li, [class*='activity' i] li, [class*='Activity' i] li, [class*='timeline' i] li, [class*='activity' i] .item, [class*='activity' i] tr",
+
+    "_notes_status": "Empty state is a specific sentence; anything else must be read for do-not-contact instructions.",
+    "notesEmptyMarker": "text=/No notes record found/i",
+    "notesList": ".notes-list li, [class*='note' i] li, [class*='Note' i] .item, [class*='note' i] tr"
   },
 
   "chat": {
-    "_status": "Chat tab (spec 2.4-2.5). Compose bar has a 'From:' picker (~130 numbers, match by trailing number), TinyMCE reply box (often in an iframe), orange paper-plane Send. Delivery shows async: plain = sent, red 'Undelivered' = failed.",
+    "_status": "Chat tab. Compose bar has a 'From:' picker — a long VIRTUALIZED list (100+ entries, no search box; must scroll incrementally, expect ~8-10 scroll/read cycles). TinyMCE reply box (often in an iframe). 'Send Text' button. Delivery shows async: plain = sent/delivered, red 'Undelivered' = carrier failure.",
     "chatTab": "[role='tab']:has-text('Chat'), text=Chat",
-    "numberDropdown": "text=All Numbers, [class*='number'] [class*='dropdown']",
-    "fromControl": "text=/From:/i, button:has-text('From'), [class*='from-number'], [class*='fromNumber']",
+    "fromControl": "text=/From:/i, button:has-text('From'), [class*='from-number'], [class*='fromNumber'], [class*='sender' i]",
+    "fromListContainer": "[role='listbox'], .dropdown-menu, [class*='menu' i], [class*='options' i], [class*='select-panel' i]",
     "fromOptions": "[role='option'], li[class*='option'], .dropdown-item, [class*='menu'] li",
     "fromSelectedText": "text=/From:/i",
     "editorFrame": "iframe.tox-edit-area__iframe, iframe[id*='tiny' i], iframe[title*='Rich Text' i]",
     "messageInput": "body#tinymce[contenteditable='true'], .mce-content-body[contenteditable='true'], [data-mce-placeholder*='Write Your Reply' i], [aria-placeholder*='Write Your Reply' i], textarea[placeholder*='Write Your Reply' i], [contenteditable='true'], div[role='textbox']",
     "sendButton": "[aria-label='Send Text' i], [title='Send Text' i], button:has-text('Send Text'), [data-testid*='send' i], [aria-label*='send' i], button[title*='send' i], button:has(svg[class*='send' i]), button:has(svg[class*='paper' i])",
     "threadArea": ".timeline, .activity-feed, .activity-history, .chat-thread, [class*='conversation'], [class*='activity'], [class*='message']",
-    "sentMetaMarker": "text=/PD #:/i, text=/Sent to:/i",
     "deliveryUndelivered": "text=/Undelivered/i",
     "lastInboundMessage": ".activity-item:first-child, [class*='activity']:first-child, .chat-message:last-child"
   }

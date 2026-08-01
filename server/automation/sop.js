@@ -56,11 +56,14 @@ export function checkEligibility(facts, config) {
     return block(DISPOSITION.OUT_OF_STATE, `Property state ${st} is outside allowed states`);
   }
 
-  // 3d. Suppression scan over tags + notes + chat history (fail-closed).
+  // 3d. Suppression scan over tags + notes + chat history + Activities tab
+  // (fail-closed). Activities is where REI records manual STOP/DNC/complaint
+  // history that may not show up anywhere else.
   const haystack = [
     ...(facts.tags || []),
     facts.notes || '',
     ...(facts.chatHistory || []),
+    ...(facts.activityLog || []),
   ]
     .join(' \n ')
     .toLowerCase();
@@ -122,6 +125,12 @@ export function checkAlreadyProcessed(ledgerHit) {
 export function checkOptIn(optInResult) {
   if (!optInResult) return block(DISPOSITION.OPT_IN_FAILED, 'No opt-in result returned');
   if (optInResult.status === 'opted_in' && optInResult.smsEnabled === true) return pass();
+  // REI BlackBook's "Phone Opted-Out" state is a permanent, explicit opt-out —
+  // distinct from "not yet asked" — and must never be treated as a retryable
+  // failure.
+  if (optInResult.status === 'opted_out') {
+    return block(DISPOSITION.OPTED_OUT, optInResult.reason || 'Phone previously opted out in REI BlackBook (permanent)');
+  }
   return block(DISPOSITION.OPT_IN_FAILED, optInResult.reason || 'Phone could not be opted in / not SMS-enabled');
 }
 
