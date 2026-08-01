@@ -25,7 +25,7 @@ import { Adapter } from './adapter-interface.js';
 import { env } from '../config/env.js';
 import { dataDir } from '../data/paths.js';
 import { logger } from '../logger.js';
-import { deriveFirstName } from '../automation/sop.js';
+import { deriveFirstName, extractUsPhones } from '../automation/sop.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -351,12 +351,31 @@ export class ReiBlackBookAdapter extends Adapter {
     return this._allTextAny(this.sel.chat.threadArea);
   }
 
+  // Read the contact's phone number(s). Label-anchored selectors first; if none
+  // of them resolve (REI's labels/DOM vary between accounts and versions),
+  // fall back to scanning a scoped region of the page for phone-shaped text.
+  // Without this fallback an unmatched selector silently yields NO phone, which
+  // the SOP then reports as "Invalid Phone" on a contact that plainly shows one.
+  async _readPhones() {
+    const c = this.sel.contact;
+    const direct = await this._allTextAny(c.phoneRows);
+    if (direct.length) return direct;
+    for (const s of this._cands(c.phoneScanScope)) {
+      const found = extractUsPhones((await this._allText(s)).join(' \n '));
+      if (found.length) {
+        logger.warn('phone_read_via_scan', { scope: s, count: found.length });
+        return found;
+      }
+    }
+    return [];
+  }
+
   async readContactFacts(contactId) {
     const c = this.sel.contact;
     // We land on About by default right after opening the contact.
     const name = await this._textAny(c.nameField);
     const address = await this._textAny(c.addressField);
-    const phones = await this._allTextAny(c.phoneRows);
+    const phones = await this._readPhones();
     const tags = await this._allTextAny(c.tagChips);
 
     const activityLog = await this._readActivities();

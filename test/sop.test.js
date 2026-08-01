@@ -166,3 +166,21 @@ test('reply classification', () => {
   assert.equal(sop.classifyReply('STOP'), REPLY_CLASS.OPT_OUT);
   assert.equal(sop.classifyReply(''), REPLY_CLASS.NONE);
 });
+
+test('extractUsPhones pulls phones from page text, deduped by last 10 digits', () => {
+  // Same number in two surface forms -> one entry.
+  assert.deepEqual(sop.extractUsPhones('Phone (Mobile) (510) 557-4965 / 510-557-4965'), ['(510) 557-4965']);
+  assert.deepEqual(sop.extractUsPhones('Mobile 510.557.4965'), ['510.557.4965']);
+  assert.deepEqual(sop.extractUsPhones('+1 510-557-4965'), ['+1 510-557-4965']);
+  assert.deepEqual(sop.extractUsPhones('5105574965'), ['5105574965']);
+  // Two genuinely different numbers stay separate (SOP then blocks as multiple).
+  assert.equal(sop.extractUsPhones('(510) 557-4965 and (925) 937-2580').length, 2);
+});
+
+test('extractUsPhones does not turn ZIPs, dates or ids into phone numbers', () => {
+  assert.deepEqual(sop.extractUsPhones('Fremont CA 94536'), []);
+  assert.deepEqual(sop.extractUsPhones('Purchase Date 1996-03-22'), []);
+  assert.deepEqual(sop.extractUsPhones('ZIP 94538 Est Value 1200000'), []);
+  assert.deepEqual(sop.extractUsPhones(''), []);
+  assert.deepEqual(sop.extractUsPhones(null), []);
+});

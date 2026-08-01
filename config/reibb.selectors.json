@@ -35,7 +35,13 @@
     "_phoneRows_status": "Confirmed from a real screenshot: the About tab's 'Contacts (NN)' panel has a labeled 'Phone (Mobile)' field with the number in the next element; the left sidebar shows the same number next to a phone glyph. The old a[href^='tel:'] guess matched nothing, which read back as NO phone and produced a false 'Invalid Phone' block. Kept as a later fallback. Deliberately narrow (mobile only) so ProfitDial numbers elsewhere on the page can't be mistaken for extra contact phones (which would trip the multiple-phones block).",
     "phoneRows": [
       "text=/^Phone \\(Mobile\\)$/ >> xpath=following::*[1]",
+      "text=/Phone \\(Mobile\\)/i >> xpath=following::*[1]",
       "a[href^='tel:']"
+    ],
+    "_phoneScanScope_status": "Last-resort fallback: if no label-anchored selector above resolves, scan these regions' text for phone-shaped strings (see extractUsPhones in sop.js). Scoped to the contact's own detail regions so ProfitDial sender numbers (which live in the Chat compose modal) can never be scraped in as extra contact phones.",
+    "phoneScanScope": [
+      "text=/^Primary Details$/ >> xpath=ancestor::*[2]",
+      "text=/Phone \\(Mobile\\)/i >> xpath=ancestor::*[3]"
     ],
     "tagChips": ".tag-item, .tag, [class*='tag-'], [class*='Tag'] .badge, .badge, .chip, .label, .pill, [class*='chip'], [class*='pill'], [class*='badge']",
     "engagementTextSent": "text=/Text Sent/i",

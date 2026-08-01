@@ -34,6 +34,25 @@ export function digitsOnly(raw) {
   return String(raw ?? '').replace(/\D/g, '');
 }
 
+// Pull US 10-digit phone numbers out of a blob of page text, deduped by their
+// last 10 digits so "(510) 557-4965" and "510-557-4965" count as one number.
+// Used as a fallback when a label-anchored selector can't find the phone field
+// (REI's DOM/labels vary), so a readable phone on screen is never reported as
+// "no usable phone number". Deliberately requires real separators or a full
+// 10/11-digit run, to avoid turning ZIPs or ids into phone numbers.
+const US_PHONE_RE = /(?:\+?1[\s.-]?)?(?:\(\d{3}\)\s?|\d{3}[\s.-])\d{3}[\s.-]?\d{4}|\b1?\d{10}\b/g;
+
+export function extractUsPhones(text) {
+  const out = new Map(); // last10 -> first surface form seen
+  for (const m of String(text ?? '').match(US_PHONE_RE) || []) {
+    const d = digitsOnly(m);
+    const ten = d.length === 11 && d.startsWith('1') ? d.slice(1) : d;
+    if (ten.length !== 10) continue;
+    if (!out.has(ten)) out.set(ten, m.trim());
+  }
+  return [...out.values()];
+}
+
 // -----------------------------------------------------------------------------
 // GATE 1 — Located + tagged + in-state + contactable (no side effects needed).
 // Runs before ANY action (we never opt-in a do-not-contact lead).
