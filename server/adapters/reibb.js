@@ -234,6 +234,7 @@ export class ReiBlackBookAdapter extends Adapter {
         if (href) await this.page.goto(href, { waitUntil: 'domcontentloaded' }).catch(() => {});
         else await this.page.locator(contacts.resultRowLink).first().click().catch(() => {});
       }
+      await this.page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
       await this.page.waitForTimeout(1000);
 
       if (/\/contacts\/\d+/i.test(this.page.url())) {
@@ -251,11 +252,24 @@ export class ReiBlackBookAdapter extends Adapter {
     return base ? `${base}?activeTab=${tab}` : null;
   }
 
+  // This is a client-rendered app: switching tabs must be a CLICK on the tab
+  // element, never a fresh page.goto(). A hard reload forces the whole SPA to
+  // re-bootstrap and can race or fall back to a stale/default contact instead
+  // of the one we just opened — this was the cause of facts being read for
+  // the wrong person. Only the very first open of a contact (from the search
+  // results) is a real navigation; every tab switch after that is a click.
+  async _clickTab(tabSelector) {
+    if (!tabSelector || !(await this._present(tabSelector, 3000))) return false;
+    await this.page.click(tabSelector).catch(() => {});
+    await this.page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+    await this.page.waitForTimeout(500);
+    return true;
+  }
+
   async _gotoTab(tab) {
-    const url = this._contactTabUrl(tab);
-    if (!url) return;
-    await this.page.goto(url, { waitUntil: 'domcontentloaded' }).catch(() => {});
-    await this.page.waitForTimeout(600);
+    const c = this.sel.contact;
+    const tabSelector = { about: c.aboutTab, activities: c.activitiesTab, notes: c.notesTab, chat: this.sel.chat.chatTab }[tab];
+    await this._clickTab(tabSelector);
   }
 
   // Activities tab: STOP/DNC/complaint history must be checked before doing
@@ -316,19 +330,10 @@ export class ReiBlackBookAdapter extends Adapter {
     return { smsEnabled: false, optedIn: false };
   }
 
-  // Open the contact's Chat tab. Prefer direct URL (?activeTab=chat) which is
-  // more reliable than clicking; fall back to the Chat tab element.
+  // Open the contact's Chat tab by clicking it (see _clickTab — never reload
+  // the page to switch tabs on this SPA).
   async openChatTab() {
-    const url = this._contactTabUrl('chat');
-    if (url && !/[?&]activeTab=chat/i.test(this.page.url())) {
-      await this.page.goto(url, { waitUntil: 'domcontentloaded' }).catch(() => {});
-      await this.page.waitForTimeout(800);
-    }
-    const { chat } = this.sel;
-    if (chat.chatTab && (await this._present(chat.chatTab, 3000))) {
-      await this.page.click(chat.chatTab).catch(() => {});
-      await this.page.waitForTimeout(400);
-    }
+    await this._clickTab(this.sel.chat.chatTab);
     return true;
   }
 
