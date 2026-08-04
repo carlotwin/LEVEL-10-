@@ -24,6 +24,7 @@ import {
 } from './data/spreadsheet.js';
 import { fetchGoogleSheetRows, parseSheetUrl } from './data/googleSheet.js';
 import { runReadOnlyVerification, summarize, resolveRowLimit } from './automation/verifyLive.js';
+import { classifySheetStatus, summarizeSheetStatus } from './automation/sheetStatus.js';
 import { logger } from './logger.js';
 import { uploadsDir } from './data/paths.js';
 import { CONTACTS, PROFITDIAL_ROWS, PD_COLS } from '../config/sandbox/seed.js';
@@ -168,6 +169,7 @@ function autoLoadWorkbook() {
     autoLoad.loaded = r.leadCount;
     autoLoad.totalRows = r.totalRows;
     autoLoad.source = found.file;
+    autoLoad.sheetStatus = r.sheetStatus;
     logger.info('auto_loaded_sheet', { file: found.file, leads: r.leadCount, of: r.totalRows });
   } catch (e) {
     autoLoad.error = e.message;
@@ -208,6 +210,11 @@ function buildLeadsFromRows(rows, cols) {
         [name, ownerCol, [firstCol, lastCol].filter(Boolean).join(' ')].map((v) => String(v || '').trim()).filter(Boolean)
       ),
     ];
+    // The sheet's own Send Status / Notes are the only record of texts already
+    // sent by hand or by an earlier run — the ledger cannot know about those.
+    // Rows already worked travel with a preset decision so the engine skips
+    // them without ever opening the contact in REI.
+    const sheetHistory = classifySheetStatus(r['Send Status'], r['Notes']);
     return {
       contactId: String(contactId),
       syntheticId: !realId,
@@ -218,6 +225,8 @@ function buildLeadsFromRows(rows, cols) {
       phones: [val(r, cols.phone)].filter(Boolean),
       reiUrl: '',
       scenario: '',
+      sheetSendStatus: String(r['Send Status'] ?? '').trim(),
+      sheetHistory,
     };
   });
 }
@@ -243,6 +252,8 @@ function loadLevel10FromRows(rows, cols, { source, tab, limit, detected = null }
   });
   const withPhone = leads.filter((l) => l.phones.length > 0).length;
   const withAddress = leads.filter((l) => l.address).length;
+  // How much of this file is still open work, per the sheet's own Send Status.
+  const sheetStatus = summarizeSheetStatus(originals);
   return {
     state,
     analysis,
@@ -250,6 +261,7 @@ function loadLevel10FromRows(rows, cols, { source, tab, limit, detected = null }
     totalRows: rows.length,
     withPhone,
     withAddress,
+    sheetStatus,
     detected,
     sample: leads.slice(0, 3).map((l) => ({ name: l.name, address: l.address, phone: l.phones[0] || '' })),
   };
@@ -511,6 +523,13 @@ app.listen(PORT, () => {
   autoLoadWorkbook();
   if (autoLoad.loaded) {
     console.log(`  Sheet: auto-loaded ${autoLoad.loaded} of ${autoLoad.totalRows} leads from ${autoLoad.source}`);
+    const ss = autoLoad.sheetStatus;
+    if (ss) {
+      console.log(`  Open work: ${ss.open} rows have a blank Send Status; ${ss.skipped} are already handled:`);
+      for (const [d, n] of Object.entries(ss.byDisposition).sort((a, b) => b[1] - a[1])) {
+        console.log(`      ${String(n).padStart(4)}  ${d}`);
+      }
+    }
   } else if (autoLoad.error) {
     console.log(`  Sheet: ${autoLoad.error}`);
   }

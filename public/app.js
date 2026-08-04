@@ -196,7 +196,9 @@ function connectSSE() {
     const { summary } = JSON.parse(e.data);
     $('btnVerify').disabled = false;
     $('verifyInfo').textContent =
-      `Done. Phone search returned rows for ${summary.searchReturnedRows}/${summary.rows}. ` +
+      `Done. ${summary.checked} of ${summary.rows} rows checked in REI` +
+      (summary.sheetSkipped ? ` (${summary.sheetSkipped} skipped — the sheet already accounts for them).` : '.') +
+      `\nPhone search returned rows for ${summary.searchReturnedRows}/${summary.checked}. ` +
       `Contacts verified: ${summary.contactsVerified}. Needs a human: ${summary.manualReview + summary.nameMismatches}. ` +
       `Opt-in control found on ${summary.optInControlFound}/${summary.opened} opened. ` +
       `Sender list found on ${summary.senderSelectorFound}/${summary.opened}, assigned number listed for ${summary.assignedSenderPresent}. ` +
@@ -329,6 +331,14 @@ function renderVerifyRow(f) {
   tb.innerHTML = rows
     .map((r) => {
       const cands = (r.candidates || []).map((c) => `${esc(c.name || '(no name)')} · ${esc(c.phone || '')}`).join('<br>');
+      if (r.sheetSkipped) {
+        return `<tr class="muted">
+        <td>${r.row}</td>
+        <td>${esc(r.sheet?.name || '')}<div class="small muted">${esc(r.sheet?.phone || '')}</div></td>
+        <td class="small" colspan="6"><span class="tag skip">${esc(r.decision || 'skipped')}</span>
+          <div class="small muted">${esc(r.decisionReason || '')}</div></td>
+      </tr>`;
+      }
       const verified = r.reverify === 'CONTACT_VERIFIED';
       const check = r.reverify
         ? `<span class="tag ${verified ? 'ok' : 'warn'}">${esc(r.reverify)}</span>`

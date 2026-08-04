@@ -297,7 +297,11 @@ export function findLevel10Workbook(explicit, { home = os.homedir(), cwd = proce
     }
     for (const n of names) {
       if (!/\.(xlsx|xlsm|xls|csv)$/i.test(n)) continue;
-      if (!/level\s*-?\s*10|with\s*contacts/i.test(n)) continue;
+      // Separators vary by how the file arrived: "Level 10 Properties.xlsx" from
+      // a browser download, "Level_10_Properties_with_Contacts.xlsx" from a
+      // Sheets export. \s does NOT match "_", so the underscore form — the one
+      // the export actually produces — was invisible to this scan.
+      if (!/level[\s_.-]*-?[\s_.-]*10|with[\s_.-]*contacts/i.test(n)) continue;
       const full = path.join(dir, n);
       if (!hits.includes(full)) hits.push(full);
     }
@@ -310,5 +314,15 @@ export function findLevel10Workbook(explicit, { home = os.homedir(), cwd = proce
       return 0;
     }
   });
+
+  // The app's own data/ folder outranks a stray copy in Downloads. Putting the
+  // file there is a deliberate act; a months-old download sitting in Downloads
+  // is not, and quietly texting off the stale list is the worst outcome here.
+  // Only ONE file in data/ counts as unambiguous — two still means "you pick".
+  const dataDir = path.join(cwd, 'data');
+  const inData = hits.filter((h) => path.dirname(h) === dataDir);
+  if (inData.length === 1) return { file: inData[0], hits, given, chosenFrom: 'data' };
+  if (inData.length > 1) return { file: null, hits: inData, given, chosenFrom: 'data' };
+
   return { file: hits.length === 1 ? hits[0] : null, hits, given };
 }

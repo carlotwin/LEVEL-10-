@@ -200,6 +200,21 @@ export class Engine extends EventEmitter {
       // Integrity re-check before doing anything irreversible.
       assertMessageIntegrity();
 
+      // STEP 0 — SHEET HISTORY. The spreadsheet's own Send Status column records
+      // texts already sent by hand or by earlier runs; the ledger cannot know
+      // about those. A row already worked (sent, undelivered, landline, opted
+      // out, do-not-send) stops here — before any REI page is opened — so it
+      // costs nothing and can never be re-texted. Fail closed: an unrecognised
+      // status is a manual review, not permission to send. Set at load time by
+      // classifySheetStatus(); absent for sandbox/seed contacts, which proceed.
+      const hist = contact.sheetHistory;
+      if (hist && hist.process === false) {
+        base.L10_Status = hist.status || L10_STATUS.MANUAL_REVIEW_REQUIRED;
+        base.L10_Disposition = hist.disposition || DISPOSITION.NEEDS_REVIEW;
+        base.L10_Reason = hist.reason || `Spreadsheet Send Status: "${contact.sheetSendStatus || ''}"`;
+        return base;
+      }
+
       // STEP 3 — Search Smart Contacts BY PHONE. The phone is the primary and only
       // search key; name is never searched (it can surface a different homeowner).
       // The adapter gathers every candidate row and decides nothing.

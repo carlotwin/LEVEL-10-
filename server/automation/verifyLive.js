@@ -16,6 +16,7 @@
 // what makes it safe to expose as a dashboard button.
 // =============================================================================
 import { chooseContact, verifyOpenedContact } from './contactMatch.js';
+import { classifySheetStatus } from './sheetStatus.js';
 import { L10_STATUS } from './constants.js';
 import { normalizePhone } from './sop.js';
 
@@ -67,6 +68,32 @@ export async function runReadOnlyVerification({ adapter, rows, cols, limit = 5, 
 
   for (const [i, row] of slice.entries()) {
     const sheet = sheetRowFor(row, cols);
+    // Rows the sheet already accounts for (texted, undelivered, landline, opted
+    // out) are reported from the sheet and never opened in REI — checking them
+    // would cost minutes each and tell us nothing we do not already know.
+    const hist = classifySheetStatus(row?.['Send Status'], row?.['Notes']);
+    if (!hist.process) {
+      const f = {
+        row: i + 1,
+        sheet,
+        normalizedPhone: normalizePhone(sheet.phone),
+        searchStatus: 'skipped',
+        searchTrail: '',
+        candidates: [],
+        decision: hist.disposition,
+        decisionReason: hist.reason,
+        opened: false,
+        detail: null,
+        reverify: '',
+        optInAvailable: false,
+        senderSelectorAvailable: false,
+        sheetSkipped: true,
+        writeActions: 0,
+      };
+      findings.push(f);
+      onRow?.(f);
+      continue;
+    }
     const f = {
       row: i + 1,
       sheet,
@@ -167,6 +194,11 @@ export function summarize(findings) {
   const is = (f, s) => f.searchStatus === s;
   return {
     rows: findings.length,
+    // Rows the sheet already accounts for — reported, never opened in REI.
+    sheetSkipped: findings.filter((f) => f.sheetSkipped).length,
+    // The rows this run actually had to check, which is what the counts below
+    // are about. Mixing skipped rows into them made the pass rate look worse.
+    checked: findings.filter((f) => !f.sheetSkipped).length,
     searchReturnedRows: findings.filter((f) => (f.candidates || []).length > 0).length,
     noContactFound: findings.filter((f) => is(f, L10_STATUS.NO_CONTACT_FOUND_BY_PHONE)).length,
     multipleContacts: findings.filter((f) => is(f, L10_STATUS.MULTIPLE_CONTACTS_FOUND)).length,
