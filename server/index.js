@@ -23,7 +23,7 @@ import {
   findLevel10Workbook,
 } from './data/spreadsheet.js';
 import { fetchGoogleSheetRows, parseSheetUrl } from './data/googleSheet.js';
-import { runReadOnlyVerification, summarize } from './automation/verifyLive.js';
+import { runReadOnlyVerification, summarize, resolveRowLimit } from './automation/verifyLive.js';
 import { logger } from './logger.js';
 import { uploadsDir } from './data/paths.js';
 import { CONTACTS, PROFITDIAL_ROWS, PD_COLS } from '../config/sandbox/seed.js';
@@ -153,7 +153,12 @@ function autoLoadWorkbook() {
       return;
     }
     engine._uploadedPd = { rows: wb.rows, cols: wb.cols };
-    const limit = parseInt(process.env.L10_AUTO_LIMIT ?? '20', 10) || 20;
+    // Load EVERY row by default. The worklist is not the send list — nothing is
+    // sent without passing all nine gates — so truncating here only hid leads the
+    // operator asked to process. `L10_AUTO_LIMIT=50` caps it; 0 or unset = all.
+    const rawLimit = process.env.L10_AUTO_LIMIT;
+    const parsed = rawLimit == null || rawLimit === '' ? 0 : parseInt(rawLimit, 10);
+    const limit = Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
     const r = loadLevel10FromRows(wb.rows, wb.cols, {
       source: found.file,
       tab: wb.tab,
@@ -405,7 +410,9 @@ app.post('/api/verify', async (req, res) => {
     });
   }
 
-  const limit = Math.min(Math.max(parseInt(req.body?.limit ?? '5', 10) || 5, 1), 50);
+  // 0 (or blank) = check EVERY loaded row. There is no upper cap: this run only
+  // READS, and capping it silently reported "all clear" on a subset.
+  const limit = resolveRowLimit(req.body?.limit, src.rows.length);
   verifyRunning = true;
   res.json({ ok: true, started: true, rows: limit });
 

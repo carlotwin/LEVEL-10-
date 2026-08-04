@@ -37,6 +37,21 @@ export function sheetRowFor(row, cols) {
 }
 
 /**
+ * How many rows a read-only run should cover.
+ *
+ * 0, blank or nonsense means EVERY loaded row: this run only reads, and a silent
+ * cap made a partial pass look like a clean bill of health for the whole file.
+ * A positive number is honoured but never exceeds the rows actually loaded, so
+ * the count reported back is always the real one.
+ */
+export function resolveRowLimit(asked, available) {
+  const n = typeof asked === 'number' ? asked : parseInt(asked, 10);
+  const total = Math.max(0, Number(available) || 0);
+  if (!Number.isFinite(n) || n <= 0) return total;
+  return Math.min(Math.floor(n), total);
+}
+
+/**
  * @param {object} p
  * @param {object} p.adapter       a live REI adapter (already init'd)
  * @param {Array<object>} p.rows   spreadsheet rows

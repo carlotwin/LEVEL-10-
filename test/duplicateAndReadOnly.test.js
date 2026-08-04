@@ -314,3 +314,26 @@ test('a delivered send does consume a template', async () => {
   });
   assert.deepEqual(ledger.templateUsage(batch), { LEVEL10_TEMPLATE_4: 1 });
 });
+
+// ---------------------------------------------------------------------------
+// The read-only run must cover the WHOLE file when the operator asks for all.
+// A silent cap here reported "all clear" for rows it never looked at.
+// ---------------------------------------------------------------------------
+test('resolveRowLimit: 0, blank or junk means every loaded row', async () => {
+  const { resolveRowLimit } = await import('../server/automation/verifyLive.js');
+  assert.equal(resolveRowLimit(0, 412), 412);
+  assert.equal(resolveRowLimit('', 412), 412);
+  assert.equal(resolveRowLimit(undefined, 412), 412);
+  assert.equal(resolveRowLimit(null, 412), 412);
+  assert.equal(resolveRowLimit('all', 412), 412);
+  assert.equal(resolveRowLimit(-5, 412), 412);
+});
+
+test('resolveRowLimit: a positive ask is honoured but never exceeds the rows loaded', async () => {
+  const { resolveRowLimit } = await import('../server/automation/verifyLive.js');
+  assert.equal(resolveRowLimit(5, 412), 5);
+  assert.equal(resolveRowLimit('5', 412), 5);
+  assert.equal(resolveRowLimit(2.7, 412), 2);
+  assert.equal(resolveRowLimit(1000, 412), 412, 'cannot claim to check more rows than exist');
+  assert.equal(resolveRowLimit(10, 0), 0, 'no rows loaded means nothing to check');
+});

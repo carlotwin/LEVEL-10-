@@ -361,7 +361,8 @@ function renderVerifyRow(f) {
 }
 
 $('btnVerify').onclick = async () => {
-  const limit = parseInt($('verifyLimit').value || '5', 10) || 5;
+  // Blank or 0 means "every loaded lead" — the server bounds it to the row count.
+  const limit = Math.max(parseInt($('verifyLimit').value || '0', 10) || 0, 0);
   verifyRows.clear();
   $('verifyTable').querySelector('tbody').innerHTML = '';
   $('verifyInfo').textContent = 'Opening REI… a browser window will appear. Nothing will be sent or changed.';
