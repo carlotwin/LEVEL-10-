@@ -102,7 +102,18 @@ export function checkEligibility(facts, config) {
     return block(DISPOSITION.INVALID_PHONE, 'Phone number is not a valid 10-digit US number');
   }
   if (uniquePhones.length > 1) {
-    return block(DISPOSITION.MULTIPLE_PHONES, `Contact has ${uniquePhones.length} distinct phone numbers — needs review`);
+    // A REI contact commonly carries both Phone (Mobile) and Phone (Home). That is
+    // normal, not ambiguity: the spreadsheet already names WHICH number this
+    // campaign is for, and it was verified on the record. Blocking here stopped
+    // most leads for no reason. Only an extra number with NO match is ambiguous.
+    const expected = normalizePhone(config.expectedPhone);
+    if (!expected || !uniquePhones.includes(expected)) {
+      return block(
+        DISPOSITION.MULTIPLE_PHONES,
+        `Contact has ${uniquePhones.length} distinct phone numbers and none matches the spreadsheet number` +
+          `${expected ? ` (${expected})` : ''} — needs review`
+      );
+    }
   }
 
   return pass();

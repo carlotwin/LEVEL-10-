@@ -182,3 +182,29 @@ test('turning the tag check off does not weaken any other gate', () => {
   const outState = sop.checkEligibility({ ...okFacts(), tags: [], state: 'TX' }, cfg);
   assert.equal(outState.disposition, DISPOSITION.OUT_OF_STATE);
 });
+
+// --- two numbers on one record is normal, not ambiguous --------------------
+test('a contact with mobile AND home numbers passes when one matches the sheet', () => {
+  const facts = { ...okFacts(), phones: ['510-206-1922', '510-555-0000'] };
+  // Without the sheet's number the second phone is genuine ambiguity.
+  const blind = sop.checkEligibility(facts, config);
+  assert.equal(blind.ok, false);
+  assert.equal(blind.disposition, DISPOSITION.MULTIPLE_PHONES);
+
+  // With it, the campaign's number is known and the extra number is irrelevant.
+  const known = sop.checkEligibility(facts, { ...config, expectedPhone: '(510) 206-1922' });
+  assert.equal(known.ok, true, known.reason);
+});
+
+test('two numbers where NEITHER matches the sheet still needs review', () => {
+  const facts = { ...okFacts(), phones: ['510-111-1111', '510-222-2222'] };
+  const r = sop.checkEligibility(facts, { ...config, expectedPhone: '510-206-1922' });
+  assert.equal(r.ok, false);
+  assert.equal(r.disposition, DISPOSITION.MULTIPLE_PHONES);
+  assert.match(r.reason, /none matches the spreadsheet/i);
+});
+
+test('a single number still has to be a valid 10-digit US number', () => {
+  const r = sop.checkEligibility({ ...okFacts(), phones: ['555'] }, { ...config, expectedPhone: '555' });
+  assert.equal(r.disposition, DISPOSITION.INVALID_PHONE);
+});

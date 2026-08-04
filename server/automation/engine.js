@@ -308,7 +308,10 @@ export class Engine extends EventEmitter {
 
       // GATE 1 — Safety review: state, suppression scan, phone validity (and the
       // tag, which verifyOpenedContact has already confirmed).
-      const elig = sop.checkEligibility(facts, this.config);
+      // expectedPhone tells the phone-validity gate WHICH number this campaign is
+      // for, so a contact holding both a mobile and a home number is not treated
+      // as ambiguous when one of them is the verified one.
+      const elig = sop.checkEligibility(facts, { ...this.config, expectedPhone: sheetRow.phone });
       if (!elig.ok) {
         base.L10_Status =
           elig.disposition === DISPOSITION.MISSING_TAG
