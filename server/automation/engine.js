@@ -619,7 +619,12 @@ export class Engine extends EventEmitter {
       // and marks failures "Undelivered" — the pilot saw that on 2 of 3 real sends.
       // An undelivered message still blocks a resend (it left our side) but must
       // not count as a successful use of that template.
-      const delivery = await this.adapter.readDeliveryStatus(facts.contactId);
+      // REI resolves delivery ASYNCHRONOUSLY — the pilot noted "Undelivered" was
+      // not visible at the moment of sending, only after the thread reloaded a few
+      // seconds later. Reading once here would report 'pending' and miss it, which
+      // would let a failed send be recorded as a success. So: re-check with a
+      // short backoff until it resolves, then give up and leave it 'pending'.
+      const delivery = await this._readDeliveryWithRecheck(facts.contactId);
       base.delivery = delivery.delivery;
       this.ledger.record({
         campaignBatch: this.config.campaignBatch,
@@ -654,6 +659,25 @@ export class Engine extends EventEmitter {
       logger.error('contact_error', { contactId: contact.contactId, message: e.message, code: e.code });
       return this._finish(base, DISPOSITION.ERROR, `${e.code || 'ERROR'}: ${e.message}`, contact);
     }
+  }
+
+  /**
+   * Delivery status, re-checked until REI resolves it.
+   *
+   * Sandbox answers immediately, so no waiting happens in tests. Live runs wait
+   * up to ~16s in total; a still-unresolved status stays 'pending' rather than
+   * being guessed either way.
+   */
+  async _readDeliveryWithRecheck(contactId) {
+    let d = await this.adapter.readDeliveryStatus(contactId);
+    if (env.SANDBOX) return d;
+    for (const waitMs of [3000, 5000, 8000]) {
+      if (d?.delivery && d.delivery !== 'pending') break;
+      await sleep(waitMs);
+      d = await this.adapter.readDeliveryStatus(contactId);
+      logger.info('delivery_recheck', { row: contactId, delivery: d?.delivery });
+    }
+    return d;
   }
 
   _finish(base, disposition, reason, contact, extra = {}) {
