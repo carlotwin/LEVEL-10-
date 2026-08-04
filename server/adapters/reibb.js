@@ -96,11 +96,16 @@ export class ReiBlackBookAdapter extends Adapter {
     // Persistent context keeps the login session between runs (SOP first-run
     // manual login is remembered), and stores writable profile in the data dir.
     const profileDir = path.join(dataDir(), 'browser-profile');
-    this.context = await chromium.launchPersistentContext(profileDir, {
+    // REIBB_BROWSER_PATH overrides the bundled Chromium. Needed when the
+    // installed browser revision does not match this Playwright version — the
+    // launch fails with "Executable doesn't exist" and no amount of retrying helps.
+    const launch = {
       headless: env.HEADLESS,
       slowMo: SLOWMO_MS,
       viewport: { width: 1400, height: 900 },
-    });
+    };
+    if (process.env.REIBB_BROWSER_PATH) launch.executablePath = process.env.REIBB_BROWSER_PATH;
+    this.context = await chromium.launchPersistentContext(profileDir, launch);
     this.page = this.context.pages()[0] || (await this.context.newPage());
     this.page.setDefaultTimeout(this.timeout);
 
@@ -525,9 +530,22 @@ export class ReiBlackBookAdapter extends Adapter {
             .split('\n')
             .map((l) => l.trim())
             .filter(Boolean);
+          // The avatar badge is usually its own line ("JP\n\nJames Potts")...
           const kept = lines.filter((l) => !/^[A-Z]{1,3}$/.test(l));
-          // If a contact really is called "JP", keeping nothing would be worse.
-          return (kept.length ? kept : lines).join(' ');
+          // ...but if the layout puts it inline it arrives as "JP James Potts",
+          // so also drop a leading 1-3 letter token that is exactly the initials
+          // of the words that follow. Relying on the newline alone was luck.
+          let text = (kept.length ? kept : lines).join(' ').replace(/\s+/g, ' ').trim();
+          const parts = text.split(' ');
+          if (parts.length > 2 && /^[A-Z]{1,3}$/.test(parts[0])) {
+            const rest = parts.slice(1);
+            const acronym = rest.map((w) => w[0]).join('').toUpperCase();
+            // "JP James Potts" -> initials of "James Potts" is "JP" -> drop it.
+            if (acronym.startsWith(parts[0]) || parts[0] === acronym.slice(0, parts[0].length)) {
+              text = rest.join(' ');
+            }
+          }
+          return text;
         };
         return els
           .map((el, index) => {
@@ -1017,10 +1035,51 @@ export class ReiBlackBookAdapter extends Adapter {
     }
     await this.page.waitForTimeout(800);
 
-    // Read the From: line back — digit-for-digit is checked by the engine.
-    const shown = await this._text(chat.profitDialSelectedValue);
+    // Read the From: line back — digit-for-digit is checked by the engine, and an
+    // empty readback is treated as a failure, so this must actually work.
+    const shown = (await this._readFromLine()) || (await this._text(chat.profitDialSelectedValue));
     const readDigits = String(shown).replace(/\D/g, '');
-    return { selected: true, readback: readDigits.length >= 10 ? readDigits.slice(-10) : shown };
+    return {
+      selected: true,
+      readback: readDigits.length >= 10 ? readDigits.slice(-10) : shown,
+      readbackText: shown,
+    };
+  }
+
+  /**
+   * The compose bar's "From: <label> (<number>)" text.
+   *
+   * Found by scanning for the visible element that starts with "From:" rather than
+   * by selector. The configured selector mixed Playwright's text=/regex/ engine
+   * with CSS in one comma list, which is not valid — it matched nothing, so the
+   * readback came back empty and the engine failed every lead with
+   * PROFITDIAL_NOT_VERIFIED even though the sender had been selected correctly.
+   */
+  async _readFromLine() {
+    try {
+      return await this.page.evaluate(() => {
+        const vis = (el) => {
+          const r = el.getBoundingClientRect();
+          return r.width > 0 && r.height > 0;
+        };
+        const els = [...document.querySelectorAll('body *')].filter(
+          (el) => el.children.length === 0 && vis(el)
+        );
+        for (const el of els) {
+          const t = (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
+          if (/^From:/i.test(t) && /\d{3}/.test(t)) return t;
+        }
+        // Fall back to a parent that holds the From: text with a nested number.
+        for (const el of document.querySelectorAll('body *')) {
+          if (!vis(el)) continue;
+          const t = (el.innerText || '').replace(/\s+/g, ' ').trim();
+          if (/^From:/i.test(t) && t.length < 120 && /\d{3}/.test(t)) return t;
+        }
+        return '';
+      });
+    } catch {
+      return '';
+    }
   }
 
   async enterMessage(contactId, text) {
