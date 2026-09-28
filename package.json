@@ -16,7 +16,8 @@
     "watch:20": "node scripts/watch-20.js",
     "verify:live": "node scripts/verify-live.js",
     "selectors:status": "node scripts/selector-status.js",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js ppc/test/*.test.js",
+    "ppc:test": "node --test ppc/test/*.test.js"
   },
   "dependencies": {
     "express": "^4.19.2",
