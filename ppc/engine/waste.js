@@ -84,10 +84,15 @@ export function analyzeSearchTerms(model, filters = {}, keywordRows = [], settin
   for (const t of terms.values()) {
     if (t.spend < s.minSpend) continue;
     const flags = [];
-    const hit = irrelevantTheme(t.term, { outOfArea });
+    // A city the keyword itself names is deliberate targeting: the keyword's
+    // own recommendation covers it, so it is not flagged again here.
+    const hit = irrelevantTheme(t.term, { outOfArea: outOfArea.filter((city) => !wordMatch(t.keywordText, city)) });
+    // The search is exactly the keyword: that is a keyword question, not a
+    // search term one (never suggest a keyword's own text as a negative).
+    if (!hit && t.term === t.keywordText) continue;
     if (hit) flags.push({ code: hit.theme.code, label: hit.theme.label, severity: hit.theme.severity, detail: `Contains "${hit.word}".` });
     if (t.conversions === 0 && t.spend >= s.highSpendNoLead) {
-      flags.push({ code: 'spend_no_leads', label: 'High spend, no leads', severity: 'high', detail: `$${Math.round(t.spend)} spent, 0 Google-reported conversions.` });
+      flags.push({ code: 'spend_no_leads', label: 'High spend, no leads', severity: hit ? 'high' : 'medium', detail: `$${Math.round(t.spend)} spent, 0 Google-reported conversions.` });
     }
     const parent = byKeywordText.get(`${t.campaignId}|${t.keywordText}`);
     if (parent) {
@@ -106,14 +111,12 @@ export function analyzeSearchTerms(model, filters = {}, keywordRows = [], settin
     const severityRank = { high: 3, medium: 2, low: 1 };
     flags.sort((a, b) => severityRank[b.severity] - severityRank[a.severity]);
     const top = flags[0];
-    let suggestion;
-    if (hit && hit.theme.severity !== 'low') {
-      suggestion = { action: 'add_negative', negative: hit.word, matchType: 'PHRASE', level: 'campaign' };
-    } else if (flags.some((f) => f.code === 'spend_no_leads')) {
-      suggestion = { action: 'add_negative', negative: t.term, matchType: 'EXACT', level: 'campaign' };
-    } else {
-      suggestion = { action: 'review', negative: '', matchType: '', level: '' };
-    }
+    // Negative keywords are only suggested for searches that are clearly not
+    // sellers (jobs, renters, courses, outside the buy box...). A relevant
+    // search that has not produced a lead yet is flagged for a person to review.
+    const suggestion = hit && hit.theme.severity !== 'low'
+      ? { action: 'add_negative', negative: hit.word, matchType: 'PHRASE', level: 'campaign' }
+      : { action: 'review', negative: '', matchType: '', level: '' };
     const campaignName = model.campaignsById.get(t.campaignId)?.name || '';
     findings.push({
       id: stableId('st', t.campaignId, t.term, t.keywordId),

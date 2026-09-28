@@ -76,7 +76,7 @@ test('Google Ads API rows (GAQL REST JSON) normalize to the same shape', () => {
   assert.equal(ads.clicks[0].city, 'San Francisco');
 });
 
-test('keyword x city spend: split by click share, fall back to spend share, remainder to unknown city', () => {
+test('keyword x city spend: matches both Google totals, follows click locations, remainder to unknown city', () => {
   const keywords = [
     { id: 'k1', campaignId: 'c', adGroupId: 'g', text: 'a' },
     { id: 'k2', campaignId: 'c', adGroupId: 'g', text: 'b' },
@@ -97,16 +97,25 @@ test('keyword x city spend: split by click share, fall back to spend share, rema
   ];
   const rows = deriveKeywordCityDaily({ keywords, keywordDaily, geoDaily, clicks });
   const get = (k, city) => rows.find((r) => r.k === k && r.city === city);
-  assert.equal(get('k1', 'Oakland').cost, 90); // 3 of 4 clicks
-  assert.equal(get('k2', 'Oakland').cost, 30);
+  const sum = (pick) => rows.reduce((a, r) => a + pick(r), 0);
+  // Clicks follow the click report exactly: 3 of k1's clicks and 1 of k2's were in Oakland.
+  assert.equal(get('k1', 'Oakland').clk, 3);
+  assert.equal(get('k2', 'Oakland').clk, 1);
   assert.equal(get('k1', 'Oakland').est, 'allocated');
-  assert.equal(get('k1', '').cost, 10); // 100 - 90 not covered by a city row
-  assert.equal(get('k2', '').cost, 70);
-  const total = rows.reduce((a, r) => a + r.cost, 0);
-  assert.equal(total, 200, 'no spend is created or lost');
+  // Spend: Oakland total ($120) and each keyword total ($100) both match.
+  assert.ok(Math.abs(get('k1', 'Oakland').cost + get('k2', 'Oakland').cost - 120) < 0.02);
+  assert.ok(Math.abs(get('k1', 'Oakland').cost + get('k1', '').cost - 100) < 0.02);
+  assert.ok(get('k1', 'Oakland').cost > get('k2', 'Oakland').cost, 'k1 had more Oakland clicks');
+  assert.equal(get('k2', '').est, 'no_city');
+  assert.ok(Math.abs(sum((r) => r.cost) - 200) < 0.02, 'no spend is created or lost');
+  assert.ok(Math.abs(sum((r) => r.clk) - 8) < 0.01, 'no clicks are created or lost');
 
   const noClicks = deriveKeywordCityDaily({ keywords, keywordDaily, geoDaily: [geoDaily[0]], clicks: [] });
-  assert.equal(noClicks.find((r) => r.k === 'k1' && r.city === 'Oakland').cost, 60, 'spend share when no click locations');
+  assert.ok(Math.abs(noClicks.find((r) => r.k === 'k1' && r.city === 'Oakland').cost - 60) < 0.02, 'spend share when no click locations');
+
+  const uncovered = deriveKeywordCityDaily({ keywords, keywordDaily, geoDaily: [], clicks: [] });
+  assert.equal(uncovered.length, 2);
+  assert.ok(uncovered.every((r) => r.city === '' && r.est === 'no_city'));
 });
 
 // ---------------------------------------------------------------- REI

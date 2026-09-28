@@ -1,0 +1,531 @@
+Day,Campaign,Ad group,City (User location),Clicks,Cost,Conversions
+2026-06-30,Search - Bay Area - Sell Fast,We Buy Houses,"Hayward, California, United States",1,57.17,0
+2026-06-30,Search - Bay Area - Sell Fast,We Buy Houses,"Stockton, California, United States",1,37.13,0
+2026-06-30,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,54.01,0
+2026-06-30,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,77.68,0
+2026-06-30,Search - Bay Area - Seller Situations,Divorce,"Antioch, California, United States",1,39.77,0
+2026-06-30,Search - Central Valley (test),We Buy Houses - Valley,"Sacramento, California, United States",1,51.24,0
+2026-07-01,Search - Bay Area - Sell Fast,We Buy Houses,"Concord, California, United States",1,74.11,0
+2026-07-01,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,51.22,0
+2026-07-01,Search - Bay Area - Seller Situations,Inherited / Probate,"Sacramento, California, United States",1,39.15,1
+2026-07-01,Search - Central Valley (test),We Buy Houses - Valley,"Sacramento, California, United States",1,31.79,0
+2026-07-02,Search - Bay Area - Sell Fast,We Buy Houses,"Fremont, California, United States",1,59.59,0
+2026-07-02,Search - Bay Area - Sell Fast,We Buy Houses,"Antioch, California, United States",1,43.03,0
+2026-07-02,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,55.68,1
+2026-07-02,Search - Bay Area - Sell Fast,Cash Offer,"Fremont, California, United States",1,51.21,0
+2026-07-02,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,41.22,1
+2026-07-02,Search - Bay Area - Seller Situations,Tired Landlord,"Sunnyvale, California, United States",1,24.23,0
+2026-07-02,Search - Bay Area - Seller Situations,Foreclosure,"Oakland, California, United States",1,45.09,0
+2026-07-02,Search - Bay Area - Seller Situations,Foreclosure,"San Francisco, California, United States",1,50.53,0
+2026-07-02,Search - Bay Area - Seller Situations,Divorce,"San Jose, California, United States",1,28.17,0
+2026-07-02,Search - Central Valley (test),We Buy Houses - Valley,"Sacramento, California, United States",1,33.74,0
+2026-07-03,Search - Bay Area - Sell Fast,We Buy Houses,"Hayward, California, United States",1,63.5,0
+2026-07-03,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Vallejo, California, United States",1,52.53,0
+2026-07-03,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Antioch, California, United States",1,44.99,0
+2026-07-03,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,49.07,0
+2026-07-03,Search - Bay Area - Seller Situations,Foreclosure,"Sunnyvale, California, United States",1,38.53,0
+2026-07-03,Search - Bay Area - Seller Situations,Foreclosure,"San Mateo, California, United States",1,44.82,0
+2026-07-03,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,40,0
+2026-07-04,Search - Bay Area - Sell Fast,We Buy Houses,"Hayward, California, United States",1,51.06,0
+2026-07-04,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",2,141.01,0
+2026-07-04,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Fremont, California, United States",1,30.28,0
+2026-07-04,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,48.11,0
+2026-07-04,Search - Bay Area - Seller Situations,Tired Landlord,"San Mateo, California, United States",1,28.8,0
+2026-07-04,Search - Bay Area - Seller Situations,Foreclosure,"Oakland, California, United States",1,33.81,0
+2026-07-05,Search - Bay Area - Seller Situations,Tired Landlord,"Oakland, California, United States",1,34.61,0
+2026-07-05,Search - Bay Area - Seller Situations,Foreclosure,"San Francisco, California, United States",1,40.41,0
+2026-07-06,Search - Bay Area - Sell Fast,We Buy Houses,"Sunnyvale, California, United States",1,51.45,0
+2026-07-06,Search - Bay Area - Sell Fast,Cash Offer,"San Jose, California, United States",1,57.38,0
+2026-07-06,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,41.41,1
+2026-07-07,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,63.55,0
+2026-07-07,Search - Bay Area - Sell Fast,We Buy Houses,"San Mateo, California, United States",1,64.51,0
+2026-07-07,Search - Bay Area - Sell Fast,Cash Offer,"Oakland, California, United States",1,58.73,0
+2026-07-07,Search - Bay Area - Seller Situations,Tired Landlord,"San Francisco, California, United States",1,41.95,0
+2026-07-07,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,36.62,0
+2026-07-08,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,63.13,0
+2026-07-08,Search - Bay Area - Sell Fast,We Buy Houses,"Antioch, California, United States",1,62.26,0
+2026-07-08,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Oakland, California, United States",1,36.5,0
+2026-07-08,Search - Bay Area - Sell Fast,Cash Offer,"San Francisco, California, United States",1,53.87,0
+2026-07-08,Search - Bay Area - Seller Situations,Inherited / Probate,"Oakland, California, United States",1,46.8,0
+2026-07-08,Search - Bay Area - Seller Situations,Foreclosure,"Oakland, California, United States",1,45.26,0
+2026-07-08,Search - Bay Area - Seller Situations,Foreclosure,"Sunnyvale, California, United States",1,31.96,0
+2026-07-08,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,34.97,0
+2026-07-09,Search - Bay Area - Sell Fast,We Buy Houses,"Vallejo, California, United States",1,50.67,0
+2026-07-09,Search - Bay Area - Sell Fast,We Buy Houses,"Stockton, California, United States",1,46.84,0
+2026-07-09,Search - Bay Area - Sell Fast,Cash Offer,"Hayward, California, United States",1,43.21,0
+2026-07-09,Search - Bay Area - Seller Situations,Inherited / Probate,"Fremont, California, United States",1,32.43,0
+2026-07-09,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,59.89,0
+2026-07-09,Search - Bay Area - Seller Situations,Foreclosure,"San Jose, California, United States",1,41.44,1
+2026-07-09,Search - Bay Area - Seller Situations,Foreclosure,"San Francisco, California, United States",1,44.59,0
+2026-07-09,Search - Central Valley (test),We Buy Houses - Valley,"Sacramento, California, United States",1,33.75,0
+2026-07-10,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,52.98,0
+2026-07-10,Search - Bay Area - Seller Situations,Foreclosure,"San Jose, California, United States",1,37.59,0
+2026-07-11,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Fremont, California, United States",1,54.75,0
+2026-07-11,Search - Bay Area - Seller Situations,Inherited / Probate,"Richmond, California, United States",1,34.73,0
+2026-07-11,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,33.09,0
+2026-07-11,Search - Bay Area - Seller Situations,Tired Landlord,"Oakland, California, United States",1,32.57,0
+2026-07-12,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Jose, California, United States",1,34.56,0
+2026-07-12,Search - Bay Area - Sell Fast,Cash Offer,"Richmond, California, United States",1,37.68,0
+2026-07-12,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,46.05,0
+2026-07-12,Search - Bay Area - Seller Situations,Foreclosure,"Oakland, California, United States",1,30.61,0
+2026-07-13,Search - Bay Area - Sell Fast,We Buy Houses,"Concord, California, United States",1,54.87,0
+2026-07-13,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,55.62,0
+2026-07-13,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Jose, California, United States",1,42.72,0
+2026-07-13,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",1,38.4,0
+2026-07-13,Search - Bay Area - Sell Fast,Cash Offer,"San Mateo, California, United States",1,54.36,0
+2026-07-13,Search - Bay Area - Seller Situations,Foreclosure,"San Jose, California, United States",1,29.28,0
+2026-07-14,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,69.15,0
+2026-07-14,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,53.56,1
+2026-07-14,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",1,49.58,0
+2026-07-15,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,80.39,0
+2026-07-15,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,73.63,0
+2026-07-15,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Hayward, California, United States",1,32.23,0
+2026-07-15,Search - Bay Area - Sell Fast,Cash Offer,"Hayward, California, United States",1,35.79,0
+2026-07-15,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,57.66,0
+2026-07-15,Search - Bay Area - Seller Situations,Inherited / Probate,"Richmond, California, United States",1,45.75,0
+2026-07-15,Search - Bay Area - Seller Situations,Tired Landlord,"San Francisco, California, United States",1,33.49,0
+2026-07-15,Search - Bay Area - Seller Situations,Divorce,"Sacramento, California, United States",1,36.43,0
+2026-07-15,Search - Bay Area - Seller Situations,Divorce,"San Jose, California, United States",1,39.44,0
+2026-07-15,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",2,94.57,0
+2026-07-16,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",2,183.69,0
+2026-07-16,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",2,104.88,0
+2026-07-16,Search - Bay Area - Sell Fast,We Buy Houses,"Richmond, California, United States",1,47.6,0
+2026-07-16,Search - Bay Area - Seller Situations,Foreclosure,"San Francisco, California, United States",1,61.13,0
+2026-07-17,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",3,187.29,1
+2026-07-17,Search - Bay Area - Sell Fast,We Buy Houses,"San Mateo, California, United States",1,52.11,0
+2026-07-17,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,55.2,0
+2026-07-17,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,75.51,0
+2026-07-17,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Oakland, California, United States",2,83.38,1
+2026-07-17,Search - Bay Area - Sell Fast,Cash Offer,"San Jose, California, United States",1,36.18,0
+2026-07-17,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,47.46,0
+2026-07-17,Search - Bay Area - Seller Situations,Foreclosure,"Oakland, California, United States",1,34.93,0
+2026-07-18,Search - Bay Area - Sell Fast,We Buy Houses,"Vallejo, California, United States",1,69.93,0
+2026-07-18,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,84.22,1
+2026-07-18,Search - Bay Area - Sell Fast,We Buy Houses,"Fremont, California, United States",1,54.57,0
+2026-07-18,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Jose, California, United States",1,46.24,0
+2026-07-18,Search - Bay Area - Sell Fast,Cash Offer,"San Jose, California, United States",1,56.87,0
+2026-07-18,Search - Bay Area - Seller Situations,Tired Landlord,"Antioch, California, United States",1,35.14,0
+2026-07-19,Search - Bay Area - Sell Fast,We Buy Houses,"Concord, California, United States",1,68.03,0
+2026-07-19,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Mateo, California, United States",1,49.79,0
+2026-07-19,Search - Bay Area - Sell Fast,Cash Offer,"Antioch, California, United States",1,48.35,0
+2026-07-19,Search - Bay Area - Sell Fast,Cash Offer,"San Jose, California, United States",2,81.24,0
+2026-07-19,Search - Bay Area - Sell Fast,Cash Offer,"San Francisco, California, United States",1,48.81,1
+2026-07-19,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,55.05,0
+2026-07-19,Search - Bay Area - Seller Situations,Foreclosure,"Oakland, California, United States",1,47.47,0
+2026-07-19,Search - Bay Area - Seller Situations,Foreclosure,"Antioch, California, United States",1,45.21,0
+2026-07-20,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Mateo, California, United States",1,44.08,0
+2026-07-20,Search - Bay Area - Sell Fast,Cash Offer,"San Jose, California, United States",1,39.1,0
+2026-07-20,Search - Bay Area - Seller Situations,Inherited / Probate,"Richmond, California, United States",1,34.9,0
+2026-07-20,Search - Bay Area - Seller Situations,Foreclosure,"Hayward, California, United States",1,45.34,0
+2026-07-21,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,65.29,0
+2026-07-21,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,65.3,0
+2026-07-21,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Mateo, California, United States",1,55.77,1
+2026-07-21,Search - Bay Area - Seller Situations,Inherited / Probate,"Oakland, California, United States",1,46,0
+2026-07-21,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,46.28,1
+2026-07-21,Search - Bay Area - Seller Situations,Tired Landlord,"Vallejo, California, United States",1,31.33,0
+2026-07-21,Search - Bay Area - Seller Situations,Tired Landlord,"Santa Rosa, California, United States",1,25.92,0
+2026-07-21,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",2,90.48,0
+2026-07-22,Search - Bay Area - Sell Fast,We Buy Houses,"Santa Rosa, California, United States",1,42.1,0
+2026-07-22,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,71.75,0
+2026-07-22,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Santa Rosa, California, United States",1,36.22,0
+2026-07-22,Search - Bay Area - Sell Fast,Cash Offer,"San Francisco, California, United States",1,48.65,0
+2026-07-22,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,37.15,0
+2026-07-22,Search - Bay Area - Seller Situations,Tired Landlord,"Stockton, California, United States",1,24.48,0
+2026-07-22,Search - Bay Area - Seller Situations,Foreclosure,"Oakland, California, United States",1,40.57,0
+2026-07-22,Search - Bay Area - Seller Situations,Divorce,"Antioch, California, United States",1,39.91,1
+2026-07-22,Search - Central Valley (test),We Buy Houses - Valley,"Sacramento, California, United States",1,31.57,0
+2026-07-22,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,41.49,0
+2026-07-23,Search - Bay Area - Sell Fast,We Buy Houses,"Richmond, California, United States",1,79.79,0
+2026-07-23,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",3,138.71,0
+2026-07-23,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Oakland, California, United States",1,34.17,1
+2026-07-23,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Concord, California, United States",1,42.83,1
+2026-07-24,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",2,143.05,0
+2026-07-24,Search - Bay Area - Sell Fast,We Buy Houses,"Hayward, California, United States",1,59.51,0
+2026-07-24,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,40.64,0
+2026-07-24,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Jose, California, United States",1,30.88,0
+2026-07-24,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,36.5,0
+2026-07-24,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,35.96,0
+2026-07-25,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,78.25,0
+2026-07-25,Search - Bay Area - Sell Fast,We Buy Houses,"Fremont, California, United States",1,50.43,0
+2026-07-25,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Oakland, California, United States",1,45.01,0
+2026-07-26,Search - Bay Area - Sell Fast,We Buy Houses,"Antioch, California, United States",1,53.53,0
+2026-07-26,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Vallejo, California, United States",1,35.45,0
+2026-07-26,Search - Bay Area - Seller Situations,Inherited / Probate,"San Mateo, California, United States",1,42.63,1
+2026-07-26,Search - Bay Area - Seller Situations,Inherited / Probate,"Hayward, California, United States",1,25.09,0
+2026-07-27,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",2,165.15,0
+2026-07-27,Search - Bay Area - Sell Fast,We Buy Houses,"Vallejo, California, United States",1,66.45,1
+2026-07-27,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",2,84.92,1
+2026-07-27,Search - Bay Area - Seller Situations,Tired Landlord,"Concord, California, United States",1,33.86,0
+2026-07-27,Search - Bay Area - Seller Situations,Foreclosure,"San Francisco, California, United States",1,36.56,0
+2026-07-27,Search - Bay Area - Seller Situations,Foreclosure,"Santa Rosa, California, United States",1,35.77,0
+2026-07-27,Search - Bay Area - Seller Situations,Foreclosure,"Fremont, California, United States",1,35.02,0
+2026-07-28,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",2,154.48,0
+2026-07-28,Search - Bay Area - Sell Fast,We Buy Houses,"Santa Rosa, California, United States",1,43.72,0
+2026-07-28,Search - Bay Area - Sell Fast,Cash Offer,"San Francisco, California, United States",1,62.42,0
+2026-07-28,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,40.07,0
+2026-07-28,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,50.14,0
+2026-07-29,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",3,209.73,0
+2026-07-29,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Jose, California, United States",1,28.62,0
+2026-07-29,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,47.7,1
+2026-07-29,Search - Central Valley (test),We Buy Houses - Valley,"Sacramento, California, United States",1,34.91,0
+2026-07-29,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,33.15,0
+2026-07-30,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,69.55,0
+2026-07-30,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,54.48,0
+2026-07-30,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",1,69.64,0
+2026-07-30,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,43.75,0
+2026-07-31,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,43.21,0
+2026-07-31,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,68.29,0
+2026-07-31,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,31.82,0
+2026-08-01,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,103.41,0
+2026-08-01,Search - Bay Area - Sell Fast,We Buy Houses,"Concord, California, United States",1,49.31,0
+2026-08-01,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",2,122.25,0
+2026-08-01,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",1,32.92,0
+2026-08-01,Search - Bay Area - Seller Situations,Inherited / Probate,"Oakland, California, United States",1,47,0
+2026-08-01,Search - Bay Area - Seller Situations,Tired Landlord,"Vallejo, California, United States",1,26.28,0
+2026-08-02,Search - Bay Area - Sell Fast,We Buy Houses,"Concord, California, United States",1,49.92,0
+2026-08-02,Search - Bay Area - Sell Fast,We Buy Houses,"Richmond, California, United States",1,72.77,0
+2026-08-02,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Richmond, California, United States",1,50.87,0
+2026-08-02,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Fremont, California, United States",1,30.61,0
+2026-08-02,Search - Bay Area - Sell Fast,Cash Offer,"San Mateo, California, United States",1,61.74,0
+2026-08-02,Search - Bay Area - Seller Situations,Inherited / Probate,"Stockton, California, United States",1,36.15,0
+2026-08-03,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,43.93,0
+2026-08-03,Search - Bay Area - Sell Fast,We Buy Houses,"Concord, California, United States",1,49.02,0
+2026-08-03,Search - Bay Area - Sell Fast,Cash Offer,"San Francisco, California, United States",1,47.56,0
+2026-08-03,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,46.28,1
+2026-08-03,Search - Bay Area - Seller Situations,Tired Landlord,"San Jose, California, United States",1,40.11,0
+2026-08-03,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,35.93,1
+2026-08-04,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",2,127.11,0
+2026-08-04,Search - Bay Area - Sell Fast,We Buy Houses,"Vallejo, California, United States",1,58.25,0
+2026-08-04,Search - Bay Area - Sell Fast,We Buy Houses,"San Mateo, California, United States",1,93.35,0
+2026-08-04,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,68.46,0
+2026-08-04,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",1,38.57,0
+2026-08-04,Search - Bay Area - Seller Situations,Tired Landlord,"San Francisco, California, United States",1,36.67,0
+2026-08-04,Search - Bay Area - Seller Situations,Foreclosure,"San Francisco, California, United States",2,105.44,0
+2026-08-04,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,28.97,0
+2026-08-05,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",2,92.64,1
+2026-08-05,Search - Bay Area - Sell Fast,We Buy Houses,"Santa Rosa, California, United States",1,67.83,0
+2026-08-05,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,85.52,1
+2026-08-05,Search - Bay Area - Seller Situations,Tired Landlord,"Stockton, California, United States",1,32.65,0
+2026-08-05,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,59.71,0
+2026-08-06,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,42.61,0
+2026-08-06,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,32.51,0
+2026-08-07,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,91.03,1
+2026-08-07,Search - Bay Area - Sell Fast,We Buy Houses,"Santa Rosa, California, United States",1,62.61,1
+2026-08-07,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Hayward, California, United States",2,81.06,0
+2026-08-07,Search - Bay Area - Seller Situations,Foreclosure,"Sunnyvale, California, United States",1,36.41,0
+2026-08-08,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,68.45,0
+2026-08-08,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,46.07,0
+2026-08-08,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",1,57.89,0
+2026-08-08,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Mateo, California, United States",1,54.14,0
+2026-08-09,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",2,118.09,0
+2026-08-09,Search - Bay Area - Sell Fast,We Buy Houses,"San Mateo, California, United States",1,47.25,0
+2026-08-09,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Oakland, California, United States",1,46.16,0
+2026-08-09,Search - Bay Area - Seller Situations,Inherited / Probate,"Oakland, California, United States",1,27.42,1
+2026-08-10,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",3,256.59,0
+2026-08-10,Search - Bay Area - Sell Fast,We Buy Houses,"Hayward, California, United States",1,63.28,0
+2026-08-10,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,48.91,1
+2026-08-10,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",2,101.73,0
+2026-08-11,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Hayward, California, United States",1,45.61,0
+2026-08-11,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Jose, California, United States",1,55.78,0
+2026-08-11,Search - Bay Area - Sell Fast,Cash Offer,"San Francisco, California, United States",1,66.23,0
+2026-08-11,Search - Bay Area - Seller Situations,Inherited / Probate,"Sunnyvale, California, United States",1,37.57,0
+2026-08-11,Search - Bay Area - Seller Situations,Foreclosure,"San Jose, California, United States",1,39.35,1
+2026-08-11,Search - Bay Area - Seller Situations,Divorce,"San Francisco, California, United States",1,59.99,0
+2026-08-12,Search - Bay Area - Sell Fast,We Buy Houses,"Vallejo, California, United States",1,72.95,0
+2026-08-12,Search - Bay Area - Sell Fast,We Buy Houses,"Hayward, California, United States",1,45.34,0
+2026-08-12,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Vallejo, California, United States",2,106.25,0
+2026-08-12,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Jose, California, United States",1,37.92,0
+2026-08-12,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,34.23,0
+2026-08-12,Search - Bay Area - Seller Situations,Inherited / Probate,"Antioch, California, United States",1,33.76,0
+2026-08-12,Search - Central Valley (test),We Buy Houses - Valley,"Sacramento, California, United States",1,36.67,0
+2026-08-13,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,46.62,1
+2026-08-13,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,48.03,0
+2026-08-13,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Oakland, California, United States",1,27.34,0
+2026-08-13,Search - Bay Area - Sell Fast,Cash Offer,"Oakland, California, United States",1,64.59,0
+2026-08-13,Search - Bay Area - Sell Fast,Cash Offer,"San Jose, California, United States",1,45.6,0
+2026-08-13,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",2,96.03,1
+2026-08-13,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,50.85,1
+2026-08-13,Search - Central Valley (test),We Buy Houses - Valley,"Sacramento, California, United States",1,38.08,0
+2026-08-13,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,28.83,0
+2026-08-14,Search - Bay Area - Sell Fast,Cash Offer,"San Francisco, California, United States",1,73.05,0
+2026-08-15,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,75.2,0
+2026-08-15,Search - Bay Area - Sell Fast,Cash Offer,"Oakland, California, United States",1,49.91,0
+2026-08-15,Search - Bay Area - Sell Fast,Cash Offer,"San Jose, California, United States",1,43.51,0
+2026-08-15,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,54.28,0
+2026-08-15,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,28.36,0
+2026-08-16,Search - Bay Area - Sell Fast,We Buy Houses,"Stockton, California, United States",1,46.01,0
+2026-08-16,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,35.42,0
+2026-08-16,Search - Bay Area - Seller Situations,Inherited / Probate,"Fremont, California, United States",1,31.58,0
+2026-08-17,Search - Bay Area - Sell Fast,We Buy Houses,"Fremont, California, United States",1,59.61,0
+2026-08-17,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Sunnyvale, California, United States",1,42.56,0
+2026-08-17,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Oakland, California, United States",1,28.59,0
+2026-08-17,Search - Bay Area - Seller Situations,Inherited / Probate,"Stockton, California, United States",1,28.25,0
+2026-08-17,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,43.35,0
+2026-08-18,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,70.84,1
+2026-08-18,Search - Bay Area - Sell Fast,We Buy Houses,"Fremont, California, United States",1,44.9,0
+2026-08-18,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",2,88.84,0
+2026-08-18,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Fremont, California, United States",1,36.82,0
+2026-08-18,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Oakland, California, United States",1,32.05,0
+2026-08-18,Search - Bay Area - Seller Situations,Inherited / Probate,"Vallejo, California, United States",1,32.48,0
+2026-08-18,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,37.04,0
+2026-08-18,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,47.86,0
+2026-08-19,Search - Bay Area - Sell Fast,We Buy Houses,"Sunnyvale, California, United States",2,119.22,0
+2026-08-19,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,57.87,0
+2026-08-19,Search - Bay Area - Sell Fast,We Buy Houses,"Concord, California, United States",1,50.85,0
+2026-08-19,Search - Bay Area - Sell Fast,We Buy Houses,"Santa Rosa, California, United States",1,62.33,0
+2026-08-19,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",1,53.19,0
+2026-08-19,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Fremont, California, United States",1,45.64,0
+2026-08-19,Search - Bay Area - Sell Fast,Cash Offer,"Fremont, California, United States",1,56.57,0
+2026-08-19,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,32.83,0
+2026-08-19,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,44.02,0
+2026-08-20,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",2,129.3,0
+2026-08-20,Search - Bay Area - Sell Fast,We Buy Houses,"Fremont, California, United States",1,61.91,0
+2026-08-20,Search - Bay Area - Sell Fast,We Buy Houses,"Richmond, California, United States",1,51.04,0
+2026-08-20,Search - Bay Area - Seller Situations,Inherited / Probate,"Antioch, California, United States",1,36.43,0
+2026-08-20,Search - Bay Area - Seller Situations,Inherited / Probate,"Oakland, California, United States",1,39.9,0
+2026-08-20,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,42.26,0
+2026-08-20,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,46.91,0
+2026-08-21,Search - Bay Area - Sell Fast,We Buy Houses,"San Mateo, California, United States",1,67.69,0
+2026-08-21,Search - Bay Area - Sell Fast,We Buy Houses,"Sunnyvale, California, United States",1,44.72,0
+2026-08-21,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",2,125.3,0
+2026-08-21,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Hayward, California, United States",1,40.36,0
+2026-08-21,Search - Bay Area - Seller Situations,Inherited / Probate,"Oakland, California, United States",1,32.03,0
+2026-08-21,Search - Bay Area - Seller Situations,Tired Landlord,"Oakland, California, United States",2,62.03,0
+2026-08-21,Search - Bay Area - Seller Situations,Foreclosure,"Hayward, California, United States",1,29.55,0
+2026-08-21,Search - Bay Area - Seller Situations,Foreclosure,"Oakland, California, United States",1,30.44,0
+2026-08-22,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,43.08,1
+2026-08-22,Search - Bay Area - Seller Situations,Foreclosure,"San Jose, California, United States",1,45.49,0
+2026-08-23,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,71.2,0
+2026-08-23,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Concord, California, United States",1,54.69,0
+2026-08-23,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Hayward, California, United States",1,44.63,0
+2026-08-23,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,46.39,1
+2026-08-24,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",2,172.86,0
+2026-08-24,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,58.34,0
+2026-08-24,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",1,45.33,0
+2026-08-24,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Sunnyvale, California, United States",1,35.38,0
+2026-08-24,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Oakland, California, United States",1,39.98,0
+2026-08-24,Search - Bay Area - Sell Fast,Cash Offer,"Sunnyvale, California, United States",1,47.91,0
+2026-08-24,Search - Bay Area - Seller Situations,Tired Landlord,"Antioch, California, United States",1,34.38,0
+2026-08-24,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,47.86,0
+2026-08-25,Search - Bay Area - Sell Fast,We Buy Houses,"Fremont, California, United States",1,47.79,0
+2026-08-25,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,95.92,1
+2026-08-25,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Jose, California, United States",1,43.15,0
+2026-08-25,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Hayward, California, United States",1,55.71,0
+2026-08-25,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,47.32,0
+2026-08-25,Search - Bay Area - Seller Situations,Foreclosure,"Oakland, California, United States",1,36.99,0
+2026-08-26,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",2,177.81,1
+2026-08-26,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,78.17,0
+2026-08-26,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Jose, California, United States",1,30.05,0
+2026-08-26,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Hayward, California, United States",1,34.36,0
+2026-08-26,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,27.2,1
+2026-08-26,Search - Bay Area - Seller Situations,Divorce,"Vallejo, California, United States",1,34.7,0
+2026-08-26,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",2,76.54,0
+2026-08-27,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,65.19,0
+2026-08-27,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",3,181.09,0
+2026-08-27,Search - Bay Area - Sell Fast,We Buy Houses,"Richmond, California, United States",1,65.06,0
+2026-08-27,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",1,35.73,0
+2026-08-27,Search - Bay Area - Seller Situations,Inherited / Probate,"Concord, California, United States",1,39.52,0
+2026-08-27,Search - Bay Area - Seller Situations,Tired Landlord,"Sacramento, California, United States",1,23.23,0
+2026-08-27,Search - Bay Area - Seller Situations,Tired Landlord,"San Francisco, California, United States",1,36.75,0
+2026-08-27,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,44.03,0
+2026-08-28,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,100.33,0
+2026-08-28,Search - Bay Area - Sell Fast,We Buy Houses,"Hayward, California, United States",1,60.61,0
+2026-08-28,Search - Bay Area - Sell Fast,We Buy Houses,"San Mateo, California, United States",1,55.24,0
+2026-08-28,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Fremont, California, United States",1,32.26,0
+2026-08-28,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Oakland, California, United States",1,36.28,1
+2026-08-28,Search - Bay Area - Seller Situations,Inherited / Probate,"Oakland, California, United States",1,26.05,0
+2026-08-28,Search - Bay Area - Seller Situations,Foreclosure,"San Jose, California, United States",1,48.44,0
+2026-08-28,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,50.49,0
+2026-08-28,Search - Central Valley (test),We Buy Houses - Valley,"Sacramento, California, United States",1,51.46,0
+2026-08-29,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,80.86,0
+2026-08-29,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",1,50.68,0
+2026-08-29,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Oakland, California, United States",1,31.78,1
+2026-08-29,Search - Bay Area - Seller Situations,Inherited / Probate,"Antioch, California, United States",1,31.9,0
+2026-08-29,Search - Bay Area - Seller Situations,Tired Landlord,"Fremont, California, United States",1,35.62,0
+2026-08-29,Search - Bay Area - Seller Situations,Foreclosure,"Vallejo, California, United States",1,27.14,0
+2026-08-29,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,28.4,1
+2026-08-30,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",2,130.69,0
+2026-08-30,Search - Bay Area - Sell Fast,We Buy Houses,"Richmond, California, United States",1,47.9,0
+2026-08-30,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",2,140.33,0
+2026-08-30,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Hayward, California, United States",1,50.9,0
+2026-08-30,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Fremont, California, United States",1,45.97,0
+2026-08-30,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,41.36,0
+2026-08-31,Search - Bay Area - Sell Fast,We Buy Houses,"Vallejo, California, United States",1,55.56,0
+2026-08-31,Search - Bay Area - Sell Fast,We Buy Houses,"Concord, California, United States",1,43.44,0
+2026-08-31,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",1,55.97,0
+2026-08-31,Search - Bay Area - Sell Fast,Cash Offer,"Hayward, California, United States",1,52.84,1
+2026-08-31,Search - Bay Area - Seller Situations,Inherited / Probate,"Fremont, California, United States",1,35.5,0
+2026-08-31,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,42.81,0
+2026-08-31,Search - Bay Area - Seller Situations,Tired Landlord,"Concord, California, United States",1,36.97,0
+2026-08-31,Search - Bay Area - Seller Situations,Foreclosure,"Vallejo, California, United States",1,47.85,0
+2026-08-31,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",2,88.76,0
+2026-09-01,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",3,232.95,0
+2026-09-01,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Oakland, California, United States",1,36.97,0
+2026-09-01,Search - Bay Area - Seller Situations,Inherited / Probate,"Richmond, California, United States",1,39.17,0
+2026-09-01,Search - Bay Area - Seller Situations,Foreclosure,"Oakland, California, United States",1,44.51,0
+2026-09-01,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,39.8,0
+2026-09-02,Search - Bay Area - Sell Fast,We Buy Houses,"Hayward, California, United States",1,52.03,0
+2026-09-02,Search - Bay Area - Sell Fast,Cash Offer,"Antioch, California, United States",1,63.7,0
+2026-09-02,Search - Bay Area - Sell Fast,Cash Offer,"San Mateo, California, United States",1,56.83,0
+2026-09-02,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,34.32,0
+2026-09-03,Search - Bay Area - Sell Fast,We Buy Houses,"Hayward, California, United States",1,74.2,0
+2026-09-03,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,74.33,0
+2026-09-03,Search - Bay Area - Sell Fast,We Buy Houses,"Concord, California, United States",1,50.06,0
+2026-09-03,Search - Bay Area - Seller Situations,Inherited / Probate,"Fremont, California, United States",1,27.23,0
+2026-09-03,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,38.66,0
+2026-09-03,Search - Bay Area - Seller Situations,Tired Landlord,"San Mateo, California, United States",1,27.69,0
+2026-09-03,Search - Bay Area - Seller Situations,Tired Landlord,"San Jose, California, United States",1,35.38,0
+2026-09-03,Search - Bay Area - Seller Situations,Divorce,"Oakland, California, United States",1,40.57,0
+2026-09-04,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",2,131.58,0
+2026-09-04,Search - Bay Area - Sell Fast,We Buy Houses,"Hayward, California, United States",1,39,1
+2026-09-04,Search - Bay Area - Sell Fast,Cash Offer,"San Jose, California, United States",1,63.08,0
+2026-09-04,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,49.24,0
+2026-09-04,Search - Bay Area - Seller Situations,Divorce,"Stockton, California, United States",1,28.66,0
+2026-09-05,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,63.51,0
+2026-09-05,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Stockton, California, United States",1,30.76,1
+2026-09-06,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,72.57,1
+2026-09-06,Search - Bay Area - Sell Fast,We Buy Houses,"San Mateo, California, United States",2,134.9,0
+2026-09-06,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",2,107.81,0
+2026-09-06,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Antioch, California, United States",1,50.46,0
+2026-09-06,Search - Bay Area - Sell Fast,Cash Offer,"San Mateo, California, United States",1,70.37,0
+2026-09-06,Search - Bay Area - Sell Fast,Cash Offer,"San Jose, California, United States",1,40.36,0
+2026-09-07,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,49.64,0
+2026-09-07,Search - Bay Area - Sell Fast,We Buy Houses,"Richmond, California, United States",1,46.49,0
+2026-09-07,Search - Bay Area - Seller Situations,Inherited / Probate,"Hayward, California, United States",1,41.96,0
+2026-09-07,Search - Bay Area - Seller Situations,Inherited / Probate,"Concord, California, United States",1,26.25,1
+2026-09-07,Search - Bay Area - Seller Situations,Tired Landlord,"Richmond, California, United States",1,41.53,0
+2026-09-07,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,47.83,0
+2026-09-08,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",2,100.09,1
+2026-09-08,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,74.45,1
+2026-09-08,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,60.98,0
+2026-09-08,Search - Bay Area - Sell Fast,Cash Offer,"Fremont, California, United States",1,53.21,0
+2026-09-08,Search - Bay Area - Seller Situations,Inherited / Probate,"Oakland, California, United States",1,35.54,0
+2026-09-08,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,45.4,0
+2026-09-08,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,43.13,0
+2026-09-09,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Santa Rosa, California, United States",1,43.58,0
+2026-09-09,Search - Bay Area - Seller Situations,Foreclosure,"Fremont, California, United States",1,48.25,0
+2026-09-09,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,58.12,0
+2026-09-09,Search - Central Valley (test),We Buy Houses - Valley,"Sacramento, California, United States",1,49.78,0
+2026-09-10,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",2,119,0
+2026-09-10,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,52.05,0
+2026-09-10,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Hayward, California, United States",1,32.62,0
+2026-09-10,Search - Bay Area - Seller Situations,Inherited / Probate,"Concord, California, United States",1,26.79,0
+2026-09-10,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,55.57,0
+2026-09-10,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,34.5,0
+2026-09-11,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",2,167.5,0
+2026-09-11,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,68.45,1
+2026-09-11,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,44.6,0
+2026-09-11,Search - Bay Area - Sell Fast,We Buy Houses,"Stockton, California, United States",1,57.66,1
+2026-09-11,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Oakland, California, United States",1,48.09,1
+2026-09-11,Search - Bay Area - Seller Situations,Inherited / Probate,"Santa Rosa, California, United States",1,30.41,0
+2026-09-11,Search - Bay Area - Seller Situations,Inherited / Probate,"Fremont, California, United States",1,48.21,0
+2026-09-11,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,31.93,0
+2026-09-12,Search - Bay Area - Seller Situations,Tired Landlord,"San Francisco, California, United States",1,37.71,0
+2026-09-12,Search - Bay Area - Seller Situations,Divorce,"San Francisco, California, United States",1,37.51,0
+2026-09-12,Search - Central Valley (test),We Buy Houses - Valley,"Sacramento, California, United States",1,36.94,0
+2026-09-13,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,73.84,0
+2026-09-13,Search - Bay Area - Sell Fast,We Buy Houses,"Fremont, California, United States",1,49.56,0
+2026-09-13,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Oakland, California, United States",1,35.18,1
+2026-09-13,Search - Bay Area - Sell Fast,Cash Offer,"San Mateo, California, United States",1,46.47,0
+2026-09-13,Search - Bay Area - Seller Situations,Tired Landlord,"San Jose, California, United States",1,36.54,0
+2026-09-13,Search - Bay Area - Seller Situations,Foreclosure,"San Jose, California, United States",1,33.17,1
+2026-09-14,Search - Bay Area - Sell Fast,We Buy Houses,"Hayward, California, United States",1,37.69,0
+2026-09-14,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,48.23,1
+2026-09-14,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,50.54,1
+2026-09-15,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,55.69,0
+2026-09-15,Search - Bay Area - Sell Fast,We Buy Houses,"Vallejo, California, United States",1,65.21,0
+2026-09-15,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,60.5,1
+2026-09-15,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",1,40.03,0
+2026-09-15,Search - Bay Area - Sell Fast,Cash Offer,"Antioch, California, United States",1,59.2,0
+2026-09-15,Search - Bay Area - Sell Fast,Cash Offer,"Fremont, California, United States",1,60.94,0
+2026-09-15,Search - Bay Area - Seller Situations,Inherited / Probate,"Oakland, California, United States",2,67.25,1
+2026-09-15,Search - Bay Area - Seller Situations,Tired Landlord,"Fremont, California, United States",1,30.27,0
+2026-09-15,Search - Bay Area - Seller Situations,Foreclosure,"Richmond, California, United States",1,37.7,0
+2026-09-15,Search - Bay Area - Seller Situations,Foreclosure,"Oakland, California, United States",1,37.38,0
+2026-09-16,Search - Bay Area - Sell Fast,Cash Offer,"Concord, California, United States",1,41.82,0
+2026-09-16,Search - Bay Area - Sell Fast,Cash Offer,"San Jose, California, United States",2,96.63,0
+2026-09-16,Search - Bay Area - Seller Situations,Inherited / Probate,"Oakland, California, United States",2,82.17,0
+2026-09-16,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,36.78,0
+2026-09-16,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,42.92,0
+2026-09-17,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,76.92,0
+2026-09-17,Search - Bay Area - Sell Fast,We Buy Houses,"Fremont, California, United States",1,36.46,0
+2026-09-17,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Vallejo, California, United States",1,44.33,0
+2026-09-17,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Hayward, California, United States",1,37.97,0
+2026-09-17,Search - Bay Area - Sell Fast,Cash Offer,"San Jose, California, United States",1,44.94,0
+2026-09-17,Search - Bay Area - Seller Situations,Inherited / Probate,"Oakland, California, United States",1,30.17,0
+2026-09-17,Search - Bay Area - Seller Situations,Inherited / Probate,"Hayward, California, United States",1,43.23,1
+2026-09-17,Search - Bay Area - Seller Situations,Foreclosure,"San Francisco, California, United States",1,43.37,0
+2026-09-18,Search - Bay Area - Sell Fast,We Buy Houses,"Fremont, California, United States",2,90.29,0
+2026-09-18,Search - Bay Area - Sell Fast,We Buy Houses,"Concord, California, United States",1,42.32,0
+2026-09-18,Search - Bay Area - Sell Fast,We Buy Houses,"Antioch, California, United States",1,68.24,0
+2026-09-19,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,65.08,0
+2026-09-19,Search - Bay Area - Sell Fast,Cash Offer,"Stockton, California, United States",1,44.03,0
+2026-09-19,Search - Bay Area - Seller Situations,Inherited / Probate,"Hayward, California, United States",1,28.29,1
+2026-09-19,Search - Bay Area - Seller Situations,Inherited / Probate,"Oakland, California, United States",1,44.56,0
+2026-09-20,Search - Bay Area - Sell Fast,We Buy Houses,"Concord, California, United States",1,39.56,0
+2026-09-20,Search - Bay Area - Sell Fast,We Buy Houses,"Sunnyvale, California, United States",1,66.76,0
+2026-09-20,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,36.31,0
+2026-09-20,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Jose, California, United States",1,38.17,0
+2026-09-20,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Antioch, California, United States",1,46.04,0
+2026-09-20,Search - Bay Area - Seller Situations,Inherited / Probate,"San Francisco, California, United States",1,53.1,0
+2026-09-20,Search - Bay Area - Seller Situations,Tired Landlord,"Oakland, California, United States",1,34.31,0
+2026-09-20,Search - Bay Area - Seller Situations,Tired Landlord,"San Francisco, California, United States",1,30.62,0
+2026-09-21,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,63.82,0
+2026-09-21,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,78.96,0
+2026-09-21,Search - Bay Area - Sell Fast,We Buy Houses,"San Mateo, California, United States",1,72.47,1
+2026-09-21,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,27.35,0
+2026-09-21,Search - Bay Area - Seller Situations,Divorce,"San Jose, California, United States",1,34.28,0
+2026-09-22,Search - Bay Area - Sell Fast,We Buy Houses,"Vallejo, California, United States",1,63.56,1
+2026-09-22,Search - Bay Area - Sell Fast,We Buy Houses,"San Mateo, California, United States",1,49.76,0
+2026-09-22,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",2,123.88,0
+2026-09-22,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Antioch, California, United States",1,50.33,1
+2026-09-22,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",1,37.16,1
+2026-09-22,Search - Bay Area - Sell Fast,Cash Offer,"San Jose, California, United States",1,55.73,0
+2026-09-22,Search - Bay Area - Seller Situations,Inherited / Probate,"Oakland, California, United States",1,41.84,0
+2026-09-22,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,33.86,0
+2026-09-22,Search - Bay Area - Seller Situations,Tired Landlord,"San Jose, California, United States",1,32.64,0
+2026-09-22,Search - Bay Area - Seller Situations,Foreclosure,"San Francisco, California, United States",1,40.02,0
+2026-09-23,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,67.84,0
+2026-09-23,Search - Bay Area - Sell Fast,We Buy Houses,"Sacramento, California, United States",1,64.45,0
+2026-09-23,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,106.59,0
+2026-09-23,Search - Bay Area - Sell Fast,We Buy Houses,"Hayward, California, United States",1,37.72,0
+2026-09-23,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,52.66,0
+2026-09-23,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",1,35.02,0
+2026-09-23,Search - Bay Area - Seller Situations,Inherited / Probate,"Fremont, California, United States",1,32.08,0
+2026-09-23,Search - Bay Area - Seller Situations,Tired Landlord,"San Jose, California, United States",1,21.95,0
+2026-09-23,Search - Bay Area - Seller Situations,Foreclosure,"San Jose, California, United States",1,44.11,0
+2026-09-23,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,32.97,0
+2026-09-24,Search - Bay Area - Sell Fast,We Buy Houses,"Hayward, California, United States",1,55.6,0
+2026-09-24,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,51.78,0
+2026-09-24,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",1,48.91,1
+2026-09-24,Search - Bay Area - Sell Fast,We Buy Houses,"Stockton, California, United States",1,65.52,0
+2026-09-24,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Concord, California, United States",1,42.28,1
+2026-09-24,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Jose, California, United States",1,35.24,0
+2026-09-24,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Francisco, California, United States",1,33.24,0
+2026-09-24,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",2,77.96,1
+2026-09-24,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",2,86.39,0
+2026-09-24,Search - Central Valley (test),We Buy Houses - Valley,"Sacramento, California, United States",1,47.2,0
+2026-09-25,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,75.67,0
+2026-09-25,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,69.23,0
+2026-09-25,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Richmond, California, United States",1,42.26,0
+2026-09-25,Search - Bay Area - Seller Situations,Inherited / Probate,"Oakland, California, United States",1,39.44,0
+2026-09-25,Search - Central Valley (test),We Buy Houses - Valley,"Stockton, California, United States",1,37.29,0
+2026-09-25,Search - Central Valley (test),We Buy Houses - Valley,"Sacramento, California, United States",1,47.17,0
+2026-09-25,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,49.97,0
+2026-09-26,Search - Bay Area - Sell Fast,We Buy Houses,"Concord, California, United States",1,65.17,1
+2026-09-26,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",1,72.19,0
+2026-09-26,Search - Bay Area - Sell Fast,We Buy Houses,"Santa Rosa, California, United States",1,41.86,1
+2026-09-26,Search - Bay Area - Sell Fast,We Buy Houses,"San Mateo, California, United States",1,63.95,0
+2026-09-26,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Sacramento, California, United States",1,33.83,0
+2026-09-26,Search - Bay Area - Seller Situations,Inherited / Probate,"San Jose, California, United States",1,36.34,0
+2026-09-26,Search - Bay Area - Seller Situations,Tired Landlord,"San Francisco, California, United States",1,35.2,1
+2026-09-26,Search - Bay Area - Seller Situations,Foreclosure,"Fremont, California, United States",1,36.13,0
+2026-09-27,Search - Bay Area - Sell Fast,We Buy Houses,"Oakland, California, United States",1,74.7,0
+2026-09-27,Search - Bay Area - Sell Fast,We Buy Houses,"San Francisco, California, United States",2,175.03,0
+2026-09-27,Search - Bay Area - Sell Fast,We Buy Houses,"Fremont, California, United States",1,67.5,0
+2026-09-27,Search - Bay Area - Sell Fast,We Buy Houses,"Stockton, California, United States",1,71.3,0
+2026-09-27,Search - Bay Area - Sell Fast,We Buy Houses,"San Jose, California, United States",3,152.14,1
+2026-09-27,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"San Jose, California, United States",1,54.92,0
+2026-09-27,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,"Fremont, California, United States",2,80.62,0
+2026-09-27,Search - Bay Area - Seller Situations,Divorce,"Santa Rosa, California, United States",1,43.39,0
+2026-09-27,Search - Central Valley (test),We Buy Houses - Valley,"Fresno, California, United States",1,49.6,0

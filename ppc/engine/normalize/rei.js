@@ -68,7 +68,7 @@ export const DEFAULT_STATUS_RULES = Object.freeze([
     'wholesaler', 'realtor', 'out of area', 'not the owner', 'duplicate', 'bad number', 'disconnected', 'sold elsewhere', 'listed with agent', 'no longer',
     'cancelled', 'canceled', 'fell through', 'terminated'] },
   { stage: 'contacted', words: ['contacted', 'attempted', 'voicemail', 'no answer', 'follow up', 'follow-up', 'nurture', 'callback', 'cold'] },
-  { stage: 'new', words: ['new'] },
+  { stage: 'new', words: ['new', 'new lead', 'new inquiry', 'fresh lead', 'unworked', 'not contacted'] },
 ]);
 
 // Lost reasons that mean the lead was never a real seller opportunity.

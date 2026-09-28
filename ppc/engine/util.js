@@ -237,7 +237,7 @@ export async function sha256Hex(text, salt = 'twin-ppc/1') {
 export function formatMoney(value) {
   if (value == null || !Number.isFinite(value)) return '—';
   const abs = Math.abs(value);
-  const digits = abs >= 100 ? 0 : 2;
+  const digits = abs >= 100 || abs < 0.005 ? 0 : 2;
   const s = abs.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
   return `${value < 0 ? '−' : ''}$${s}`;
 }

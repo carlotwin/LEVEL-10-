@@ -1,0 +1,560 @@
+Day,Search term,Campaign,Ad group,Keyword,Match type,Clicks,Cost,Conversions
+2026-06-30,we buy houses bay area,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,57.17,0
+2026-06-30,cash home buyers,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,37.13,0
+2026-06-30,sell house fast for cash fast,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,54.01,0
+2026-06-30,sell house fast for cash,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,77.68,0
+2026-06-30,sell house during divorce antioch,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,1,39.77,0
+2026-06-30,sell my house fast sacramento bay area,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,1,51.24,0
+2026-07-01,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,74.11,0
+2026-07-01,sell house fast for cash near me,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,51.22,0
+2026-07-01,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,39.15,1
+2026-07-01,sell my house fast sacramento,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,1,31.79,0
+2026-07-02,real estate license san jose,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,59.59,0
+2026-07-02,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,2,98.71,1
+2026-07-02,get a cash offer on my house,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,51.21,0
+2026-07-02,sell inherited house san francisco,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,41.22,1
+2026-07-02,sell rental property with tenants for cash,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,24.23,0
+2026-07-02,sell house before foreclosure,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,2,95.62,0
+2026-07-02,sell house during divorce san jose,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,1,28.17,0
+2026-07-02,sell my house fast sacramento,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,1,33.74,0
+2026-07-03,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,63.5,0
+2026-07-03,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,52.53,0
+2026-07-03,sell house that needs repairs near me,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,44.99,0
+2026-07-03,sell inherited house san francisco,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,49.07,0
+2026-07-03,behind on mortgage sell house,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,1,38.53,0
+2026-07-03,refinance behind on payments,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,1,44.82,0
+2026-07-03,we buy houses stockton near me,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,40,0
+2026-07-04,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,51.06,0
+2026-07-04,we buy houses san jose,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,83.63,0
+2026-07-04,sell my house fast san jose,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,57.38,0
+2026-07-04,sell house that needs repairs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,30.28,0
+2026-07-04,sell house in probate,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,1,48.11,0
+2026-07-04,sell rental property with tenants san mateo,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,28.8,0
+2026-07-04,sell house before foreclosure,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,33.81,0
+2026-07-05,sell rental property with tenants oakland,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,34.61,0
+2026-07-05,sell house before foreclosure san francisco,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,40.41,0
+2026-07-06,cash home buyers,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,51.45,0
+2026-07-06,get a cash offer on my house,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,57.38,0
+2026-07-06,sell inherited house fast,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,41.41,1
+2026-07-07,we buy houses for cash,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,63.55,0
+2026-07-07,cash home buyers,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,64.51,0
+2026-07-07,cash offer for my house fast,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,58.73,0
+2026-07-07,sell rental property with tenants,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,41.95,0
+2026-07-07,we buy houses stockton for cash,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,36.62,0
+2026-07-08,houses for rent oakland,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,63.13,0
+2026-07-08,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,62.26,0
+2026-07-08,sell house that needs repairs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,36.5,0
+2026-07-08,cash offer for my house,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,53.87,0
+2026-07-08,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,46.8,0
+2026-07-08,sell house before foreclosure,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,45.26,0
+2026-07-08,behind on mortgage sell house,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,1,31.96,0
+2026-07-08,we buy houses stockton near me,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,34.97,0
+2026-07-09,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,50.67,0
+2026-07-09,how to wholesale houses bay area,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,46.84,0
+2026-07-09,free home value estimate,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,43.21,0
+2026-07-09,sell inherited house fremont,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,32.43,0
+2026-07-09,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,59.89,0
+2026-07-09,sell house before foreclosure,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,41.44,1
+2026-07-09,mortgage relief programs,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,1,44.59,0
+2026-07-09,sell my house fast sacramento,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,1,33.75,0
+2026-07-10,cash home buyers,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,52.98,0
+2026-07-10,sell house before foreclosure,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,37.59,0
+2026-07-11,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,54.75,0
+2026-07-11,sell inherited house richmond,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,34.73,0
+2026-07-11,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,33.09,0
+2026-07-11,sell rental property with tenants,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,32.57,0
+2026-07-12,fixer upper homes for sale,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,34.56,0
+2026-07-12,get a cash offer on my house,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,37.68,0
+2026-07-12,sell inherited house san francisco,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,46.05,0
+2026-07-12,behind on mortgage sell house fast,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,1,30.61,0
+2026-07-13,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,54.87,0
+2026-07-13,we buy houses jobs,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,55.62,0
+2026-07-13,sell fixer upper house near me,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,42.72,0
+2026-07-13,sell fixer upper house san francisco,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,38.4,0
+2026-07-13,cash offer for my house fast,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,54.36,0
+2026-07-13,behind on mortgage sell house,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,1,29.28,0
+2026-07-14,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,69.15,0
+2026-07-14,we buy houses for cash,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,53.56,1
+2026-07-14,sell house as is near me,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,49.58,0
+2026-07-15,we buy houses fast,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,80.39,0
+2026-07-15,sell house fast for cash bay area,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,73.63,0
+2026-07-15,sell house that needs repairs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,32.23,0
+2026-07-15,get a cash offer on my house fast,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,35.79,0
+2026-07-15,sell inherited house san francisco for cash,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,57.66,0
+2026-07-15,sell house in probate,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,1,45.75,0
+2026-07-15,sell rental property with tenants,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,33.49,0
+2026-07-15,sell house during divorce sacramento,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,1,36.43,0
+2026-07-15,sell house during divorce,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,1,39.44,0
+2026-07-15,we buy houses stockton stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,49.36,0
+2026-07-15,we buy houses stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,45.21,0
+2026-07-16,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,91.35,0
+2026-07-16,real estate license san jose,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,48.25,0
+2026-07-16,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,3,196.57,0
+2026-07-16,sell house before foreclosure bay area,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,61.13,0
+2026-07-17,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,63.42,0
+2026-07-17,we buy houses san francisco,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,66.46,1
+2026-07-17,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,57.41,0
+2026-07-17,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,2,107.31,0
+2026-07-17,sell my house fast san jose,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,75.51,0
+2026-07-17,sell house as is bay area,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,43.33,1
+2026-07-17,sell fixer upper house oakland,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,40.05,0
+2026-07-17,get a cash offer on my house,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,36.18,0
+2026-07-17,sell inherited house san francisco for cash,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,47.46,0
+2026-07-17,sell house before foreclosure,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,34.93,0
+2026-07-18,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,69.93,0
+2026-07-18,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,84.22,1
+2026-07-18,sell my house fast near me,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,54.57,0
+2026-07-18,diy home repair costs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,46.24,0
+2026-07-18,free home value estimate,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,56.87,0
+2026-07-18,sell rental property with tenants,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,35.14,0
+2026-07-19,sell my house fast fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,68.03,0
+2026-07-19,sell fixer upper house for cash,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,49.79,0
+2026-07-19,cash offer for my house,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,48.35,0
+2026-07-19,get a cash offer on my house,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,43.03,0
+2026-07-19,get a cash offer on my house san jose,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,38.21,0
+2026-07-19,get a cash offer on my house fast,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,48.81,1
+2026-07-19,sell inherited house san francisco for cash,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,55.05,0
+2026-07-19,sell house before foreclosure,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,47.47,0
+2026-07-19,sell house before foreclosure bay area,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,45.21,0
+2026-07-20,sell house that needs repairs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,44.08,0
+2026-07-20,cash offer for my house,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,39.1,0
+2026-07-20,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,34.9,0
+2026-07-20,behind on mortgage sell house,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,1,45.34,0
+2026-07-21,sell my house fast near me,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,65.29,0
+2026-07-21,sell house fast for cash,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,65.3,0
+2026-07-21,sell house that needs repairs fast,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,55.77,1
+2026-07-21,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,46,0
+2026-07-21,sell inherited house san francisco,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,46.28,1
+2026-07-21,tired landlord sell house,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,2,57.25,0
+2026-07-21,we buy houses stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,55.66,0
+2026-07-21,cash home buyers fresno for cash,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,34.82,0
+2026-07-22,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,42.1,0
+2026-07-22,sell house fast for cash,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,71.75,0
+2026-07-22,sell house as is bay area,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,36.22,0
+2026-07-22,cash offer for my house,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,48.65,0
+2026-07-22,sell house in probate,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,1,37.15,0
+2026-07-22,rentals near me,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,24.48,0
+2026-07-22,sell house before foreclosure,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,40.57,0
+2026-07-22,sell house during divorce,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,1,39.91,1
+2026-07-22,sell my house fast sacramento bay area,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,1,31.57,0
+2026-07-22,cash home buyers fresno,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,41.49,0
+2026-07-23,houses for rent oakland,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,79.79,0
+2026-07-23,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,56.79,0
+2026-07-23,diy home repair costs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,39.61,0
+2026-07-23,sell house as is near me,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,34.17,1
+2026-07-23,sell house as is san francisco,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,42.31,0
+2026-07-23,sell house that needs repairs concord,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,42.83,1
+2026-07-24,we buy houses san francisco,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,83.89,0
+2026-07-24,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,59.51,0
+2026-07-24,we buy houses near me near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,40.64,0
+2026-07-24,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,59.16,0
+2026-07-24,sell house that needs repairs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,30.88,0
+2026-07-24,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,36.5,0
+2026-07-24,stockton jobs hiring,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,35.96,0
+2026-07-25,we buy houses near me for cash,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,78.25,0
+2026-07-25,cash home buyers,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,50.43,0
+2026-07-25,fixer upper homes for sale,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,45.01,0
+2026-07-26,how to wholesale houses bay area,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,53.53,0
+2026-07-26,diy home repair costs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,35.45,0
+2026-07-26,sell inherited house san francisco,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,42.63,1
+2026-07-26,probate house buyers,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,1,25.09,0
+2026-07-27,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,2,165.15,0
+2026-07-27,we buy houses vallejo,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,66.45,1
+2026-07-27,inheritance tax california,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,48.69,0
+2026-07-27,sell house in probate san francisco,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,1,36.23,1
+2026-07-27,sell rental property with tenants fast,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,33.86,0
+2026-07-27,behind on mortgage sell house,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,2,72.33,0
+2026-07-27,behind on mortgage sell house fremont,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,1,35.02,0
+2026-07-28,we buy houses fast,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,86.49,0
+2026-07-28,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,2,111.71,0
+2026-07-28,get a cash offer on my house,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,62.42,0
+2026-07-28,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,40.07,0
+2026-07-28,we buy houses stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,50.14,0
+2026-07-29,we buy houses for cash,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,85.03,0
+2026-07-29,cash home buyers,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,61.3,0
+2026-07-29,sell my house fast near me,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,63.4,0
+2026-07-29,sell fixer upper house,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,28.62,0
+2026-07-29,we buy houses stockton stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,47.7,1
+2026-07-29,sell my house fast sacramento bay area,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,1,34.91,0
+2026-07-29,cash home buyers fresno near me,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,33.15,0
+2026-07-30,how to wholesale houses bay area,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,2,124.03,0
+2026-07-30,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,69.64,0
+2026-07-30,sell inherited house san francisco,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,43.75,0
+2026-07-31,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,43.21,0
+2026-07-31,sell my house fast san francisco,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,68.29,0
+2026-07-31,sell house in probate,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,1,31.82,0
+2026-08-01,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,103.41,0
+2026-08-01,cash home buyers bay area,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,49.31,0
+2026-08-01,sell my house fast oakland,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,75.26,0
+2026-08-01,sell house fast for cash,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,46.99,0
+2026-08-01,sell fixer upper house,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,32.92,0
+2026-08-01,sell inherited house oakland,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,47,0
+2026-08-01,tired landlord sell house vallejo,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,1,26.28,0
+2026-08-02,sell my house fast concord,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,49.92,0
+2026-08-02,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,72.77,0
+2026-08-02,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,50.87,0
+2026-08-02,sell house that needs repairs for cash,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,30.61,0
+2026-08-02,cash offer for my house near me,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,61.74,0
+2026-08-02,probate house buyers,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,1,36.15,0
+2026-08-03,real estate license san jose,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,43.93,0
+2026-08-03,sell my house fast fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,49.02,0
+2026-08-03,cash offer for my house fast,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,47.56,0
+2026-08-03,sell inherited house san jose,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,46.28,1
+2026-08-03,sell rental property with tenants near me,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,40.11,0
+2026-08-03,we buy houses stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,35.93,1
+2026-08-04,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,74.05,0
+2026-08-04,we buy houses vallejo,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,58.25,0
+2026-08-04,we buy houses bay area,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,93.35,0
+2026-08-04,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,53.06,0
+2026-08-04,sell house fast for cash,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,68.46,0
+2026-08-04,sell house that needs repairs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,38.57,0
+2026-08-04,sell rental property with tenants,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,36.67,0
+2026-08-04,sell house before foreclosure,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,44.33,0
+2026-08-04,sell house before foreclosure near me,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,61.11,0
+2026-08-04,cash home buyers fresno for cash,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,28.97,0
+2026-08-05,cash home buyers,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,37.1,0
+2026-08-05,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,2,141.06,2
+2026-08-05,sell my house fast near me,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,67.83,0
+2026-08-05,sell rental property with tenants bay area,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,32.65,0
+2026-08-05,we buy houses stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,59.71,0
+2026-08-06,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,42.61,0
+2026-08-06,cash home buyers fresno fresno,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,32.51,0
+2026-08-07,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,91.03,1
+2026-08-07,cash home buyers near me,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,62.61,1
+2026-08-07,sell house as is near me,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,46.01,0
+2026-08-07,fixer upper homes for sale,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,35.05,0
+2026-08-07,sell house before foreclosure,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,36.41,0
+2026-08-08,houses for rent oakland,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,68.45,0
+2026-08-08,sell my house fast oakland,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,46.07,0
+2026-08-08,fixer upper homes for sale,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,57.89,0
+2026-08-08,sell house that needs repairs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,54.14,0
+2026-08-09,we buy houses san jose,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,64.62,0
+2026-08-09,we buy houses near me near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,53.47,0
+2026-08-09,real estate license san jose,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,47.25,0
+2026-08-09,sell fixer upper house,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,46.16,0
+2026-08-09,probate house buyers oakland,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,1,27.42,1
+2026-08-10,we buy houses jobs,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,84.65,0
+2026-08-10,we buy houses san francisco,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,83.39,0
+2026-08-10,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,88.55,0
+2026-08-10,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,63.28,0
+2026-08-10,houses for rent oakland,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,48.91,1
+2026-08-10,we buy houses stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,62.01,0
+2026-08-10,cash home buyers fresno,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,39.72,0
+2026-08-11,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,2,101.39,0
+2026-08-11,cash offer for my house,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,66.23,0
+2026-08-11,probate house buyers sunnyvale,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,1,37.57,0
+2026-08-11,sell house before foreclosure,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,39.35,1
+2026-08-11,sell house during divorce,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,1,59.99,0
+2026-08-12,sell my house fast vallejo,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,72.95,0
+2026-08-12,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,45.34,0
+2026-08-12,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,54.49,0
+2026-08-12,sell house as is bay area,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,51.76,0
+2026-08-12,sell fixer upper house san jose,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,37.92,0
+2026-08-12,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,2,67.99,0
+2026-08-12,cash home buyers fresno,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,36.67,0
+2026-08-13,we buy houses near me near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,46.62,1
+2026-08-13,cash home buyers near me,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,48.03,0
+2026-08-13,sell fixer upper house,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,27.34,0
+2026-08-13,cash offer for my house,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,64.59,0
+2026-08-13,cash offer for my house bay area,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,45.6,0
+2026-08-13,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,39.76,1
+2026-08-13,sell inherited house san francisco near me,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,56.27,0
+2026-08-13,we buy houses stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,50.85,1
+2026-08-13,sell my house fast sacramento fast,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,1,38.08,0
+2026-08-13,cash home buyers fresno near me,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,28.83,0
+2026-08-14,get a cash offer on my house,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,73.05,0
+2026-08-15,houses for rent oakland,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,75.2,0
+2026-08-15,cash offer for my house,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,49.91,0
+2026-08-15,get a cash offer on my house bay area,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,43.51,0
+2026-08-15,we buy houses stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,54.28,0
+2026-08-15,cash home buyers fresno for cash,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,28.36,0
+2026-08-16,cash home buyers stockton,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,46.01,0
+2026-08-16,probate house buyers,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,1,35.42,0
+2026-08-16,probate house buyers fremont,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,1,31.58,0
+2026-08-17,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,59.61,0
+2026-08-17,sell house as is near me,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,42.56,0
+2026-08-17,sell fixer upper house,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,28.59,0
+2026-08-17,sell inherited house stockton,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,28.25,0
+2026-08-17,sell inherited house san francisco,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,43.35,0
+2026-08-18,we buy houses bay area,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,70.84,1
+2026-08-18,houses for rent oakland,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,44.9,0
+2026-08-18,sell my house fast oakland,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,47.94,0
+2026-08-18,sell house fast for cash,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,40.9,0
+2026-08-18,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,36.82,0
+2026-08-18,sell fixer upper house,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,32.05,0
+2026-08-18,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,32.48,0
+2026-08-18,we buy houses stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,37.04,0
+2026-08-18,cash home buyers fresno,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,47.86,0
+2026-08-19,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,70.39,0
+2026-08-19,cash home buyers oakland,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,57.87,0
+2026-08-19,how to wholesale houses bay area,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,50.85,0
+2026-08-19,sell my house fast santa rosa,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,62.33,0
+2026-08-19,sell house fast for cash sunnyvale,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,48.83,0
+2026-08-19,sell house that needs repairs bay area,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,53.19,0
+2026-08-19,sell fixer upper house for cash,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,45.64,0
+2026-08-19,free home value estimate,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,56.57,0
+2026-08-19,probate house buyers near me,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,1,32.83,0
+2026-08-19,we buy houses stockton fast,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,44.02,0
+2026-08-20,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,75.05,0
+2026-08-20,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,61.91,0
+2026-08-20,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,54.25,0
+2026-08-20,sell my house fast for cash,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,51.04,0
+2026-08-20,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,2,78.69,0
+2026-08-20,probate attorney near me,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,39.9,0
+2026-08-20,cash home buyers fresno fresno,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,46.91,0
+2026-08-21,we buy houses bay area,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,67.69,0
+2026-08-21,real estate license san jose,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,44.72,0
+2026-08-21,sell my house fast bay area,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,73.68,0
+2026-08-21,sell my house fast fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,51.62,0
+2026-08-21,sell house as is bay area,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,40.36,0
+2026-08-21,sell house in probate bay area,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,1,32.03,0
+2026-08-21,sell rental property with tenants oakland,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,32.2,0
+2026-08-21,tired landlord sell house,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,1,29.83,0
+2026-08-21,mortgage relief programs,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,29.55,0
+2026-08-21,behind on mortgage sell house bay area,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,1,30.44,0
+2026-08-22,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,43.08,1
+2026-08-22,mortgage relief programs,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,45.49,0
+2026-08-23,sell my house fast san francisco,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,71.2,0
+2026-08-23,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,54.69,0
+2026-08-23,sell fixer upper house bay area,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,44.63,0
+2026-08-23,cash home buyers fresno,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,46.39,1
+2026-08-24,we buy houses bay area,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,84.59,0
+2026-08-24,sell my house fast san francisco,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,88.27,0
+2026-08-24,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,58.34,0
+2026-08-24,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,2,80.71,0
+2026-08-24,sell fixer upper house for cash,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,39.98,0
+2026-08-24,cash offer for my house,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,47.91,0
+2026-08-24,tired landlord sell house,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,1,34.38,0
+2026-08-24,we buy houses stockton for cash,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,47.86,0
+2026-08-25,sell my house fast fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,47.79,0
+2026-08-25,sell my house fast bay area,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,95.92,1
+2026-08-25,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,43.15,0
+2026-08-25,sell house as is fast,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,55.71,0
+2026-08-25,sell inherited house fast,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,47.32,0
+2026-08-25,mortgage relief programs,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,36.99,0
+2026-08-26,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,92.18,0
+2026-08-26,we buy houses fast,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,85.63,1
+2026-08-26,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,78.17,0
+2026-08-26,sell house that needs repairs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,30.05,0
+2026-08-26,sell fixer upper house,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,34.36,0
+2026-08-26,sell inherited house for cash,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,27.2,1
+2026-08-26,sell house during divorce,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,1,34.7,0
+2026-08-26,we buy houses stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,45.18,0
+2026-08-26,sell my house fast sacramento,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,1,31.36,0
+2026-08-27,we buy houses san francisco,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,65.19,0
+2026-08-27,we buy houses near me bay area,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,67.41,0
+2026-08-27,we buy houses near me near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,63.47,0
+2026-08-27,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,65.06,0
+2026-08-27,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,50.21,0
+2026-08-27,sell house that needs repairs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,35.73,0
+2026-08-27,sell inherited house concord,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,39.52,0
+2026-08-27,sell rental property with tenants,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,23.23,0
+2026-08-27,tired landlord sell house,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,1,36.75,0
+2026-08-27,cash home buyers fresno fast,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,44.03,0
+2026-08-28,we buy houses san francisco,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,100.33,0
+2026-08-28,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,60.61,0
+2026-08-28,sell my house fast san mateo,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,55.24,0
+2026-08-28,sell house as is fremont,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,32.26,0
+2026-08-28,sell house as is near me,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,36.28,1
+2026-08-28,sell house in probate,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,1,26.05,0
+2026-08-28,sell house before foreclosure fast,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,48.44,0
+2026-08-28,houses for rent stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,50.49,0
+2026-08-28,sell my house fast sacramento,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,1,51.46,0
+2026-08-29,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,80.86,0
+2026-08-29,sell fixer upper house,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,2,82.46,1
+2026-08-29,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,31.9,0
+2026-08-29,sell rental property with tenants,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,35.62,0
+2026-08-29,behind on mortgage sell house near me,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,1,27.14,0
+2026-08-29,cash home buyers fresno for cash,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,28.4,1
+2026-08-30,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,2,125.07,0
+2026-08-30,how to wholesale houses bay area,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,53.52,0
+2026-08-30,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,58.83,0
+2026-08-30,houses for rent oakland,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,81.5,0
+2026-08-30,sell house that needs repairs hayward,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,50.9,0
+2026-08-30,sell fixer upper house,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,45.97,0
+2026-08-30,probate attorney near me,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,1,41.36,0
+2026-08-31,cash home buyers,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,55.56,0
+2026-08-31,how to wholesale houses bay area,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,43.44,0
+2026-08-31,sell house that needs repairs near me,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,55.97,0
+2026-08-31,get a cash offer on my house,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,52.84,1
+2026-08-31,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,35.5,0
+2026-08-31,sell inherited house san francisco fast,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,42.81,0
+2026-08-31,sell rental property with tenants,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,36.97,0
+2026-08-31,sell house before foreclosure vallejo,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,47.85,0
+2026-08-31,we buy houses stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,2,88.76,0
+2026-09-01,we buy houses for cash,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,78.12,0
+2026-09-01,we buy houses fast,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,78.32,0
+2026-09-01,cash home buyers,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,76.51,0
+2026-09-01,fixer upper homes for sale,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,36.97,0
+2026-09-01,sell inherited house for cash,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,39.17,0
+2026-09-01,sell house before foreclosure,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,44.51,0
+2026-09-01,cash home buyers fresno fast,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,39.8,0
+2026-09-02,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,52.03,0
+2026-09-02,cash offer for my house,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,63.7,0
+2026-09-02,get a cash offer on my house fast,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,56.83,0
+2026-09-02,probate house buyers,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,1,34.32,0
+2026-09-03,how to wholesale houses bay area,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,74.2,0
+2026-09-03,sell my house fast oakland,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,74.33,0
+2026-09-03,sell house fast for cash,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,50.06,0
+2026-09-03,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,27.23,0
+2026-09-03,probate house buyers,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,1,38.66,0
+2026-09-03,tired landlord sell house san mateo,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,1,27.69,0
+2026-09-03,rentals near me,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,1,35.38,0
+2026-09-03,sell house during divorce,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,1,40.57,0
+2026-09-04,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,70.18,0
+2026-09-04,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,39,1
+2026-09-04,sell my house fast san francisco,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,61.4,0
+2026-09-04,cash offer for my house,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,63.08,0
+2026-09-04,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,49.24,0
+2026-09-04,sell house during divorce near me,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,1,28.66,0
+2026-09-05,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,63.51,0
+2026-09-05,sell house that needs repairs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,30.76,1
+2026-09-06,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,72.57,1
+2026-09-06,sell my house fast fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,74.12,0
+2026-09-06,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,60.78,0
+2026-09-06,real estate license san jose,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,45.98,0
+2026-09-06,sell my house fast for cash,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,61.83,0
+2026-09-06,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,50.46,0
+2026-09-06,get a cash offer on my house,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,70.37,0
+2026-09-06,free home value estimate,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,40.36,0
+2026-09-07,houses for rent oakland,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,49.64,0
+2026-09-07,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,46.49,0
+2026-09-07,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,41.96,0
+2026-09-07,probate house buyers fast,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,1,26.25,1
+2026-09-07,sell rental property with tenants,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,41.53,0
+2026-09-07,cash home buyers fresno for cash,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,47.83,0
+2026-09-08,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,52.08,1
+2026-09-08,we buy houses fast,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,48.01,0
+2026-09-08,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,2,135.43,1
+2026-09-08,cash offer for my house for cash,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,53.21,0
+2026-09-08,probate attorney near me,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,35.54,0
+2026-09-08,sell inherited house san francisco,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,45.4,0
+2026-09-08,we buy houses stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,43.13,0
+2026-09-09,sell house as is santa rosa,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,43.58,0
+2026-09-09,refinance behind on payments,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,48.25,0
+2026-09-09,houses for rent stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,58.12,0
+2026-09-09,sell my house fast sacramento sacramento,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,1,49.78,0
+2026-09-10,how to wholesale houses bay area,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,70.64,0
+2026-09-10,sell house fast for cash fast,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,48.36,0
+2026-09-10,sell house fast for cash,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,52.05,0
+2026-09-10,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,32.62,0
+2026-09-10,inheritance tax california,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,1,26.79,0
+2026-09-10,houses for rent stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,55.57,0
+2026-09-10,cash home buyers fresno fresno,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,34.5,0
+2026-09-11,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,83.04,0
+2026-09-11,we buy houses near me bay area,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,68.45,1
+2026-09-11,cash home buyers bay area,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,44.6,0
+2026-09-11,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,2,142.12,1
+2026-09-11,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,48.09,1
+2026-09-11,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,30.41,0
+2026-09-11,sell inherited house near me,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,48.21,0
+2026-09-11,probate house buyers,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,1,31.93,0
+2026-09-12,sell rental property with tenants,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,37.71,0
+2026-09-12,sell house during divorce,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,1,37.51,0
+2026-09-12,sell my house fast sacramento,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,1,36.94,0
+2026-09-13,we buy houses jobs,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,73.84,0
+2026-09-13,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,49.56,0
+2026-09-13,sell fixer upper house oakland,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,35.18,1
+2026-09-13,cash offer for my house,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,46.47,0
+2026-09-13,tired landlord sell house san jose,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,1,36.54,0
+2026-09-13,sell house before foreclosure bay area,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,33.17,1
+2026-09-14,cash home buyers,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,37.69,0
+2026-09-14,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,48.23,1
+2026-09-14,sell inherited house san francisco san francisco,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,50.54,1
+2026-09-15,cash home buyers bay area,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,55.69,0
+2026-09-15,real estate license san jose,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,65.21,0
+2026-09-15,sell my house fast san jose,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,60.5,1
+2026-09-15,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,40.03,0
+2026-09-15,cash offer for my house,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,2,120.14,0
+2026-09-15,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,2,67.25,1
+2026-09-15,tired landlord sell house,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,1,30.27,0
+2026-09-15,sell house before foreclosure for cash,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,37.7,0
+2026-09-15,behind on mortgage sell house,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,1,37.38,0
+2026-09-16,cash offer for my house,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,2,96.82,0
+2026-09-16,get a cash offer on my house san jose,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,1,41.63,0
+2026-09-16,sell inherited house near me,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,37.48,0
+2026-09-16,probate house buyers,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,1,36.78,0
+2026-09-16,sell house in probate oakland,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,1,44.69,0
+2026-09-16,we buy houses stockton near me,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,42.92,0
+2026-09-17,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,76.92,0
+2026-09-17,cash home buyers,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,36.46,0
+2026-09-17,sell house as is for cash,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,44.33,0
+2026-09-17,sell fixer upper house,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,37.97,0
+2026-09-17,cash offer for my house,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,44.94,0
+2026-09-17,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,30.17,0
+2026-09-17,sell house in probate hayward,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,1,43.23,1
+2026-09-17,behind on mortgage sell house san francisco,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,1,43.37,0
+2026-09-18,we buy houses near me fremont,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,51.15,0
+2026-09-18,cash home buyers bay area,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,39.14,0
+2026-09-18,cash home buyers,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,42.32,0
+2026-09-18,sell house fast for cash,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,68.24,0
+2026-09-19,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,65.08,0
+2026-09-19,cash offer for my house,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,44.03,0
+2026-09-19,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,28.29,1
+2026-09-19,sell inherited house near me,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,44.56,0
+2026-09-20,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,2,106.32,0
+2026-09-20,cash home buyers fast,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,36.31,0
+2026-09-20,sell house that needs repairs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,38.17,0
+2026-09-20,sell house that needs repairs near me,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,46.04,0
+2026-09-20,sell inherited house san francisco for cash,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,1,53.1,0
+2026-09-20,sell rental property with tenants oakland,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,34.31,0
+2026-09-20,tired landlord sell house,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,1,30.62,0
+2026-09-21,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,2,142.78,0
+2026-09-21,sell my house fast near me,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,72.47,1
+2026-09-21,sell inherited house for cash,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,27.35,0
+2026-09-21,sell house during divorce fast,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,1,34.28,0
+2026-09-22,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,63.56,1
+2026-09-22,we buy houses near me san mateo,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,49.76,0
+2026-09-22,sell my house fast bay area,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,67.81,0
+2026-09-22,we buy houses jobs,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,56.07,0
+2026-09-22,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,50.33,1
+2026-09-22,sell fixer upper house,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,37.16,1
+2026-09-22,cash offer for my house fast,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,1,55.73,0
+2026-09-22,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,2,75.7,0
+2026-09-22,sell rental property with tenants san jose,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,32.64,0
+2026-09-22,sell house before foreclosure for cash,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,40.02,0
+2026-09-23,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,2,132.29,0
+2026-09-23,we buy houses bay area,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,106.59,0
+2026-09-23,cash home buyers,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,37.72,0
+2026-09-23,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,52.66,0
+2026-09-23,sell fixer upper house,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,35.02,0
+2026-09-23,sell house in probate,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,1,32.08,0
+2026-09-23,tired landlord sell house san jose,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,1,21.95,0
+2026-09-23,sell house before foreclosure bay area,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,44.11,0
+2026-09-23,cash home buyers fresno,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,32.97,0
+2026-09-24,we buy houses hayward,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,55.6,0
+2026-09-24,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,1,51.78,0
+2026-09-24,sell my house fast for cash,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,48.91,1
+2026-09-24,sell house fast for cash,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,1,65.52,0
+2026-09-24,sell house as is near me,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,42.28,1
+2026-09-24,sell house as is bay area,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,35.24,0
+2026-09-24,sell fixer upper house bay area,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,33.24,0
+2026-09-24,probate attorney near me,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,39.11,0
+2026-09-24,sell inherited house,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,38.85,1
+2026-09-24,we buy houses stockton stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,37.88,0
+2026-09-24,sell my house fast sacramento,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,1,47.2,0
+2026-09-24,cash home buyers fresno,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,48.51,0
+2026-09-25,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,2,144.9,0
+2026-09-25,sell house that needs repairs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,42.26,0
+2026-09-25,sell house in probate near me,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,1,39.44,0
+2026-09-25,we buy houses stockton,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,1,37.29,0
+2026-09-25,sell my house fast sacramento,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,1,47.17,0
+2026-09-25,cash home buyers fresno fresno,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,49.97,0
+2026-09-26,we buy houses,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,2,137.36,1
+2026-09-26,cash home buyers,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,1,41.86,1
+2026-09-26,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,63.95,0
+2026-09-26,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,33.83,0
+2026-09-26,probate attorney near me,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,1,36.34,0
+2026-09-26,sell rental property with tenants,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,1,35.2,1
+2026-09-26,mortgage relief programs,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,1,36.13,0
+2026-09-27,we buy houses oakland,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,1,74.7,0
+2026-09-27,we buy houses near me,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,2,151.44,0
+2026-09-27,sell my house fast stockton,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,71.3,0
+2026-09-27,sell my house fast,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,2,152.71,1
+2026-09-27,houses for rent oakland,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,46.71,0
+2026-09-27,how to wholesale houses bay area,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,1,43.81,0
+2026-09-27,sell house as is,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,1,54.92,0
+2026-09-27,sell house that needs repairs,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,1,38.06,0
+2026-09-27,sell fixer upper house,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,1,42.56,0
+2026-09-27,sell house during divorce,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,1,43.39,0
+2026-09-27,stockton jobs hiring,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,1,49.6,0

@@ -193,6 +193,7 @@ export function keywordCityTable(model, filters = {}) {
       t.spend += r.cost || 0;
       t.googleConversions += r.conv || 0;
       if (r.est && r.est !== 'exact') t.estimatedSpend += r.cost || 0;
+      if (row.inBuyBox === false) t.outOfAreaSpend += r.cost || 0;
     }
   }
 
@@ -231,7 +232,8 @@ export function keywordCityTable(model, filters = {}) {
   for (const row of rows.values()) {
     if (leadOnly && !row.matched) continue;
     const m = computeMetrics(row.totals);
-    const decision = decide(leadOnly ? computeMetrics(row.allTotals) : m, model.settings.decision);
+    const basis = computeMetrics(leadOnly ? row.allTotals : row.totals);
+    const decision = decide({ ...basis, unknownCity: !row.city }, model.settings.decision);
     const terms = [...row.keywordIds].flatMap((id) => topTerms.get(id) || []);
     terms.sort((a, b) => b.cost - a.cost);
     out.push({
@@ -310,7 +312,7 @@ export function rollUp(model, rows, by) {
     const m = computeMetrics(g.totals);
     return {
       ...g, keywordIds: [...g.keywordIds], cities: [...g.cities], keywords: [...g.keywords], metrics: m,
-      decision: decide(computeMetrics(g.allTotals), model.settings.decision),
+      decision: decide({ ...computeMetrics(g.allTotals), unknownCity: withCity && !g.city }, model.settings.decision),
     };
   }).sort((a, b) => b.metrics.spend - a.metrics.spend);
 }

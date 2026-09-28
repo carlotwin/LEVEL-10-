@@ -1,0 +1,11 @@
+Call ID,Start Time,Caller Number,Tracking Number,Duration,Status,Source,Campaign,Keyword,City
+DEMO-CALL-1,2026-07-24 14:10,(925) 555-0114,(415) 555-0142,7:31,Answered,Google Ads,Search - Bay Area - Sell Fast,sell house that needs repairs,Concord
+DEMO-CALL-2,2026-07-26 08:10,(650) 555-0115,(415) 555-0142,6:09,Answered,Google Ads,Search - Bay Area - Seller Situations,sell inherited house san francisco,San Mateo
+DEMO-CALL-3,2026-08-10 21:10,(408) 555-0128,(415) 555-0142,1:41,Answered,Google Ads,Search - Bay Area - Sell Fast,sell house fast for cash,San Jose
+DEMO-CALL-4,2026-08-13 17:10,(510) 555-0129,(415) 555-0142,4:16,Answered,Google Ads,Search - Bay Area - Sell Fast,,San Jose
+DEMO-CALL-5,2026-08-14 16:10,(209) 555-0132,(415) 555-0142,5:55,Answered,Google Ads,Search - Central Valley (test),,Stockton
+DEMO-CALL-6,2026-08-22 11:10,(707) 555-0134,(415) 555-0142,3:35,Answered,Google Ads,Search - Bay Area - Sell Fast,we buy houses near me,Oakland
+DEMO-CALL-7,2026-09-07 11:10,(925) 555-0146,(415) 555-0142,3:39,Answered,Google Ads,Search - Bay Area - Seller Situations,,Concord
+DEMO-CALL-8,2026-09-22 13:10,(650) 555-0160,(415) 555-0142,4:27,Answered,Google Ads,Search - Bay Area - Sell Fast,sell my house fast,San Mateo
+DEMO-CALL-9,2026-09-26 12:10,(707) 555-0168,(415) 555-0142,2:41,Answered,Google Ads,Search - Bay Area - Sell Fast,,Santa Rosa
+DEMO-CALL-10,2026-09-26 19:10,(415) 555-0169,(415) 555-0142,6:18,Answered,Google Ads,Search - Bay Area - Seller Situations,sell rental property with tenants,San Francisco

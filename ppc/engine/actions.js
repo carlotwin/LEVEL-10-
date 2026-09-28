@@ -5,9 +5,10 @@
 import { normText, stableId } from './util.js';
 
 export const DEFAULT_ACTION_SETTINGS = Object.freeze({
-  windowDays: 60,       // decisions for the queue use the last N days of data
+  windowDays: 90,       // decisions for the queue use the last N days of data
   lowerBidPct: 20,      // REDUCE keyword -> lower its max CPC by this %
   raiseBidPct: 15,      // SCALE keyword -> raise max CPC / budget by this %
+  cityPausePct: 50,     // PAUSE city inside the buy box -> lower bids this much
   cityBidDownPct: 30,   // REDUCE city -> location bid adjustment
   cityBidUpPct: 20,     // SCALE city -> location bid adjustment
   minSpendForAction: 150,
@@ -109,46 +110,64 @@ export function proposeActions(model, { keywordRows = [], campaignCityRows = [],
     });
   }
 
-  // City-level (per campaign): exclude / bid adjustment.
+  // City-level (per campaign). Cities outside the buy box are excluded;
+  // cities inside it get bid adjustments (a full exclusion inside the buy
+  // box is a bigger call than the data usually supports).
   for (const c of campaignCityRows) {
-    if (!c.city || c.decision.rec === 'WATCH' || c.metrics.spend < s.minSpendForAction) continue;
+    if (!c.city || c.metrics.spend < s.minSpendForAction) continue;
     const rec = c.decision.rec;
+    const outside = c.inBuyBox === false;
+    if (!outside && rec === 'WATCH') continue;
     const geoId = geoIdFor(model, c.city, c.st);
     const campaignRes = isNumericId(c.campaignId) ? `${CUSTOMER}/campaigns/${c.campaignId}` : null;
     let type;
     let change;
     let summary;
     let op = null;
-    if (rec === 'PAUSE') {
+    if (outside) {
       type = 'exclude_location'; change = { kind: 'exclude', value: true };
-      summary = `Stop showing ${c.campaignName} ads in ${c.city}`;
+      summary = `Stop showing ${c.campaignName} ads in ${c.city} (outside the buy box)`;
       if (campaignRes && geoId) op = [{ service: 'CampaignCriterionService', create: { campaign: campaignRes, negative: true, location: { geoTargetConstant: `geoTargetConstants/${geoId}` } } }];
     } else {
-      const pct = rec === 'REDUCE' ? -s.cityBidDownPct : s.cityBidUpPct;
+      const pct = rec === 'PAUSE' ? -s.cityPausePct : rec === 'REDUCE' ? -s.cityBidDownPct : s.cityBidUpPct;
       type = 'location_bid'; change = { kind: 'bid_modifier', value: pct };
       summary = `${pct < 0 ? 'Lower' : 'Raise'} bids in ${c.city} by ${Math.abs(pct)}% for ${c.campaignName}`;
       if (campaignRes && geoId) op = [{ service: 'CampaignCriterionService', create: { campaign: campaignRes, location: { geoTargetConstant: `geoTargetConstants/${geoId}` }, bidModifier: 1 + pct / 100 }, note: 'update instead if the city is already targeted' }];
     }
     add({
-      id: stableId('act', type, c.campaignId, c.city, c.st), type, rec, summary,
+      id: stableId('act', type, c.campaignId, c.city, c.st), type, rec: outside ? 'PAUSE' : rec, summary,
       target: { campaignId: c.campaignId, campaignName: c.campaignName, city: c.city, st: c.st, geoTargetConstant: geoId },
-      change, reason: c.decision.reason, headline: c.decision.headline, facts: c.decision.facts, confidence: c.decision.confidence,
+      change, reason: c.decision.reason, headline: outside ? 'Outside buy box' : c.decision.headline, facts: c.decision.facts, confidence: c.decision.confidence,
       spend: c.metrics.spend, source: 'city', operation: op,
       manualNote: op ? '' : 'City id or campaign id not known yet (needs a Google Ads API sync); make the change by hand.',
     });
   }
 
-  // Search terms -> negative keywords (never added automatically).
+  // Search terms -> negative keywords (never added automatically). One action
+  // per campaign + negative, however many searches it would block.
+  const negatives = new Map();
   for (const f of searchTerms?.findings || []) {
     if (f.suggestion.action !== 'add_negative') continue;
+    const key = `${f.campaignId}|${f.suggestion.negative}|${f.suggestion.matchType}`;
+    let n = negatives.get(key);
+    if (!n) negatives.set(key, (n = { f, terms: [], spend: 0, clicks: 0, high: false }));
+    n.terms.push(f.term);
+    n.spend += f.spend;
+    n.clicks += f.clicks;
+    n.high = n.high || f.severity === 'high';
+  }
+  for (const { f, terms, spend, clicks, high } of negatives.values()) {
     const campaignRes = isNumericId(f.campaignId) ? `${CUSTOMER}/campaigns/${f.campaignId}` : null;
+    const shown = terms.slice(0, 3).map((t) => `"${t}"`).join(', ');
     add({
       id: stableId('act', 'add_negative', f.campaignId, f.suggestion.negative, f.suggestion.matchType), type: 'add_negative', rec: 'PAUSE',
       summary: `Add "${f.suggestion.negative}" as a ${f.suggestion.matchType.toLowerCase()} negative keyword in ${f.campaignName || 'the campaign'}`,
-      target: { campaignId: f.campaignId, campaignName: f.campaignName, term: f.term, negative: f.suggestion.negative, matchType: f.suggestion.matchType },
+      target: { campaignId: f.campaignId, campaignName: f.campaignName, terms, negative: f.suggestion.negative, matchType: f.suggestion.matchType },
       change: { kind: 'negative', value: f.suggestion.negative },
-      reason: `Search "${f.term}": ${f.reason}`, headline: f.flags[0].label, facts: [{ label: 'Spent', value: `$${Math.round(f.spend)}` }, { label: 'Clicks', value: String(f.clicks) }],
-      confidence: f.severity === 'high' ? 'high' : 'medium', spend: f.spend, source: 'search_term',
+      reason: `$${Math.round(spend)} spent on ${terms.length} search${terms.length === 1 ? '' : 'es'} like ${shown}${terms.length > 3 ? '…' : ''}. ${f.flags[0].label}: ${f.flags[0].detail}`,
+      headline: f.flags[0].label,
+      facts: [{ label: 'Spent', value: `$${Math.round(spend)}` }, { label: 'Clicks', value: String(Math.round(clicks)) }, { label: 'Searches', value: String(terms.length) }],
+      confidence: high ? 'high' : 'medium', spend, source: 'search_term',
       operation: campaignRes ? [{ service: 'CampaignCriterionService', create: { campaign: campaignRes, negative: true, keyword: { text: f.suggestion.negative, matchType: f.suggestion.matchType } } }] : null,
       manualNote: campaignRes ? '' : 'Campaign id not known yet (CSV import); add the negative by hand.',
     });
@@ -156,7 +175,8 @@ export function proposeActions(model, { keywordRows = [], campaignCityRows = [],
 
   // Landing pages.
   for (const l of landing) {
-    if (l.match !== 'poor' || l.spend < s.minSpendForAction) continue;
+    // Outside the buy box the keyword itself is the problem (see its pause).
+    if (l.match !== 'poor' || l.outsideBuyBox || l.spend < s.minSpendForAction) continue;
     const keywords = model.keywordsById ? [...model.keywordsById.values()].filter((k) => normText(k.text) === l.keyword && (!l.key || l.key.startsWith(`${k.campaignId}|`))) : [];
     if (l.betterPage) {
       const ops = keywordOperations(keywords, { kind: 'final_url', value: l.betterPage });

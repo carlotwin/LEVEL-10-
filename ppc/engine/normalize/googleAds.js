@@ -346,12 +346,41 @@ export function normalizeGaql(results) {
  * Build keyword x city x day rows from keyword/day totals, ad group (or
  * campaign) x city x day geo rows, and click locations.
  *
- * - Where exact keyword x city rows already exist for a day they are kept.
- * - Otherwise each geo row's metrics are split across the keywords of its ad
- *   group (or campaign) by that keyword's clicks in that city that day; with no
- *   click locations, by the keywords' spend share that day.
- * - Keyword spend that no geo row covers stays with city '' (unknown city).
+ * Google Ads reports spend by keyword, and by ad group + city, but never by
+ * keyword + city. For each day and ad group this fills the keyword x city
+ * grid so that every keyword's total and every city's total both match what
+ * Google reported (iterative proportional fitting), starting from where each
+ * keyword's clicks came from (click report). Without click locations it
+ * starts from the keywords' share of spend.
+ *
+ * - Exact keyword x city rows, where they exist for a day, are kept as is.
+ * - Keyword spend that no city row covers stays with city '' (unknown city).
+ * - Rows produced here are marked est: 'allocated'.
  */
+const METRICS = ['imp', 'clk', 'cost', 'conv', 'cv'];
+
+function fitGrid(rowTargets, colTargets, seed) {
+  // Iterative proportional fitting: returns x with row sums == rowTargets and
+  // column sums == colTargets (to within rounding), as close to `seed` as
+  // possible. rowTargets and colTargets must have equal totals.
+  const x = seed.map((r) => r.slice());
+  const colSum = (j) => x.reduce((a, r) => a + r[j], 0);
+  for (let iter = 0; iter < 60; iter++) {
+    for (let j = 0; j < colTargets.length; j++) {
+      const s = colSum(j);
+      if (s > 0) for (let i = 0; i < x.length; i++) x[i][j] *= colTargets[j] / s;
+    }
+    for (let i = 0; i < x.length; i++) {
+      const s = x[i].reduce((a, b) => a + b, 0);
+      if (s > 0) for (let j = 0; j < colTargets.length; j++) x[i][j] *= rowTargets[i] / s;
+    }
+    let err = 0;
+    for (let j = 0; j < colTargets.length; j++) err = Math.max(err, Math.abs(colSum(j) - colTargets[j]));
+    if (err < 1e-6) break;
+  }
+  return x;
+}
+
 export function deriveKeywordCityDaily({ keywords = [], keywordDaily = [], geoDaily = [], clicks = [], exact = [] }) {
   const out = [...exact];
   const exactDays = new Set(exact.map((r) => `${r.d}|${r.k}`));
@@ -363,7 +392,7 @@ export function deriveKeywordCityDaily({ keywords = [], keywordDaily = [], geoDa
     if (exactDays.has(`${r.d}|${r.k}`)) continue;
     const key = `${r.d}|${r.k}`;
     const cur = kwDay.get(key) || { d: r.d, k: r.k, imp: 0, clk: 0, cost: 0, conv: 0, cv: 0 };
-    cur.imp += r.imp || 0; cur.clk += r.clk || 0; cur.cost += r.cost || 0; cur.conv += r.conv || 0; cur.cv += r.cv || 0;
+    for (const m of METRICS) cur[m] += r[m] || 0;
     kwDay.set(key, cur);
   }
   // click counts per day/keyword/city
@@ -373,60 +402,92 @@ export function deriveKeywordCityDaily({ keywords = [], keywordDaily = [], geoDa
     const key = `${c.d}|${c.k}|${c.city}|${c.st || ''}`;
     clickCount.set(key, (clickCount.get(key) || 0) + 1);
   }
-  const allocated = new Map(); // `${d}|${k}` -> allocated metrics
-  const add = (row) => {
-    const key = `${row.d}|${row.k}|${row.city}|${row.st}`;
-    const prev = allocated.get(key);
-    if (prev) {
-      prev.imp += row.imp; prev.clk += row.clk; prev.cost += row.cost; prev.conv += row.conv; prev.cv += row.cv;
-    } else allocated.set(key, { ...row });
-  };
-  // keywords per (day, ad group) and (day, campaign) that had activity
+  // Keywords that had activity, per (day, ad group) and (day, campaign).
   const byDayGroup = groupBy([...kwDay.values()], (r) => `${r.d}|${kwById.get(r.k)?.adGroupId || ''}`);
   const byDayCampaign = groupBy([...kwDay.values()], (r) => `${r.d}|${kwById.get(r.k)?.campaignId || ''}`);
-  const usedCost = new Map(); // `${d}|${k}` -> cost allocated to known cities
-  // When ad-group-level city rows exist for a campaign/day, campaign-level rows
-  // for the same campaign/day would count the same spend twice: skip them.
+  // City rows per (day, ad group); campaign-level rows only where no ad group
+  // rows exist for that campaign and day (otherwise the same spend twice).
   const hasGroupLevel = new Set(geoDaily.filter((g) => g.g).map((g) => `${g.d}|${g.c}`));
-
+  const geoGroups = new Map();
   for (const g of geoDaily) {
     if (!g.city) continue;
     if (!g.g && hasGroupLevel.has(`${g.d}|${g.c}`)) continue;
-    const group = g.g ? byDayGroup.get(`${g.d}|${g.g}`) : byDayCampaign.get(`${g.d}|${g.c}`);
-    if (!group || !group.length) continue;
-    const weights = group.map((r) => clickCount.get(`${g.d}|${r.k}|${g.city}|${g.st || ''}`) || 0);
-    let total = weights.reduce((a, b) => a + b, 0);
-    let w = weights;
-    if (!total) {
-      w = group.map((r) => r.cost || r.clk || 0);
-      total = w.reduce((a, b) => a + b, 0);
+    const key = g.g ? `g|${g.d}|${g.g}` : `c|${g.d}|${g.c}`;
+    const list = geoGroups.get(key) || [];
+    list.push(g);
+    geoGroups.set(key, list);
+  }
+
+  const cells = new Map(); // `${d}|${k}|${city}|${st}` -> row
+  const cell = (d, k, city, st, est) => {
+    const key = `${d}|${k}|${city}|${st}`;
+    let row = cells.get(key);
+    if (!row) cells.set(key, (row = { d, k, city, st, imp: 0, clk: 0, cost: 0, conv: 0, cv: 0, est }));
+    return row;
+  };
+  const done = new Set(); // keyword/day fully allocated by a geo group
+  for (const [key, cityRows] of geoGroups) {
+    const [level, d, id] = key.split('|');
+    const kws = level === 'g' ? byDayGroup.get(`${d}|${id}`) : byDayCampaign.get(`${d}|${id}`);
+    if (!kws || !kws.length) continue;
+    if (level === 'c' && kws.some((r) => done.has(`${r.d}|${r.k}`))) continue;
+    // Merge duplicate city rows into one column each.
+    const cols = [];
+    const colIndex = new Map();
+    for (const g of cityRows) {
+      const ck = `${g.city}|${g.st || ''}`;
+      if (!colIndex.has(ck)) {
+        colIndex.set(ck, cols.length);
+        cols.push({ city: g.city, st: g.st || '', imp: 0, clk: 0, cost: 0, conv: 0, cv: 0 });
+      }
+      const col = cols[colIndex.get(ck)];
+      for (const m of METRICS) col[m] += g[m] || 0;
     }
-    if (!total) continue;
-    group.forEach((r, i) => {
-      const share = w[i] / total;
-      if (!share) return;
-      const row = {
-        d: g.d, k: r.k, city: g.city, st: g.st || '',
-        imp: (g.imp || 0) * share, clk: (g.clk || 0) * share, cost: (g.cost || 0) * share,
-        conv: (g.conv || 0) * share, cv: (g.cv || 0) * share, est: 'allocated',
-      };
-      add(row);
-      usedCost.set(`${g.d}|${r.k}`, (usedCost.get(`${g.d}|${r.k}`) || 0) + row.cost);
-    });
+    const located = kws.map((r) => cols.map((c) => clickCount.get(`${d}|${r.k}|${c.city}|${c.st}`) || 0));
+    const unlocated = kws.map((r, i) => Math.max(0, (r.clk || 0) - located[i].reduce((a, b) => a + b, 0)));
+    const kwWeight = kws.map((r) => r.cost || r.clk || r.imp || 0);
+    const kwTotal = kwWeight.reduce((a, b) => a + b, 0) || 1;
+    const colWeight = cols.map((c) => c.cost || c.clk || c.imp || 0);
+    const colTotal = colWeight.reduce((a, b) => a + b, 0) || 1;
+    for (const m of METRICS) {
+      const rowT = kws.map((r) => r[m] || 0);
+      const rowSum = rowT.reduce((a, b) => a + b, 0);
+      if (!rowSum) continue;
+      const colT = cols.map((c) => c[m] || 0);
+      const colSum = colT.reduce((a, b) => a + b, 0);
+      // Cities cannot hold more than the keywords spent (the extra is traffic
+      // no keyword reported); keyword spend the cities do not cover goes to
+      // an "unknown city" column.
+      const targets = colSum > rowSum ? colT.map((v) => (v * rowSum) / colSum) : colT.slice();
+      const unknown = Math.max(0, rowSum - colSum);
+      if (unknown > 0) targets.push(unknown);
+      // Seed: where each keyword's clicks came from; a small independence
+      // term lets a city with spend but no recorded clicks still be filled.
+      const seed = kws.map((r, i) => {
+        const rowSeed = cols.map((c, j) => located[i][j] + 1e-3 * (kwWeight[i] / kwTotal) * (colWeight[j] / colTotal));
+        if (unknown > 0) rowSeed.push(unlocated[i] + 1e-3 * (kwWeight[i] / kwTotal));
+        return rowSeed;
+      });
+      const x = fitGrid(rowT, targets, seed);
+      kws.forEach((r, i) => {
+        cols.forEach((c, j) => { if (x[i][j]) cell(d, r.k, c.city, c.st, 'allocated')[m] += x[i][j]; });
+        if (unknown > 0 && x[i][cols.length]) cell(d, r.k, '', '', 'no_city')[m] += x[i][cols.length];
+      });
+    }
+    for (const r of kws) done.add(`${r.d}|${r.k}`);
   }
-  for (const r of allocated.values()) {
-    out.push({ ...r, imp: Math.round(r.imp), clk: Math.round(r.clk * 100) / 100, cost: Math.round(r.cost * 100) / 100, conv: Math.round(r.conv * 100) / 100, cv: Math.round(r.cv * 100) / 100 });
+  for (const row of cells.values()) {
+    const cleaned = {
+      ...row, imp: Math.round(row.imp * 100) / 100, clk: Math.round(row.clk * 1000) / 1000, cost: Math.round(row.cost * 100) / 100,
+      conv: Math.round(row.conv * 1000) / 1000, cv: Math.round(row.cv * 100) / 100,
+    };
+    if (cleaned.cost || cleaned.clk || cleaned.imp) out.push(cleaned);
   }
-  // Remainder of keyword spend not covered by any city row -> unknown city.
+  // Keyword days that no city row covers at all -> unknown city.
   for (const r of kwDay.values()) {
-    const covered = usedCost.get(`${r.d}|${r.k}`) || 0;
-    const rest = r.cost - covered;
-    if (covered === 0) {
-      out.push({ d: r.d, k: r.k, city: '', st: '', imp: r.imp, clk: r.clk, cost: Math.round(r.cost * 100) / 100, conv: r.conv, cv: r.cv, est: 'no_city' });
-    } else if (rest > 0.5) {
-      const f = rest / r.cost;
-      out.push({ d: r.d, k: r.k, city: '', st: '', imp: Math.round(r.imp * f), clk: Math.round(r.clk * f * 100) / 100, cost: Math.round(rest * 100) / 100, conv: Math.round(r.conv * f * 100) / 100, cv: Math.round(r.cv * f * 100) / 100, est: 'no_city' });
-    }
+    if (done.has(`${r.d}|${r.k}`)) continue;
+    if (!r.cost && !r.clk && !r.imp) continue;
+    out.push({ d: r.d, k: r.k, city: '', st: '', imp: r.imp, clk: r.clk, cost: Math.round(r.cost * 100) / 100, conv: r.conv, cv: r.cv, est: 'no_city' });
   }
   return out;
 }

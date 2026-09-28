@@ -1,0 +1,591 @@
+Day,Campaign,Ad group,Keyword,Match type,GCLID,City (User location),Device
+2026-06-30,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000001,"Hayward, California, United States",desktop
+2026-06-30,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000002,"Stockton, California, United States",mobile
+2026-06-30,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000003,"Oakland, California, United States",desktop
+2026-06-30,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000004,"San Francisco, California, United States",mobile
+2026-06-30,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,DEMO0000005,"Antioch, California, United States",desktop
+2026-06-30,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,DEMO0000006,"Sacramento, California, United States",desktop
+2026-07-01,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000007,"Concord, California, United States",desktop
+2026-07-01,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000008,"San Francisco, California, United States",mobile
+2026-07-01,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000009,"Sacramento, California, United States",mobile
+2026-07-01,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,DEMO0000010,"Sacramento, California, United States",desktop
+2026-07-02,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000011,"Fremont, California, United States",tablet
+2026-07-02,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000012,"Antioch, California, United States",desktop
+2026-07-02,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000013,"San Jose, California, United States",mobile
+2026-07-02,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000014,"Fremont, California, United States",mobile
+2026-07-02,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000015,"San Francisco, California, United States",mobile
+2026-07-02,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000016,"Sunnyvale, California, United States",desktop
+2026-07-02,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000017,"Oakland, California, United States",desktop
+2026-07-02,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000018,"San Francisco, California, United States",desktop
+2026-07-02,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,DEMO0000019,"San Jose, California, United States",mobile
+2026-07-02,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,DEMO0000020,"Sacramento, California, United States",mobile
+2026-07-03,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000021,"Hayward, California, United States",desktop
+2026-07-03,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000022,"Vallejo, California, United States",mobile
+2026-07-03,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000023,"Antioch, California, United States",mobile
+2026-07-03,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000024,"San Francisco, California, United States",mobile
+2026-07-03,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,DEMO0000025,"Sunnyvale, California, United States",mobile
+2026-07-03,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,DEMO0000026,"San Mateo, California, United States",mobile
+2026-07-03,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000027,"Stockton, California, United States",desktop
+2026-07-04,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000028,"Hayward, California, United States",mobile
+2026-07-04,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000029,"San Jose, California, United States",mobile
+2026-07-04,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000030,"San Jose, California, United States",mobile
+2026-07-04,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000031,"Fremont, California, United States",mobile
+2026-07-04,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,DEMO0000032,"San Francisco, California, United States",desktop
+2026-07-04,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000033,"San Mateo, California, United States",mobile
+2026-07-04,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000034,"Oakland, California, United States",mobile
+2026-07-05,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000035,"Oakland, California, United States",desktop
+2026-07-05,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000036,"San Francisco, California, United States",tablet
+2026-07-06,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000037,"Sunnyvale, California, United States",mobile
+2026-07-06,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000038,"San Jose, California, United States",mobile
+2026-07-06,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000039,"San Jose, California, United States",desktop
+2026-07-07,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000040,"Oakland, California, United States",mobile
+2026-07-07,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000041,"San Mateo, California, United States",desktop
+2026-07-07,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000042,"Oakland, California, United States",desktop
+2026-07-07,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000043,"San Francisco, California, United States",desktop
+2026-07-07,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000044,"Stockton, California, United States",desktop
+2026-07-08,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000045,"San Jose, California, United States",desktop
+2026-07-08,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000046,"Antioch, California, United States",desktop
+2026-07-08,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000047,"Oakland, California, United States",mobile
+2026-07-08,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000048,"San Francisco, California, United States",mobile
+2026-07-08,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000049,"Oakland, California, United States",mobile
+2026-07-08,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000050,"Oakland, California, United States",mobile
+2026-07-08,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,DEMO0000051,"Sunnyvale, California, United States",desktop
+2026-07-08,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000052,"Stockton, California, United States",mobile
+2026-07-09,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000053,"Vallejo, California, United States",mobile
+2026-07-09,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000054,"Stockton, California, United States",mobile
+2026-07-09,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000055,"Hayward, California, United States",tablet
+2026-07-09,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000056,"Fremont, California, United States",mobile
+2026-07-09,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000057,"San Francisco, California, United States",mobile
+2026-07-09,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000058,"San Jose, California, United States",mobile
+2026-07-09,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,DEMO0000059,"San Francisco, California, United States",desktop
+2026-07-09,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,DEMO0000060,"Sacramento, California, United States",desktop
+2026-07-10,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000061,"San Jose, California, United States",desktop
+2026-07-10,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000062,"San Jose, California, United States",mobile
+2026-07-11,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000063,"Fremont, California, United States",desktop
+2026-07-11,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000064,"Richmond, California, United States",mobile
+2026-07-11,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000065,"San Jose, California, United States",tablet
+2026-07-11,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000066,"Oakland, California, United States",mobile
+2026-07-12,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000067,"San Jose, California, United States",mobile
+2026-07-12,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000068,"Richmond, California, United States",mobile
+2026-07-12,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000069,"San Francisco, California, United States",mobile
+2026-07-12,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,DEMO0000070,"Oakland, California, United States",mobile
+2026-07-13,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000071,"Concord, California, United States",mobile
+2026-07-13,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000072,"San Francisco, California, United States",desktop
+2026-07-13,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000073,"San Jose, California, United States",mobile
+2026-07-13,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000074,"San Francisco, California, United States",desktop
+2026-07-13,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000075,"San Mateo, California, United States",mobile
+2026-07-13,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,DEMO0000076,"San Jose, California, United States",mobile
+2026-07-14,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000077,"San Francisco, California, United States",mobile
+2026-07-14,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000078,"San Jose, California, United States",mobile
+2026-07-14,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000079,"San Francisco, California, United States",desktop
+2026-07-15,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000080,"Oakland, California, United States",mobile
+2026-07-15,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000081,"San Jose, California, United States",mobile
+2026-07-15,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000082,"Hayward, California, United States",mobile
+2026-07-15,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000083,"Hayward, California, United States",mobile
+2026-07-15,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000084,"San Francisco, California, United States",desktop
+2026-07-15,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,DEMO0000085,"Richmond, California, United States",tablet
+2026-07-15,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000086,"San Francisco, California, United States",mobile
+2026-07-15,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,DEMO0000087,"Sacramento, California, United States",mobile
+2026-07-15,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,DEMO0000088,"San Jose, California, United States",mobile
+2026-07-15,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000089,"Stockton, California, United States",desktop
+2026-07-15,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000090,"Stockton, California, United States",desktop
+2026-07-16,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000091,"San Francisco, California, United States",mobile
+2026-07-16,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000092,"San Jose, California, United States",mobile
+2026-07-16,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000093,"San Francisco, California, United States",tablet
+2026-07-16,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000094,"Richmond, California, United States",tablet
+2026-07-16,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000095,"San Jose, California, United States",desktop
+2026-07-16,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000096,"San Francisco, California, United States",mobile
+2026-07-17,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000097,"San Francisco, California, United States",desktop
+2026-07-17,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000098,"San Francisco, California, United States",mobile
+2026-07-17,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000099,"San Francisco, California, United States",mobile
+2026-07-17,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000100,"San Mateo, California, United States",mobile
+2026-07-17,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000101,"Oakland, California, United States",mobile
+2026-07-17,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000102,"San Jose, California, United States",mobile
+2026-07-17,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000103,"Oakland, California, United States",desktop
+2026-07-17,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000104,"Oakland, California, United States",mobile
+2026-07-17,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000105,"San Jose, California, United States",mobile
+2026-07-17,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000106,"San Francisco, California, United States",desktop
+2026-07-17,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000107,"Oakland, California, United States",mobile
+2026-07-18,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000108,"Vallejo, California, United States",desktop
+2026-07-18,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000109,"San Francisco, California, United States",desktop
+2026-07-18,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000110,"Fremont, California, United States",mobile
+2026-07-18,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000111,"San Jose, California, United States",mobile
+2026-07-18,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000112,"San Jose, California, United States",desktop
+2026-07-18,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000113,"Antioch, California, United States",desktop
+2026-07-19,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000114,"Concord, California, United States",desktop
+2026-07-19,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000115,"San Mateo, California, United States",mobile
+2026-07-19,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000116,"Antioch, California, United States",mobile
+2026-07-19,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000117,"San Jose, California, United States",mobile
+2026-07-19,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000118,"San Jose, California, United States",tablet
+2026-07-19,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000119,"San Francisco, California, United States",mobile
+2026-07-19,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000120,"San Francisco, California, United States",mobile
+2026-07-19,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000121,"Oakland, California, United States",mobile
+2026-07-19,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000122,"Antioch, California, United States",mobile
+2026-07-20,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000123,"San Mateo, California, United States",desktop
+2026-07-20,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000124,"San Jose, California, United States",mobile
+2026-07-20,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000125,"Richmond, California, United States",desktop
+2026-07-20,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,DEMO0000126,"Hayward, California, United States",mobile
+2026-07-21,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000127,"San Jose, California, United States",desktop
+2026-07-21,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000128,"Oakland, California, United States",mobile
+2026-07-21,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000129,"San Mateo, California, United States",mobile
+2026-07-21,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000130,"Oakland, California, United States",mobile
+2026-07-21,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000131,"San Francisco, California, United States",mobile
+2026-07-21,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,DEMO0000132,"Vallejo, California, United States",mobile
+2026-07-21,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,DEMO0000133,"Santa Rosa, California, United States",tablet
+2026-07-21,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000134,"Fresno, California, United States",mobile
+2026-07-21,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000135,"Fresno, California, United States",mobile
+2026-07-22,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000136,"Santa Rosa, California, United States",desktop
+2026-07-22,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000137,"Oakland, California, United States",mobile
+2026-07-22,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000138,"Santa Rosa, California, United States",desktop
+2026-07-22,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000139,"San Francisco, California, United States",desktop
+2026-07-22,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,DEMO0000140,"San Jose, California, United States",mobile
+2026-07-22,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000141,"Stockton, California, United States",mobile
+2026-07-22,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000142,"Oakland, California, United States",mobile
+2026-07-22,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,DEMO0000143,"Antioch, California, United States",mobile
+2026-07-22,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,DEMO0000144,"Sacramento, California, United States",mobile
+2026-07-22,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000145,"Fresno, California, United States",desktop
+2026-07-23,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000146,"Richmond, California, United States",mobile
+2026-07-23,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000147,"San Francisco, California, United States",mobile
+2026-07-23,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000148,"San Francisco, California, United States",desktop
+2026-07-23,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000149,"Oakland, California, United States",mobile
+2026-07-23,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000150,"San Francisco, California, United States",desktop
+2026-07-23,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000151,"Concord, California, United States",desktop
+2026-07-24,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000152,"San Francisco, California, United States",mobile
+2026-07-24,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000153,"Hayward, California, United States",desktop
+2026-07-24,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000154,"San Jose, California, United States",mobile
+2026-07-24,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000155,"San Francisco, California, United States",desktop
+2026-07-24,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000156,"San Jose, California, United States",mobile
+2026-07-24,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000157,"San Jose, California, United States",mobile
+2026-07-24,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000158,"Stockton, California, United States",desktop
+2026-07-25,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000159,"San Francisco, California, United States",desktop
+2026-07-25,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000160,"Fremont, California, United States",mobile
+2026-07-25,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000161,"Oakland, California, United States",mobile
+2026-07-26,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000162,"Antioch, California, United States",mobile
+2026-07-26,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000163,"Vallejo, California, United States",desktop
+2026-07-26,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000164,"San Mateo, California, United States",mobile
+2026-07-26,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,DEMO0000165,"Hayward, California, United States",desktop
+2026-07-27,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000166,"San Francisco, California, United States",tablet
+2026-07-27,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000167,"San Francisco, California, United States",desktop
+2026-07-27,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000168,"Vallejo, California, United States",mobile
+2026-07-27,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000169,"San Francisco, California, United States",mobile
+2026-07-27,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,DEMO0000170,"San Francisco, California, United States",mobile
+2026-07-27,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000171,"Concord, California, United States",mobile
+2026-07-27,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,DEMO0000172,"San Francisco, California, United States",mobile
+2026-07-27,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,DEMO0000173,"Santa Rosa, California, United States",desktop
+2026-07-27,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,DEMO0000174,"Fremont, California, United States",mobile
+2026-07-28,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000175,"San Francisco, California, United States",desktop
+2026-07-28,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000176,"Santa Rosa, California, United States",mobile
+2026-07-28,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000177,"San Francisco, California, United States",desktop
+2026-07-28,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000178,"San Francisco, California, United States",desktop
+2026-07-28,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000179,"San Jose, California, United States",mobile
+2026-07-28,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000180,"Stockton, California, United States",desktop
+2026-07-29,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000181,"San Jose, California, United States",desktop
+2026-07-29,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000182,"San Jose, California, United States",mobile
+2026-07-29,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000183,"San Jose, California, United States",mobile
+2026-07-29,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000184,"San Jose, California, United States",mobile
+2026-07-29,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000185,"Stockton, California, United States",mobile
+2026-07-29,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,DEMO0000186,"Sacramento, California, United States",mobile
+2026-07-29,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000187,"Fresno, California, United States",mobile
+2026-07-30,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000188,"San Francisco, California, United States",mobile
+2026-07-30,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000189,"San Jose, California, United States",desktop
+2026-07-30,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000190,"San Francisco, California, United States",mobile
+2026-07-30,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000191,"San Jose, California, United States",desktop
+2026-07-31,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000192,"Oakland, California, United States",mobile
+2026-07-31,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000193,"San Francisco, California, United States",mobile
+2026-07-31,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,DEMO0000194,"San Jose, California, United States",mobile
+2026-08-01,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000195,"San Francisco, California, United States",desktop
+2026-08-01,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000196,"Concord, California, United States",mobile
+2026-08-01,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000197,"Oakland, California, United States",desktop
+2026-08-01,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000198,"Oakland, California, United States",mobile
+2026-08-01,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000199,"San Francisco, California, United States",desktop
+2026-08-01,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000200,"Oakland, California, United States",mobile
+2026-08-01,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,DEMO0000201,"Vallejo, California, United States",mobile
+2026-08-02,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000202,"Concord, California, United States",tablet
+2026-08-02,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000203,"Richmond, California, United States",mobile
+2026-08-02,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000204,"Richmond, California, United States",desktop
+2026-08-02,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000205,"Fremont, California, United States",mobile
+2026-08-02,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000206,"San Mateo, California, United States",mobile
+2026-08-02,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,DEMO0000207,"Stockton, California, United States",mobile
+2026-08-03,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000208,"San Jose, California, United States",mobile
+2026-08-03,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000209,"Concord, California, United States",mobile
+2026-08-03,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000210,"San Francisco, California, United States",desktop
+2026-08-03,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000211,"San Jose, California, United States",mobile
+2026-08-03,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000212,"San Jose, California, United States",desktop
+2026-08-03,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000213,"Stockton, California, United States",mobile
+2026-08-04,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000214,"San Jose, California, United States",mobile
+2026-08-04,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000215,"Vallejo, California, United States",mobile
+2026-08-04,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000216,"San Mateo, California, United States",tablet
+2026-08-04,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000217,"San Jose, California, United States",mobile
+2026-08-04,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000218,"San Francisco, California, United States",mobile
+2026-08-04,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000219,"San Francisco, California, United States",mobile
+2026-08-04,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000220,"San Francisco, California, United States",mobile
+2026-08-04,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000221,"San Francisco, California, United States",mobile
+2026-08-04,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000222,"San Francisco, California, United States",mobile
+2026-08-04,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000223,"Fresno, California, United States",mobile
+2026-08-05,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000224,"Oakland, California, United States",mobile
+2026-08-05,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000225,"Oakland, California, United States",mobile
+2026-08-05,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000226,"Santa Rosa, California, United States",mobile
+2026-08-05,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000227,"San Francisco, California, United States",desktop
+2026-08-05,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000228,"Stockton, California, United States",desktop
+2026-08-05,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000229,"Stockton, California, United States",mobile
+2026-08-06,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000230,"San Jose, California, United States",desktop
+2026-08-06,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000231,"Fresno, California, United States",mobile
+2026-08-07,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000232,"San Francisco, California, United States",mobile
+2026-08-07,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000233,"Santa Rosa, California, United States",desktop
+2026-08-07,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000234,"Hayward, California, United States",tablet
+2026-08-07,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000235,"Hayward, California, United States",mobile
+2026-08-07,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000236,"Sunnyvale, California, United States",mobile
+2026-08-08,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000237,"San Francisco, California, United States",mobile
+2026-08-08,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000238,"Oakland, California, United States",mobile
+2026-08-08,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000239,"San Francisco, California, United States",mobile
+2026-08-08,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000240,"San Mateo, California, United States",mobile
+2026-08-09,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000241,"San Jose, California, United States",mobile
+2026-08-09,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000242,"San Jose, California, United States",mobile
+2026-08-09,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000243,"San Mateo, California, United States",desktop
+2026-08-09,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000244,"Oakland, California, United States",desktop
+2026-08-09,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,DEMO0000245,"Oakland, California, United States",mobile
+2026-08-10,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000246,"San Francisco, California, United States",mobile
+2026-08-10,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000247,"San Francisco, California, United States",desktop
+2026-08-10,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000248,"San Francisco, California, United States",mobile
+2026-08-10,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000249,"Hayward, California, United States",mobile
+2026-08-10,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000250,"San Jose, California, United States",mobile
+2026-08-10,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000251,"Stockton, California, United States",mobile
+2026-08-10,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000252,"Stockton, California, United States",desktop
+2026-08-11,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000253,"Hayward, California, United States",mobile
+2026-08-11,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000254,"San Jose, California, United States",mobile
+2026-08-11,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000255,"San Francisco, California, United States",desktop
+2026-08-11,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,DEMO0000256,"Sunnyvale, California, United States",mobile
+2026-08-11,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000257,"San Jose, California, United States",mobile
+2026-08-11,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,DEMO0000258,"San Francisco, California, United States",mobile
+2026-08-12,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000259,"Vallejo, California, United States",desktop
+2026-08-12,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000260,"Hayward, California, United States",mobile
+2026-08-12,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000261,"Vallejo, California, United States",mobile
+2026-08-12,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000262,"Vallejo, California, United States",desktop
+2026-08-12,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000263,"San Jose, California, United States",mobile
+2026-08-12,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000264,"San Jose, California, United States",mobile
+2026-08-12,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000265,"Antioch, California, United States",mobile
+2026-08-12,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000266,"Sacramento, California, United States",desktop
+2026-08-13,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000267,"San Jose, California, United States",mobile
+2026-08-13,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000268,"Oakland, California, United States",mobile
+2026-08-13,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000269,"Oakland, California, United States",mobile
+2026-08-13,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000270,"Oakland, California, United States",mobile
+2026-08-13,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000271,"San Jose, California, United States",mobile
+2026-08-13,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000272,"San Jose, California, United States",desktop
+2026-08-13,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000273,"San Jose, California, United States",mobile
+2026-08-13,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000274,"Stockton, California, United States",desktop
+2026-08-13,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,DEMO0000275,"Sacramento, California, United States",desktop
+2026-08-13,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000276,"Fresno, California, United States",mobile
+2026-08-14,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000277,"San Francisco, California, United States",mobile
+2026-08-15,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000278,"San Jose, California, United States",mobile
+2026-08-15,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000279,"Oakland, California, United States",mobile
+2026-08-15,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000280,"San Jose, California, United States",mobile
+2026-08-15,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000281,"Stockton, California, United States",mobile
+2026-08-15,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000282,"Fresno, California, United States",mobile
+2026-08-16,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000283,"Stockton, California, United States",mobile
+2026-08-16,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,DEMO0000284,"San Jose, California, United States",mobile
+2026-08-16,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,DEMO0000285,"Fremont, California, United States",desktop
+2026-08-17,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000286,"Fremont, California, United States",mobile
+2026-08-17,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000287,"Sunnyvale, California, United States",desktop
+2026-08-17,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000288,"Oakland, California, United States",mobile
+2026-08-17,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000289,"Stockton, California, United States",desktop
+2026-08-17,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000290,"San Francisco, California, United States",mobile
+2026-08-18,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000291,"San Jose, California, United States",desktop
+2026-08-18,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000292,"Fremont, California, United States",mobile
+2026-08-18,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000293,"Oakland, California, United States",mobile
+2026-08-18,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000294,"Oakland, California, United States",desktop
+2026-08-18,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000295,"Fremont, California, United States",mobile
+2026-08-18,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000296,"Oakland, California, United States",mobile
+2026-08-18,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000297,"Vallejo, California, United States",tablet
+2026-08-18,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000298,"Stockton, California, United States",mobile
+2026-08-18,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000299,"Fresno, California, United States",desktop
+2026-08-19,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000300,"Sunnyvale, California, United States",desktop
+2026-08-19,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000301,"Oakland, California, United States",desktop
+2026-08-19,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000302,"Concord, California, United States",mobile
+2026-08-19,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000303,"Santa Rosa, California, United States",mobile
+2026-08-19,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000304,"Sunnyvale, California, United States",tablet
+2026-08-19,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000305,"San Francisco, California, United States",mobile
+2026-08-19,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000306,"Fremont, California, United States",mobile
+2026-08-19,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000307,"Fremont, California, United States",desktop
+2026-08-19,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,DEMO0000308,"San Francisco, California, United States",mobile
+2026-08-19,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000309,"Stockton, California, United States",mobile
+2026-08-20,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000310,"San Francisco, California, United States",tablet
+2026-08-20,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000311,"Fremont, California, United States",tablet
+2026-08-20,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000312,"San Francisco, California, United States",mobile
+2026-08-20,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000313,"Richmond, California, United States",mobile
+2026-08-20,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000314,"Antioch, California, United States",desktop
+2026-08-20,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000315,"Oakland, California, United States",mobile
+2026-08-20,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000316,"San Francisco, California, United States",mobile
+2026-08-20,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000317,"Fresno, California, United States",mobile
+2026-08-21,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000318,"San Mateo, California, United States",desktop
+2026-08-21,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000319,"Sunnyvale, California, United States",desktop
+2026-08-21,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000320,"Oakland, California, United States",mobile
+2026-08-21,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000321,"Oakland, California, United States",desktop
+2026-08-21,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000322,"Hayward, California, United States",mobile
+2026-08-21,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,DEMO0000323,"Oakland, California, United States",desktop
+2026-08-21,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000324,"Oakland, California, United States",desktop
+2026-08-21,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,DEMO0000325,"Oakland, California, United States",desktop
+2026-08-21,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000326,"Hayward, California, United States",tablet
+2026-08-21,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,DEMO0000327,"Oakland, California, United States",mobile
+2026-08-22,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000328,"Oakland, California, United States",tablet
+2026-08-22,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000329,"San Jose, California, United States",desktop
+2026-08-23,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000330,"San Francisco, California, United States",mobile
+2026-08-23,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000331,"Concord, California, United States",desktop
+2026-08-23,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000332,"Hayward, California, United States",mobile
+2026-08-23,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000333,"Fresno, California, United States",desktop
+2026-08-24,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000334,"San Francisco, California, United States",mobile
+2026-08-24,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000335,"San Francisco, California, United States",desktop
+2026-08-24,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000336,"San Jose, California, United States",mobile
+2026-08-24,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000337,"San Francisco, California, United States",mobile
+2026-08-24,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000338,"Sunnyvale, California, United States",mobile
+2026-08-24,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000339,"Oakland, California, United States",mobile
+2026-08-24,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000340,"Sunnyvale, California, United States",mobile
+2026-08-24,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,DEMO0000341,"Antioch, California, United States",mobile
+2026-08-24,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000342,"Stockton, California, United States",desktop
+2026-08-25,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000343,"Fremont, California, United States",mobile
+2026-08-25,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000344,"San Francisco, California, United States",mobile
+2026-08-25,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000345,"San Jose, California, United States",mobile
+2026-08-25,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000346,"Hayward, California, United States",desktop
+2026-08-25,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000347,"San Jose, California, United States",mobile
+2026-08-25,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000348,"Oakland, California, United States",mobile
+2026-08-26,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000349,"San Francisco, California, United States",mobile
+2026-08-26,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000350,"San Francisco, California, United States",mobile
+2026-08-26,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000351,"San Jose, California, United States",mobile
+2026-08-26,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000352,"San Jose, California, United States",mobile
+2026-08-26,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000353,"Hayward, California, United States",desktop
+2026-08-26,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000354,"San Jose, California, United States",desktop
+2026-08-26,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,DEMO0000355,"Vallejo, California, United States",mobile
+2026-08-26,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000356,"Stockton, California, United States",mobile
+2026-08-26,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,DEMO0000357,"Stockton, California, United States",mobile
+2026-08-27,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000358,"San Francisco, California, United States",mobile
+2026-08-27,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000359,"San Jose, California, United States",desktop
+2026-08-27,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000360,"San Jose, California, United States",tablet
+2026-08-27,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000361,"Richmond, California, United States",mobile
+2026-08-27,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000362,"San Jose, California, United States",mobile
+2026-08-27,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000363,"San Francisco, California, United States",desktop
+2026-08-27,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000364,"Concord, California, United States",tablet
+2026-08-27,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000365,"Sacramento, California, United States",desktop
+2026-08-27,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,DEMO0000366,"San Francisco, California, United States",desktop
+2026-08-27,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000367,"Fresno, California, United States",mobile
+2026-08-28,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000368,"San Francisco, California, United States",mobile
+2026-08-28,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000369,"Hayward, California, United States",mobile
+2026-08-28,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000370,"San Mateo, California, United States",tablet
+2026-08-28,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000371,"Fremont, California, United States",desktop
+2026-08-28,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000372,"Oakland, California, United States",mobile
+2026-08-28,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,DEMO0000373,"Oakland, California, United States",desktop
+2026-08-28,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000374,"San Jose, California, United States",mobile
+2026-08-28,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000375,"Stockton, California, United States",mobile
+2026-08-28,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,DEMO0000376,"Sacramento, California, United States",desktop
+2026-08-29,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000377,"San Jose, California, United States",tablet
+2026-08-29,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000378,"San Francisco, California, United States",mobile
+2026-08-29,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000379,"Oakland, California, United States",mobile
+2026-08-29,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000380,"Antioch, California, United States",mobile
+2026-08-29,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000381,"Fremont, California, United States",mobile
+2026-08-29,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,DEMO0000382,"Vallejo, California, United States",mobile
+2026-08-29,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000383,"Fresno, California, United States",desktop
+2026-08-30,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000384,"Oakland, California, United States",mobile
+2026-08-30,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000385,"Richmond, California, United States",mobile
+2026-08-30,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000386,"Oakland, California, United States",mobile
+2026-08-30,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000387,"San Francisco, California, United States",desktop
+2026-08-30,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000388,"San Francisco, California, United States",mobile
+2026-08-30,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000389,"Hayward, California, United States",mobile
+2026-08-30,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000390,"Fremont, California, United States",mobile
+2026-08-30,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,DEMO0000391,"San Jose, California, United States",desktop
+2026-08-31,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000392,"Vallejo, California, United States",desktop
+2026-08-31,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000393,"Concord, California, United States",mobile
+2026-08-31,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000394,"San Francisco, California, United States",mobile
+2026-08-31,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000395,"Hayward, California, United States",mobile
+2026-08-31,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000396,"Fremont, California, United States",tablet
+2026-08-31,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000397,"San Francisco, California, United States",mobile
+2026-08-31,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000398,"Concord, California, United States",mobile
+2026-08-31,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000399,"Vallejo, California, United States",mobile
+2026-08-31,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000400,"Stockton, California, United States",desktop
+2026-08-31,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000401,"Stockton, California, United States",mobile
+2026-09-01,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000402,"San Francisco, California, United States",mobile
+2026-09-01,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000403,"San Francisco, California, United States",mobile
+2026-09-01,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000404,"San Francisco, California, United States",desktop
+2026-09-01,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000405,"Oakland, California, United States",desktop
+2026-09-01,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000406,"Richmond, California, United States",mobile
+2026-09-01,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000407,"Oakland, California, United States",mobile
+2026-09-01,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000408,"Fresno, California, United States",tablet
+2026-09-02,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000409,"Hayward, California, United States",mobile
+2026-09-02,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000410,"Antioch, California, United States",desktop
+2026-09-02,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000411,"San Mateo, California, United States",desktop
+2026-09-02,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,DEMO0000412,"San Jose, California, United States",mobile
+2026-09-03,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000413,"Hayward, California, United States",mobile
+2026-09-03,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000414,"Oakland, California, United States",mobile
+2026-09-03,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000415,"Concord, California, United States",mobile
+2026-09-03,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000416,"Fremont, California, United States",mobile
+2026-09-03,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,DEMO0000417,"San Jose, California, United States",mobile
+2026-09-03,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,DEMO0000418,"San Mateo, California, United States",desktop
+2026-09-03,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,DEMO0000419,"San Jose, California, United States",desktop
+2026-09-03,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,DEMO0000420,"Oakland, California, United States",tablet
+2026-09-04,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000421,"San Francisco, California, United States",mobile
+2026-09-04,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000422,"Hayward, California, United States",desktop
+2026-09-04,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000423,"San Francisco, California, United States",mobile
+2026-09-04,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000424,"San Jose, California, United States",desktop
+2026-09-04,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000425,"San Francisco, California, United States",mobile
+2026-09-04,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,DEMO0000426,"Stockton, California, United States",tablet
+2026-09-05,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000427,"San Jose, California, United States",mobile
+2026-09-05,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000428,"Stockton, California, United States",mobile
+2026-09-06,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000429,"San Francisco, California, United States",mobile
+2026-09-06,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000430,"San Mateo, California, United States",desktop
+2026-09-06,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000431,"San Mateo, California, United States",mobile
+2026-09-06,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000432,"San Jose, California, United States",mobile
+2026-09-06,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000433,"San Jose, California, United States",mobile
+2026-09-06,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000434,"Antioch, California, United States",mobile
+2026-09-06,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000435,"San Mateo, California, United States",mobile
+2026-09-06,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000436,"San Jose, California, United States",mobile
+2026-09-07,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000437,"Oakland, California, United States",desktop
+2026-09-07,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000438,"Richmond, California, United States",mobile
+2026-09-07,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000439,"Hayward, California, United States",desktop
+2026-09-07,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,DEMO0000440,"Concord, California, United States",tablet
+2026-09-07,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000441,"Richmond, California, United States",mobile
+2026-09-07,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000442,"Fresno, California, United States",desktop
+2026-09-08,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000443,"San Jose, California, United States",tablet
+2026-09-08,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000444,"San Jose, California, United States",desktop
+2026-09-08,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000445,"San Francisco, California, United States",mobile
+2026-09-08,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000446,"Oakland, California, United States",mobile
+2026-09-08,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000447,"Fremont, California, United States",desktop
+2026-09-08,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000448,"Oakland, California, United States",mobile
+2026-09-08,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000449,"San Francisco, California, United States",desktop
+2026-09-08,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000450,"Stockton, California, United States",mobile
+2026-09-09,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000451,"Santa Rosa, California, United States",mobile
+2026-09-09,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000452,"Fremont, California, United States",desktop
+2026-09-09,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000453,"Stockton, California, United States",desktop
+2026-09-09,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,DEMO0000454,"Sacramento, California, United States",mobile
+2026-09-10,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000455,"San Jose, California, United States",mobile
+2026-09-10,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000456,"San Jose, California, United States",tablet
+2026-09-10,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000457,"Oakland, California, United States",desktop
+2026-09-10,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000458,"Hayward, California, United States",desktop
+2026-09-10,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,DEMO0000459,"Concord, California, United States",desktop
+2026-09-10,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000460,"Stockton, California, United States",desktop
+2026-09-10,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000461,"Fresno, California, United States",tablet
+2026-09-11,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000462,"San Francisco, California, United States",mobile
+2026-09-11,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000463,"Oakland, California, United States",mobile
+2026-09-11,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000464,"San Jose, California, United States",mobile
+2026-09-11,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000465,"San Francisco, California, United States",mobile
+2026-09-11,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000466,"Stockton, California, United States",desktop
+2026-09-11,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000467,"Oakland, California, United States",mobile
+2026-09-11,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000468,"Santa Rosa, California, United States",tablet
+2026-09-11,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000469,"Fremont, California, United States",desktop
+2026-09-11,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,DEMO0000470,"San Jose, California, United States",mobile
+2026-09-12,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000471,"San Francisco, California, United States",desktop
+2026-09-12,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,DEMO0000472,"San Francisco, California, United States",mobile
+2026-09-12,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,DEMO0000473,"Sacramento, California, United States",desktop
+2026-09-13,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000474,"San Francisco, California, United States",mobile
+2026-09-13,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000475,"Fremont, California, United States",desktop
+2026-09-13,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000476,"Oakland, California, United States",desktop
+2026-09-13,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000477,"San Mateo, California, United States",mobile
+2026-09-13,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,DEMO0000478,"San Jose, California, United States",mobile
+2026-09-13,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000479,"San Jose, California, United States",mobile
+2026-09-14,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000480,"Hayward, California, United States",mobile
+2026-09-14,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000481,"San Jose, California, United States",mobile
+2026-09-14,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000482,"San Francisco, California, United States",mobile
+2026-09-15,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000483,"Oakland, California, United States",mobile
+2026-09-15,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000484,"Vallejo, California, United States",mobile
+2026-09-15,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000485,"San Jose, California, United States",mobile
+2026-09-15,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000486,"San Francisco, California, United States",mobile
+2026-09-15,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000487,"Antioch, California, United States",desktop
+2026-09-15,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000488,"Fremont, California, United States",desktop
+2026-09-15,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000489,"Oakland, California, United States",desktop
+2026-09-15,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000490,"Oakland, California, United States",desktop
+2026-09-15,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,DEMO0000491,"Fremont, California, United States",tablet
+2026-09-15,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000492,"Richmond, California, United States",mobile
+2026-09-15,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,DEMO0000493,"Oakland, California, United States",desktop
+2026-09-16,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000494,"Concord, California, United States",mobile
+2026-09-16,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000495,"San Jose, California, United States",desktop
+2026-09-16,Search - Bay Area - Sell Fast,Cash Offer,get a cash offer on my house,Exact,DEMO0000496,"San Jose, California, United States",mobile
+2026-09-16,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000497,"Oakland, California, United States",desktop
+2026-09-16,Search - Bay Area - Seller Situations,Inherited / Probate,probate house buyers,Phrase,DEMO0000498,"San Francisco, California, United States",mobile
+2026-09-16,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,DEMO0000499,"Oakland, California, United States",mobile
+2026-09-16,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000500,"Stockton, California, United States",desktop
+2026-09-17,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000501,"San Francisco, California, United States",desktop
+2026-09-17,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000502,"Fremont, California, United States",desktop
+2026-09-17,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000503,"Vallejo, California, United States",mobile
+2026-09-17,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000504,"Hayward, California, United States",tablet
+2026-09-17,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000505,"San Jose, California, United States",desktop
+2026-09-17,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000506,"Oakland, California, United States",mobile
+2026-09-17,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,DEMO0000507,"Hayward, California, United States",mobile
+2026-09-17,Search - Bay Area - Seller Situations,Foreclosure,behind on mortgage sell house,Phrase,DEMO0000508,"San Francisco, California, United States",mobile
+2026-09-18,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000509,"Fremont, California, United States",mobile
+2026-09-18,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000510,"Fremont, California, United States",desktop
+2026-09-18,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000511,"Concord, California, United States",mobile
+2026-09-18,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000512,"Antioch, California, United States",tablet
+2026-09-19,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000513,"San Jose, California, United States",mobile
+2026-09-19,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000514,"Stockton, California, United States",mobile
+2026-09-19,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000515,"Hayward, California, United States",mobile
+2026-09-19,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000516,"Oakland, California, United States",desktop
+2026-09-20,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000517,"Concord, California, United States",mobile
+2026-09-20,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000518,"Sunnyvale, California, United States",mobile
+2026-09-20,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000519,"San Jose, California, United States",mobile
+2026-09-20,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000520,"San Jose, California, United States",mobile
+2026-09-20,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000521,"Antioch, California, United States",mobile
+2026-09-20,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house san francisco,Exact,DEMO0000522,"San Francisco, California, United States",mobile
+2026-09-20,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000523,"Oakland, California, United States",mobile
+2026-09-20,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,DEMO0000524,"San Francisco, California, United States",desktop
+2026-09-21,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000525,"Oakland, California, United States",mobile
+2026-09-21,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000526,"San Jose, California, United States",mobile
+2026-09-21,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000527,"San Mateo, California, United States",mobile
+2026-09-21,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000528,"San Jose, California, United States",desktop
+2026-09-21,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,DEMO0000529,"San Jose, California, United States",desktop
+2026-09-22,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000530,"Vallejo, California, United States",mobile
+2026-09-22,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000531,"San Mateo, California, United States",mobile
+2026-09-22,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000532,"San Jose, California, United States",mobile
+2026-09-22,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000533,"San Jose, California, United States",mobile
+2026-09-22,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000534,"Antioch, California, United States",desktop
+2026-09-22,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000535,"San Francisco, California, United States",desktop
+2026-09-22,Search - Bay Area - Sell Fast,Cash Offer,cash offer for my house,Phrase,DEMO0000536,"San Jose, California, United States",desktop
+2026-09-22,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000537,"Oakland, California, United States",desktop
+2026-09-22,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000538,"San Jose, California, United States",mobile
+2026-09-22,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000539,"San Jose, California, United States",desktop
+2026-09-22,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000540,"San Francisco, California, United States",mobile
+2026-09-23,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000541,"San Jose, California, United States",desktop
+2026-09-23,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000542,"Sacramento, California, United States",desktop
+2026-09-23,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000543,"San Francisco, California, United States",mobile
+2026-09-23,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000544,"Hayward, California, United States",mobile
+2026-09-23,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000545,"Oakland, California, United States",mobile
+2026-09-23,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000546,"San Francisco, California, United States",desktop
+2026-09-23,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,DEMO0000547,"Fremont, California, United States",mobile
+2026-09-23,Search - Bay Area - Seller Situations,Tired Landlord,tired landlord sell house,Phrase,DEMO0000548,"San Jose, California, United States",desktop
+2026-09-23,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000549,"San Jose, California, United States",tablet
+2026-09-23,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000550,"Fresno, California, United States",mobile
+2026-09-24,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000551,"Hayward, California, United States",mobile
+2026-09-24,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000552,"Oakland, California, United States",mobile
+2026-09-24,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000553,"San Jose, California, United States",desktop
+2026-09-24,Search - Bay Area - Sell Fast,We Buy Houses,sell house fast for cash,Exact,DEMO0000554,"Stockton, California, United States",mobile
+2026-09-24,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000555,"Concord, California, United States",desktop
+2026-09-24,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000556,"San Jose, California, United States",mobile
+2026-09-24,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000557,"San Francisco, California, United States",mobile
+2026-09-24,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000558,"San Jose, California, United States",mobile
+2026-09-24,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000559,"San Jose, California, United States",mobile
+2026-09-24,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000560,"Stockton, California, United States",mobile
+2026-09-24,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,DEMO0000561,"Sacramento, California, United States",mobile
+2026-09-24,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000562,"Stockton, California, United States",desktop
+2026-09-25,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000563,"Oakland, California, United States",mobile
+2026-09-25,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000564,"San Francisco, California, United States",mobile
+2026-09-25,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000565,"Richmond, California, United States",mobile
+2026-09-25,Search - Bay Area - Seller Situations,Inherited / Probate,sell house in probate,Phrase,DEMO0000566,"Oakland, California, United States",desktop
+2026-09-25,Search - Central Valley (test),We Buy Houses - Valley,we buy houses stockton,Phrase,DEMO0000567,"Stockton, California, United States",tablet
+2026-09-25,Search - Central Valley (test),We Buy Houses - Valley,sell my house fast sacramento,Phrase,DEMO0000568,"Sacramento, California, United States",mobile
+2026-09-25,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000569,"Fresno, California, United States",mobile
+2026-09-26,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000570,"Concord, California, United States",mobile
+2026-09-26,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000571,"San Francisco, California, United States",mobile
+2026-09-26,Search - Bay Area - Sell Fast,We Buy Houses,cash home buyers,Phrase,DEMO0000572,"Santa Rosa, California, United States",desktop
+2026-09-26,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000573,"San Mateo, California, United States",mobile
+2026-09-26,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000574,"Sacramento, California, United States",mobile
+2026-09-26,Search - Bay Area - Seller Situations,Inherited / Probate,sell inherited house,Phrase,DEMO0000575,"San Jose, California, United States",mobile
+2026-09-26,Search - Bay Area - Seller Situations,Tired Landlord,sell rental property with tenants,Phrase,DEMO0000576,"San Francisco, California, United States",desktop
+2026-09-26,Search - Bay Area - Seller Situations,Foreclosure,sell house before foreclosure,Phrase,DEMO0000577,"Fremont, California, United States",desktop
+2026-09-27,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses,Phrase,DEMO0000578,"Oakland, California, United States",mobile
+2026-09-27,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000579,"San Francisco, California, United States",mobile
+2026-09-27,Search - Bay Area - Sell Fast,We Buy Houses,we buy houses near me,Phrase,DEMO0000580,"Fremont, California, United States",mobile
+2026-09-27,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000581,"Stockton, California, United States",mobile
+2026-09-27,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000582,"San Francisco, California, United States",desktop
+2026-09-27,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000583,"San Jose, California, United States",mobile
+2026-09-27,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000584,"San Jose, California, United States",desktop
+2026-09-27,Search - Bay Area - Sell Fast,We Buy Houses,sell my house fast,Phrase,DEMO0000585,"San Jose, California, United States",tablet
+2026-09-27,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house as is,Phrase,DEMO0000586,"San Jose, California, United States",tablet
+2026-09-27,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell house that needs repairs,Phrase,DEMO0000587,"Fremont, California, United States",tablet
+2026-09-27,Search - Bay Area - Sell Fast,Sell As-Is / Repairs,sell fixer upper house,Phrase,DEMO0000588,"Fremont, California, United States",mobile
+2026-09-27,Search - Bay Area - Seller Situations,Divorce,sell house during divorce,Phrase,DEMO0000589,"Santa Rosa, California, United States",tablet
+2026-09-27,Search - Central Valley (test),We Buy Houses - Valley,cash home buyers fresno,Phrase,DEMO0000590,"Fresno, California, United States",mobile

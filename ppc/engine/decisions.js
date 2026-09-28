@@ -24,6 +24,8 @@ export const DEFAULT_DECISION_SETTINGS = Object.freeze({
   reduceMultiplier: 1.5,         // cost above target x this -> REDUCE (between -> WATCH)
   pauseSpendNoLeads: 800,        // spend with zero leads -> PAUSE
   pauseSpendNoQualified: 1200,   // spend with leads but zero qualified -> PAUSE
+  outsideBuyBoxShare: 0.8,       // this share of spend outside the buy box -> PAUSE
+  minSpendOutsideBuyBox: 100,    // ...once at least this much was spent there
 });
 
 export const RECOMMENDATIONS = ['SCALE', 'WATCH', 'REDUCE', 'PAUSE'];
@@ -55,7 +57,7 @@ export function emptyTotals() {
     impressions: 0, clicks: 0, spend: 0, googleConversions: 0,
     leads: 0, qualified: 0, appointments: 0, offers: 0, contracts: 0, deals: 0, junk: 0,
     revenue: 0, profit: 0, dealsWithRevenue: 0, dealsWithProfit: 0,
-    attrHigh: 0, attrMedium: 0, attrLow: 0, estimatedSpend: 0,
+    attrHigh: 0, attrMedium: 0, attrLow: 0, estimatedSpend: 0, outOfAreaSpend: 0,
   };
 }
 
@@ -132,6 +134,25 @@ export function decide(m, settings = {}) {
   if (m.unattributed) {
     return out('WATCH', 'attribution', 'Attribution', 'Keyword unknown',
       'These Google Ads leads could not be tied to a keyword or city (no GCLID or UTM match). Fix tracking before judging them.');
+  }
+  if (m.unknownCity && m.leads > 0) {
+    return out('WATCH', 'attribution', 'Attribution', 'City unknown',
+      'These leads could not be placed in a city (no click location), so they are not compared with city spend. They still count in the keyword and account totals.');
+  }
+  if (m.spend <= 0 && m.leads > 0) {
+    return out('WATCH', 'attribution', 'Attribution', 'No matching spend',
+      'Leads are recorded here but there is no ad spend for this keyword and city in the date range (the click may be older than the range).');
+  }
+
+  // 0) Outside the buy box: money spent where the team does not buy.
+  const outsideShare = m.spend > 0 ? (m.outOfAreaSpend || 0) / m.spend : 0;
+  if (outsideShare >= s.outsideBuyBoxShare && m.spend >= s.minSpendOutsideBuyBox) {
+    if (m.deals > 0 && m.profitKnown && m.profit > m.spend) {
+      return out('WATCH', 'buy_box', 'Buy box', 'Outside buy box, but profitable',
+        `Outside your buy box, yet it produced ${plural(m.deals, 'profitable deal')}. Decide whether to add this area to the buy box.`);
+    }
+    return out('PAUSE', 'buy_box', 'Buy box', 'Outside buy box',
+      `${Math.round(outsideShare * 100)}% of this spend came from cities marked outside your buy box in Settings.`);
   }
 
   // 1) Profit, only when every closed deal has profit recorded.

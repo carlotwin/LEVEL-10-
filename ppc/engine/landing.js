@@ -36,6 +36,26 @@ function placeMatch(kwPlace, pagePlace) {
 }
 
 const worst = (...levels) => (levels.includes('poor') ? 'poor' : levels.includes('partial') ? 'partial' : 'good');
+const SCORE = { good: 2, partial: 1, poor: 0 };
+
+/** How well a page fits a keyword: situation, place and call to action. */
+function fit(kwIntent, kwPlace, page, situations, geo) {
+  const text = `${page.h1 || ''} ${page.title || ''} ${page.path || cleanPath(page.url)}`;
+  const pageIntent = page.situation || intentOf(text, situations);
+  const pagePlace = placeIn(text, geo);
+  const s = situationMatch(kwIntent, pageIntent);
+  const p = placeMatch(kwPlace, pagePlace);
+  const cta = String(page.cta || '').trim() ? 'good' : 'partial';
+  return { pageIntent, pagePlace, s, p, cta, score: SCORE[s] * 2 + SCORE[p] * 2 + SCORE[cta] };
+}
+
+/** Ad headlines for the keyword's ad groups (from the ad copy sync). */
+function adHeadlines(model, keywordIds) {
+  const groups = new Set(keywordIds.map((id) => model.keywordsById.get(id)?.adGroupId).filter(Boolean));
+  const out = [];
+  for (const ad of model.dataset.ads?.adCopy || []) if (groups.has(ad.adGroupId)) out.push(...(ad.headlines || []));
+  return [...new Set(out)];
+}
 
 /**
  * @param model buildModel result
@@ -58,60 +78,65 @@ export function analyzeLandingPages(model, keywordRows = []) {
     if (!row.keyword || row.keyword.startsWith('(')) continue;
     const kwIntent = intentOf(row.keyword, situations);
     const kwPlace = placeIn(row.keyword, model.geo);
+    const outsideBuyBox = kwPlace.level === 'city' && model.geo.inBuyBox(kwPlace.name, 'CA') === false;
     const urls = [...new Set(row.keywordIds.map((id) => model.keywordsById.get(id)?.finalUrl).filter(Boolean))];
     const url = urls[0] || '';
     const path = url ? cleanPath(url) : '';
     const page = path ? byPath.get(normText(path)) : null;
+    const headlines = adHeadlines(model, row.keywordIds);
     const issues = [];
     let match = 'unknown';
-    let pageIntent = null;
-    let pagePlace = { level: 'none', name: '' };
+    let current = null;
     if (!url) {
       issues.push('No landing page URL recorded for this keyword.');
     } else if (!page) {
       issues.push(`Page ${path} is not in the page list yet, so its headline could not be checked.`);
     } else {
-      const pageText = `${page.h1 || ''} ${page.title || ''} ${path}`;
-      pageIntent = page.situation || intentOf(pageText, situations);
-      pagePlace = placeIn(`${page.h1 || ''} ${page.title || ''} ${path}`, model.geo);
-      const sMatch = situationMatch(kwIntent, pageIntent);
-      const pMatch = placeMatch(kwPlace, pagePlace);
-      const ctaOk = !!String(page.cta || '').trim();
-      match = worst(sMatch, pMatch, ctaOk ? 'good' : 'partial');
-      if (sMatch === 'poor') {
-        issues.push(kwIntent !== 'general' && pageIntent === 'general'
+      current = fit(kwIntent, kwPlace, page, situations, model.geo);
+      match = worst(current.s, current.p, current.cta);
+      if (current.s === 'poor') {
+        issues.push(kwIntent !== 'general' && current.pageIntent === 'general'
           ? `The search is about "${situationLabel(kwIntent, situations)}" but the page is a general "${page.h1 || page.title}" page.`
-          : `The search is about "${situationLabel(kwIntent, situations)}" but the page is about "${situationLabel(pageIntent, situations)}".`);
-      } else if (sMatch === 'partial') {
-        issues.push(`The page is about "${situationLabel(pageIntent, situations)}", narrower than this general search.`);
+          : `The search is about "${situationLabel(kwIntent, situations)}" but the page is about "${situationLabel(current.pageIntent, situations)}".`);
+      } else if (current.s === 'partial') {
+        issues.push(`The page is about "${situationLabel(current.pageIntent, situations)}", narrower than this general search.`);
       }
-      if (pMatch === 'poor') {
+      if (current.p === 'poor') {
         issues.push(kwPlace.level === 'city'
-          ? `The search names ${kwPlace.name} but the page ${pagePlace.level === 'none' ? 'names no city' : `says "${pagePlace.name}"`}.`
+          ? `The search names ${kwPlace.name} but the page ${current.pagePlace.level === 'none' ? 'names no city' : `says "${current.pagePlace.name}"`}.`
           : 'The page does not name the area searched.');
-      } else if (pMatch === 'partial') {
-        issues.push(`The search names ${kwPlace.name}; the page only says "${pagePlace.name || 'no area'}".`);
+      } else if (current.p === 'partial') {
+        issues.push(`The search names ${kwPlace.name}; the page only says "${current.pagePlace.name || 'no area'}".`);
       }
-      if (!ctaOk) issues.push('No clear call to action found (for example "Get my cash offer").');
+      if (current.cta !== 'good') issues.push('No clear call to action found (for example "Get my cash offer").');
     }
-    // A better existing page: same situation, and same city or region.
-    const better = pages
-      .map((p) => {
-        const pi = p.situation || intentOf(`${p.h1 || ''} ${p.title || ''} ${p.path || ''}`, situations);
-        const pp = placeIn(`${p.h1 || ''} ${p.title || ''} ${p.path || ''}`, model.geo);
-        return { p, score: (pi === kwIntent ? 2 : 0) + (placeMatch(kwPlace, pp) === 'good' ? 1 : 0) + (p.cta ? 0.5 : 0) };
-      })
-      .filter((x) => x.score >= 2 && normText(cleanPath(x.p.url || x.p.path)) !== normText(path))
-      .sort((a, b) => b.score - a.score)[0]?.p || null;
+    // The ad in between: does it speak to the same situation?
+    let adMatch = headlines.length ? 'good' : 'unknown';
+    if (headlines.length && kwIntent !== 'general' && intentOf(headlines.join(' · '), situations) !== kwIntent) {
+      adMatch = 'partial';
+      issues.push(`The ad headlines ("${headlines[0]}") do not mention "${situationLabel(kwIntent, situations)}".`);
+      if (match === 'good') match = 'partial';
+    }
+    if (outsideBuyBox) issues.push(`${kwPlace.name} is outside your buy box.`);
+
+    // A better existing page must fit on every count and beat the current page.
+    const better = outsideBuyBox ? null : pages
+      .filter((p) => normText(cleanPath(p.url || p.path)) !== normText(path))
+      .map((p) => ({ p, f: fit(kwIntent, kwPlace, p, situations, model.geo) }))
+      .filter((x) => x.f.s !== 'poor' && x.f.p !== 'poor' && x.f.score > (current?.score ?? -1))
+      .sort((a, b) => b.f.score - a.f.score)[0]?.p || null;
     const want = `${kwIntent === 'general' ? 'Sell your house fast for cash' : situationLabel(kwIntent, situations)}${kwPlace.level === 'city' ? ` in ${kwPlace.name}` : kwPlace.level !== 'none' ? ` in the ${kwPlace.name}` : ''}`;
     const stats = path ? pageStats.get(normText(path)) : null;
+    let recommendation;
+    if (outsideBuyBox) recommendation = `This keyword targets ${kwPlace.name}, outside your buy box. Pause the keyword rather than building a page for it.`;
+    else if (match === 'good') recommendation = 'Good match. Keep it.';
+    else if (better) recommendation = `Send this keyword to ${better.path || better.url} ("${better.h1 || better.title}"), which matches better.`;
+    else if (match === 'unknown') recommendation = 'Add this page to the landing page list (or run the page scan) so it can be checked.';
+    else recommendation = `Use a page whose headline says "${want}" with a clear "Get my cash offer" button.`;
     results.push({
-      key: row.key, keyword: row.keyword, campaignName: row.campaignName, url, path, page,
-      keywordIntent: kwIntent, keywordPlace: kwPlace, pageIntent, pagePlace, match, issues,
-      recommendation: match === 'good' ? 'Good match. Keep it.'
-        : better ? `Send this keyword to ${better.path || better.url} ("${better.h1 || better.title}"), which matches better.`
-        : `Use a page whose headline says "${want}" with a clear "Get my cash offer" button.`,
-      wantHeadline: want,
+      key: row.key, keyword: row.keyword, campaignName: row.campaignName, url, path, page, adHeadlines: headlines, adMatch,
+      keywordIntent: kwIntent, keywordPlace: kwPlace, pageIntent: current?.pageIntent ?? null, pagePlace: current?.pagePlace ?? { level: 'none', name: '' },
+      match, issues, outsideBuyBox, recommendation, wantHeadline: want,
       betterPage: better ? (better.path || better.url) : null,
       spend: row.metrics.spend, leads: row.metrics.leads, qualified: row.metrics.qualified,
       sessions: stats?.sessions ?? null, pageConversionRate: stats ? safeDiv(stats.keyEvents, stats.sessions) : null,
