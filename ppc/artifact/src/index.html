@@ -1,0 +1,59 @@
+<title>Twin PPC Decisions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/*__CSS__*/
+</style>
+
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" role="presentation"><path d="M3 11.2 12 4l9 7.2V20a1 1 0 0 1-1 1h-5.2v-5.6H9.2V21H4a1 1 0 0 1-1-1z" fill="currentColor"/></svg>
+      </span>
+      <div class="brand-text">
+        <span class="brand-name">Twin PPC Decisions</span>
+        <span class="brand-sub">Which keyword + city is making money, and which is wasting it</span>
+      </div>
+    </div>
+    <div class="topbar-status" id="topbar-status" aria-live="polite"></div>
+  </header>
+
+  <div class="demo-banner" id="demo-banner" hidden>
+    <strong>DEMO DATA</strong>
+    <span id="demo-banner-text">Made-up numbers for illustration. No real leads, spend or people. Import or sync real data on the Data Sources page.</span>
+  </div>
+
+  <nav class="tabs" id="tabs" aria-label="Pages"></nav>
+
+  <section class="filters" id="filters" aria-label="Filters"></section>
+
+  <main class="view" id="view" tabindex="-1">
+    <div class="loading" id="boot-loading">
+      <p class="loading-title">Loading the dashboard…</p>
+      <p class="loading-sub">Money, lead quality, deals and recommendations for every keyword and city appear here in a moment.</p>
+    </div>
+  </main>
+
+  <footer class="footer" id="footer"></footer>
+</div>
+
+<aside class="drawer" id="drawer" hidden aria-modal="true" role="dialog" aria-labelledby="drawer-title">
+  <div class="drawer-panel">
+    <div class="drawer-head">
+      <h2 class="drawer-title" id="drawer-title"></h2>
+      <button class="btn btn-ghost" id="drawer-close" type="button">Close</button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+  </div>
+</aside>
+<div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+/*__ENGINE__*/
+</script>
+<script>
+/*__APP__*/
+</script>

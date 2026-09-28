@@ -161,8 +161,10 @@ export function decide(m, settings = {}) {
     const x = `$${round(perDollar, 2)}`;
     const profitLine = `${money(m.profit)} profit recorded`;
     if (perDollar >= s.profitabilityThreshold) {
-      return out('SCALE', 'profit', 'Profit (recorded)', 'Profitable',
-        `Profitable: ${profitLine}, ${x} per $1 of ad spend (target $${s.profitabilityThreshold}).`);
+      const thin = m.deals < 2 && m.spend < s.minSpend;
+      const d = out('SCALE', 'profit', 'Profit (recorded)', thin ? 'Profitable, one deal' : 'Profitable',
+        `Profitable: ${profitLine}, ${x} per $1 of ad spend (target $${s.profitabilityThreshold}).${thin ? ' One deal on little spend: a good sign, not yet a pattern. Scale in small steps.' : ''}`);
+      return thin ? { ...d, confidence: 'low' } : d;
     }
     if (perDollar >= 1) {
       return out('WATCH', 'profit', 'Profit (recorded)', 'Thin profit',

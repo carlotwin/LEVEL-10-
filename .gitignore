@@ -21,3 +21,6 @@ node_modules/
 *.swp
 .env
 .env.local
+
+# PPC dashboard build output (rebuild with npm run ppc:build)
+/ppc/artifact/dist/

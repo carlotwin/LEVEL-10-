@@ -17,7 +17,11 @@
     "verify:live": "node scripts/verify-live.js",
     "selectors:status": "node scripts/selector-status.js",
     "test": "node --test test/*.test.js ppc/test/*.test.js",
-    "ppc:test": "node --test ppc/test/*.test.js"
+    "ppc:test": "node --test ppc/test/*.test.js",
+    "ppc:e2e": "node --test --test-concurrency=1 ppc/test/e2e/*.e2e.mjs",
+    "ppc:demo": "node ppc/scripts/generate-demo.mjs",
+    "ppc:build": "node ppc/scripts/build-artifact.mjs",
+    "ppc:dashboard": "node ppc/scripts/serve-dashboard.mjs"
   },
   "dependencies": {
     "express": "^4.19.2",

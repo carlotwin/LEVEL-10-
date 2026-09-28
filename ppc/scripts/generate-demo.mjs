@@ -528,7 +528,7 @@ for (let i = 13; i >= 0; i--) {
   recordSync(ds, { id: `demo_gads_${d}`, source: 'google_ads', mode: 'api', status: 'ok', startedAt: at(d, 5), finishedAt: at(d, 5), created: 40 + (i % 7), updated: 12, message: 'Demo: Google Ads API sync (yesterday and the last 3 days re-pulled).' });
   const crawlerFailed = i === 0;
   recordSync(ds, crawlerFailed
-    ? { id: `demo_rei_${d}`, source: 'rei', mode: 'crawler', status: 'failed', startedAt: at(d, 6), finishedAt: at(d, 6), failed: 1, message: 'Demo: contact detail page layout changed; field "Lead Status" not found. Using the last good data; CSV import still works.',
+    ? { id: `demo_rei_${d}`, source: 'rei', mode: 'crawler', status: 'failed', startedAt: at(d, 6), finishedAt: at(d, 6), failed: 1, message: 'Demo: contact detail page layout changed; field "Lead Status" not found. The last good data is kept',
       errors: [{ step: 'contact.detail', selector: 'label:has-text("Lead Status") + *', message: 'Demo: timeout 15000 ms waiting for selector' }] }
     : { id: `demo_rei_${d}`, source: 'rei', mode: 'crawler', status: 'ok', startedAt: at(d, 6), finishedAt: at(d, 6), created: 2 + (i % 3), updated: 5 + (i % 4), message: 'Demo: REI crawler sync.' });
   recordSync(ds, { id: `demo_ga4_${d}`, source: 'ga4', mode: 'api', status: 'ok', startedAt: at(d, 5), finishedAt: at(d, 5), created: 30, message: 'Demo: GA4 Data API sync.' });

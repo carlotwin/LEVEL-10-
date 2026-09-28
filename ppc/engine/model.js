@@ -20,6 +20,9 @@ export function mergeSettings(settings = {}) {
     situations: settings.situations?.length ? settings.situations : DEFAULT_SITUATIONS,
     waste: { ...(settings.waste || {}) },
     alerts: { ...(settings.alerts || {}) },
+    actions: { ...(settings.actions || {}) },
+    health: { ...(settings.health || {}) },
+    retargeting: { ...(settings.retargeting || {}) },
   };
 }
 
