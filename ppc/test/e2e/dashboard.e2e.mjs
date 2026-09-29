@@ -3,7 +3,11 @@
 //   npm run ppc:e2e
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { existsSync, mkdtempSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { createDashboardServer } from '../../scripts/serve-dashboard.mjs';
 
@@ -38,8 +42,21 @@ async function open(role = 'admin', { hash = 'overview', query = '', viewport = 
 }
 const tab = (page, label) => page.click(`button.tab:has-text("${label}")`);
 
+// The sync agent writes its sync file into a folder standing in for Google Drive.
+const driveDir = mkdtempSync(path.join(tmpdir(), 'ppc-drive-'));
+function agentWritesSyncFile() {
+  const root = fileURLToPath(new URL('../../../', import.meta.url));
+  const csvs = ['google-ads-keywords-DEMO.csv', 'google-ads-locations-DEMO.csv', 'google-ads-clicks-DEMO.csv', 'rei-export-DEMO.csv'].map((f) => fileURLToPath(new URL(f, CSV_DIR)));
+  const r = spawnSync(process.execPath, ['ppc/agent/cli.js', 'import', ...csvs], {
+    cwd: root, encoding: 'utf8', env: { ...process.env, PPC_DATA_DIR: mkdtempSync(path.join(tmpdir(), 'ppc-data-')), PPC_BUNDLE_DIR: driveDir },
+  });
+  if (r.status !== 0) throw new Error(`agent import failed: ${r.stdout}${r.stderr}`);
+  return path.join(driveDir, 'twin-ppc-bundle.json');
+}
+
 test.before(async () => {
-  server = createDashboardServer();
+  agentWritesSyncFile();
+  server = createDashboardServer({ driveDirs: [fileURLToPath(CSV_DIR), driveDir] });
   await new Promise((r) => server.listen(PORT, r));
   browser = await launch();
 });
@@ -236,6 +253,24 @@ test('no page errors in any view', async () => {
   }
   await page.context().close();
   assert.deepEqual(errors, []);
+});
+
+test('full loop: the agent\'s sync file in Drive is offered to the admin and loads as live data', async () => {
+  const bundle = JSON.parse(readFileSync(path.join(driveDir, 'twin-ppc-bundle.json'), 'utf8'));
+  assert.equal(bundle.isDemo, false);
+  assert.doesNotMatch(JSON.stringify(bundle), /Demo Seller|555-01|example\.com|Demo Street/);
+  const admin = await open('admin');
+  await admin.waitForSelector('button:has-text("New sync file in Drive")', { timeout: 20000 });
+  await admin.click('button:has-text("New sync file in Drive")');
+  await admin.waitForSelector('button:has-text("Add 1 file to the dashboard")', { timeout: 20000 });
+  assert.match(await admin.textContent('.file-result'), /Dashboard dataset \(sync file\)/);
+  await admin.click('button:has-text("Add 1 file to the dashboard")');
+  await admin.waitForSelector('.note-good', { timeout: 20000 });
+  assert.match(await admin.textContent('.topbar-status'), /Live data/);
+  assert.equal(await admin.locator('button:has-text("New sync file in Drive")').count(), 0, 'no longer offered once loaded');
+  await admin.click('button:has-text("Undo last change")');
+  await admin.waitForSelector('#demo-banner:not([hidden])', { timeout: 15000 });
+  await admin.context().close();
 });
 
 // Keep the demo dataset byte-identical: the tests must not depend on local edits.

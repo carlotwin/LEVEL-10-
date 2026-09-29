@@ -21,7 +21,13 @@
     "ppc:e2e": "node --test --test-concurrency=1 ppc/test/e2e/*.e2e.mjs",
     "ppc:demo": "node ppc/scripts/generate-demo.mjs",
     "ppc:build": "node ppc/scripts/build-artifact.mjs",
-    "ppc:dashboard": "node ppc/scripts/serve-dashboard.mjs"
+    "ppc:dashboard": "node ppc/scripts/serve-dashboard.mjs",
+    "ppc:check": "node ppc/agent/cli.js check",
+    "ppc:sync": "node ppc/agent/cli.js sync",
+    "ppc:agent": "node ppc/agent/cli.js schedule",
+    "ppc:import": "node ppc/agent/cli.js import",
+    "ppc:rei-login": "node ppc/agent/cli.js rei-login",
+    "ppc:google-auth": "node ppc/agent/cli.js google-auth"
   },
   "dependencies": {
     "express": "^4.19.2",

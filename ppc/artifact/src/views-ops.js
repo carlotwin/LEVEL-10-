@@ -175,7 +175,7 @@ function importCard(a) {
   return card({ kicker: 'Import', title: 'Add files', sub: 'Each file is recognised automatically, checked, and merged. Importing the same file twice does not double anything.', body: [zone, results] });
 }
 
-/** Parse, preview, then merge + save on confirmation. files: [{name, bytes}] */
+/** Parse, preview, then merge + save on confirmation. files: [{name, bytes, driveFile?}] */
 async function runImport(files, resultsEl, a) {
   clear(resultsEl);
   const parsed = [];
@@ -185,7 +185,7 @@ async function runImport(files, resultsEl, a) {
     try {
       const text = await bytesToText(f.name, f.bytes);
       const r = await PPC.importFile({ name: f.name, text }, { settings: state.settings || {}, by: me.id || '' });
-      parsed.push({ ...r, name: f.name });
+      parsed.push({ ...r, name: f.name, driveFile: f.driveFile || null });
       clear(row);
       row.append(h('div', { class: 'file-result-head' }, h('b', {}, f.name), chip(r.label, r.part ? 'info' : 'bad'),
         r.stats?.rows != null ? h('span', { class: 'small muted' }, `${fmt.int(r.stats.rows)} rows${r.stats.leads != null ? ` · ${fmt.int(r.stats.leads)} leads` : ''}${r.stats.reportType ? ` · ${r.stats.reportType.replace('_', ' ')} report` : ''}`) : null));
@@ -218,7 +218,9 @@ async function runImport(files, resultsEl, a) {
       const leadsNew = stats.reduce((x, st) => x + (st.leads?.created || 0), 0);
       const leadsUpd = stats.reduce((x, st) => x + (st.leads?.updated || 0), 0);
       const summary = `${fmt.int(leadsNew)} new and ${fmt.int(leadsUpd)} updated leads, ${fmt.int(stats.reduce((x, st) => x + (st.ads?.rows || 0), 0))} Google Ads rows${stats.some((st) => st.replacedDemo) ? '; demo data replaced' : ''}`;
-      const pointer = await saveDataset(base, state.pointer, summary);
+      const synced = good.find((p) => (p.kind === 'dataset' || p.kind === 'gads_script') && p.driveFile);
+      const syncFile = synced ? { id: synced.driveFile.id, title: String(synced.driveFile.title || '').slice(0, 120), modifiedTime: synced.driveFile.modifiedTime || '' } : null;
+      const pointer = await saveDataset(base, state.pointer, summary, { syncFile });
       await dbWrite(() => rt.db.collection('imports').add({
         at: new Date().toISOString(), by: me.id || '', summary,
         files: good.map((p) => ({ name: String(p.name).slice(0, 120), kind: p.kind, label: p.label, rows: p.stats?.rows ?? null, warnings: p.warnings.slice(0, 3) })),
@@ -259,7 +261,7 @@ function driveCard(a) {
             const bytes = await driveDownload(f);
             status.textContent = '';
             const name = f.mimeType === 'application/vnd.google-apps.spreadsheet' ? `${f.title}.csv` : f.title;
-            await runImport([{ name, bytes }], results, a);
+            await runImport([{ name, bytes, driveFile: f }], results, a);
           } catch (err) {
             e.target.disabled = false;
             status.textContent = driveErrorText(err);
@@ -278,6 +280,20 @@ function driveCard(a) {
     }
   };
   const q = (t) => String(t).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  if (state.pendingDriveFile) {
+    const f = state.pendingDriveFile;
+    state.pendingDriveFile = null;
+    setTimeout(async () => {
+      status.textContent = `Downloading ${f.title}…`;
+      try {
+        const bytes = await driveDownload(f);
+        status.textContent = '';
+        await runImport([{ name: f.title, bytes, driveFile: f }], results, a);
+      } catch (err) {
+        status.textContent = driveErrorText(err);
+      }
+    }, 0);
+  }
   return card({
     kicker: 'Google Drive', title: 'Sync from Drive', sub: 'Uses your own Google Drive connection. Nothing is stored except the cleaned data you import.',
     body: [
@@ -330,7 +346,8 @@ function viewSettings(root, a) {
       button('Back to defaults', async () => {
         const ok = await dbWrite(() => rt.db.doc('config/settings').set({ updatedAt: new Date().toISOString(), updatedBy: me.id || '' }), 'reset settings');
         if (ok) toast('Settings reset to defaults.');
-      }, { kind: 'ghost' })) : chip('Read only', 'neutral', ROLE_HINT[me.role])));
+      }, { kind: 'ghost' }),
+      button('Download for the sync agent', () => offerDownload('settings.json', JSON.stringify(settingsWithDefaults(state.settings), null, 2)), { kind: 'ghost', title: 'Save as data/ppc/settings.json next to the sync agent, so its alerts and imports use the same rules' })) : chip('Read only', 'neutral', ROLE_HINT[me.role])));
   if (!admin) root.append(note('Only editors change settings. You can see every rule here.', 'info'));
   root.append(card({ kicker: 'Recommendations', title: 'Targets and thresholds', body: h('div', { class: 'form-grid' }, DECISION_FIELDS.map((f) => numField('decision', f, PPC.DEFAULT_DECISION_SETTINGS))) }));
   root.append(card({ kicker: 'Action Queue', title: 'What actions propose', body: h('div', { class: 'form-grid' }, ACTION_FIELDS.map((f) => numField('actions', f, PPC.DEFAULT_ACTION_SETTINGS))) }));

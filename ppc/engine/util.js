@@ -162,8 +162,8 @@ export function weekStart(dateStr) {
   return dt.toISOString().slice(0, 10);
 }
 
-export function todayUtc() {
-  return new Date().toISOString().slice(0, 10);
+export function todayUtc(date = new Date()) {
+  return date.toISOString().slice(0, 10);
 }
 
 /** Lowercase, trim, collapse spaces, strip surrounding quotes/brackets. */

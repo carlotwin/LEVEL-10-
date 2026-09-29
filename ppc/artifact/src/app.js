@@ -146,6 +146,13 @@ function renderTopbar() {
     el.append(hc);
   }
   el.append(chip(`You: ${ROLE_LABEL[me.role]}`, me.role === 'admin' ? 'info' : 'neutral', ROLE_HINT[me.role]));
+  if (state.newerDriveFile) {
+    const f = state.newerDriveFile;
+    el.append(h('button', {
+      class: 'btn btn-sm btn-primary', type: 'button', title: `${f.title} · modified ${fmt.dateTime(f.modifiedTime)}`,
+      onclick: () => { state.pendingDriveFile = f; state.newerDriveFile = null; go('sources'); },
+    }, 'New sync file in Drive: load it'));
+  }
   const banner = $('demo-banner');
   banner.hidden = !ds?.isDemo;
   $('demo-banner-text').textContent = ds?.isDemo
@@ -297,11 +304,31 @@ function renderFooter() {
     h('span', {}, 'Version 1: recommendations only. Nothing here changes Google Ads.')]);
 }
 
+// ---------------------------------------------------------------- newer sync file in Drive
+let driveChecked = false;
+async function checkDriveForNewer() {
+  if (driveChecked || !can.import() || !rt.mcp) return;
+  driveChecked = true;
+  // Never prompts: only when this viewer already allowed Google Drive here.
+  const allowed = rt.permissions ? await rt.permissions.state('mcp:Google Drive').catch(() => 'unavailable') : 'unavailable';
+  if (allowed !== 'granted') return;
+  try {
+    const files = (await driveSearch("title contains 'twin-ppc'")).filter((f) => /\.json$/i.test(f.title || ''));
+    const newest = files.sort((x, y) => String(y.modifiedTime).localeCompare(String(x.modifiedTime)))[0];
+    const last = state.pointer?.syncFile;
+    if (newest && (!last?.modifiedTime || Date.parse(newest.modifiedTime) > Date.parse(last.modifiedTime))) {
+      state.newerDriveFile = newest;
+      renderTopbar();
+    }
+  } catch { /* the Data sources page shows Drive errors when used */ }
+}
+
 // ---------------------------------------------------------------- shared state from the store
 async function onShared(kind, value) {
   switch (kind) {
     case 'pointer': {
       state.pointer = value || null;
+      setTimeout(checkDriveForNewer, 1500);
       if (value?.assetId && value.assetId !== state.loadedAssetId) {
         state.loadingShared = true;
         renderTopbar();

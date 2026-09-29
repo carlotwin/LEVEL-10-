@@ -1,0 +1,98 @@
+{
+  "_README": "Selectors for the PPC sync agent's REI BlackBook crawler (read only). login.* and list.* reuse selectors that were verified live in this account by the Level 10 app (config/reibb.selectors.json: contacts.searchInput, contacts.resultRow, contacts.openContact). Every detail.labels value is the visible label text on a contact page; labels marked in _verify still need to be checked against your account (run: npm run ppc:rei-login, open one contact, compare the labels). If REI renames a label or changes its layout, the crawler stops that field, reports the exact step and selector in Data health, and keeps the last good data; REI CSV exports remain the safe fallback. Selector syntax: one Playwright selector per value; a comma list must be CSS only (Playwright's :has-text(), :text-is() and :text-matches() are fine inside it), never mixed with text= or xpath=.",
+  "login": {
+    "emailInput": "input[type='email'], input[name='email'], input[name='username'], input[type='text']",
+    "passwordInput": "input[type='password'], input[name='password']",
+    "submitButton": "button[type='submit'], button:has-text('Log In'), button:has-text('Login'), button:has-text('Sign In'), input[type='submit']",
+    "loggedInMarker": "text=Contacts",
+    "errorMessage": ":text-matches('invalid (email|password|credentials)', 'i'), :text-matches('incorrect (email|password)', 'i')"
+  },
+  "blockers": {
+    "mfa": "input[autocomplete='one-time-code'], input[name*='otp' i], :text-matches('verification code', 'i'), :text-matches('two-factor', 'i'), :text-matches('authenticator app', 'i')",
+    "captcha": "iframe[src*='recaptcha'], iframe[src*='hcaptcha'], iframe[title*='challenge' i], .g-recaptcha, #challenge-form, :text-matches('verify you are human', 'i')"
+  },
+  "list": {
+    "url": "/contacts",
+    "pageMarker": "input[placeholder*='Search By Name' i], input[placeholder*='Search by name' i], input[placeholder*='Name, Phone' i], input[placeholder*='Search' i], input[type='search']",
+    "row": "table tbody tr, .list-row, [role='row']",
+    "link": "a[href*='/contacts/']",
+    "columns": {
+      "name": 0,
+      "propertyAddress": 1,
+      "phone": 2,
+      "email": 3,
+      "tags": 4
+    },
+    "nextPage": "a[aria-label*='next' i], button[aria-label*='next' i]:not([disabled]), button:has-text('Next'):not([disabled]), a:has-text('Next')",
+    "tagFilter": {
+      "open": "button:has-text('Tags'), :text-is('Tags')",
+      "search": "input[placeholder='Search...']",
+      "option": "text=%TAG%",
+      "apply": "button:has-text('Apply')"
+    }
+  },
+  "detail": {
+    "url": "/contacts/%ID%",
+    "pageMarker": "text=Property Address",
+    "tagChips": "[class*='tagTheme' i], span.chakra-badge[class*='tagTheme' i]",
+    "labels": {
+      "name": "Name",
+      "phone": "Phone (Mobile)",
+      "email": "Email",
+      "address": "Property Address",
+      "status": "Lead Status",
+      "leadSource": "Lead Source",
+      "motivation": "Motivation",
+      "createdAt": "Created",
+      "updatedAt": "Last Updated",
+      "appointmentAt": "Appointment Date",
+      "offerAt": "Offer Date",
+      "offerAmount": "Offer Amount",
+      "contractAt": "Contract Date",
+      "closedAt": "Closed Date",
+      "lostReason": "Lost Reason",
+      "revenue": "Revenue",
+      "profit": "Profit",
+      "gclid": "GCLID",
+      "utmSource": "UTM Source",
+      "utmMedium": "UTM Medium",
+      "utmCampaign": "UTM Campaign",
+      "utmTerm": "UTM Term"
+    },
+    "required": [
+      "status"
+    ]
+  },
+  "_verify": [
+    "detail.labels.status",
+    "detail.labels.leadSource",
+    "detail.labels.motivation",
+    "detail.labels.createdAt",
+    "detail.labels.updatedAt",
+    "detail.labels.appointmentAt",
+    "detail.labels.offerAt",
+    "detail.labels.offerAmount",
+    "detail.labels.contractAt",
+    "detail.labels.closedAt",
+    "detail.labels.lostReason",
+    "detail.labels.revenue",
+    "detail.labels.profit",
+    "detail.labels.gclid",
+    "detail.labels.utmSource",
+    "detail.labels.utmMedium",
+    "detail.labels.utmCampaign",
+    "detail.labels.utmTerm",
+    "detail.pageMarker",
+    "list.nextPage",
+    "list.columns"
+  ],
+  "_verifiedLive": [
+    "login.loggedInMarker",
+    "list.pageMarker",
+    "list.row",
+    "list.link",
+    "detail.labels.name",
+    "detail.labels.phone",
+    "detail.labels.address"
+  ]
+}

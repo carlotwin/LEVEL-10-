@@ -111,7 +111,7 @@ async function loadSharedDataset(pointer) {
 }
 
 /** Store a new dataset version (admins). Keeps one step of undo. */
-async function saveDataset(ds, previousPointer, note) {
+async function saveDataset(ds, previousPointer, note, { syncFile } = {}) {
   const v = PPC.validateDataset(ds);
   if (!v.ok) throw new Error(v.errors.join(' '));
   if (!rt.assets) throw new Error('Uploading needs editor access to this dashboard.');
@@ -121,6 +121,8 @@ async function saveDataset(ds, previousPointer, note) {
     assetId: up.id, previousAssetId: previousPointer?.assetId || null, isDemo: !!ds.isDemo,
     uploadedAt: new Date().toISOString(), uploadedBy: me.id || '', note: String(note || '').slice(0, 200),
     summary: PPC.summarizeDataset(ds), schema: PPC.DATASET_SCHEMA, engine: PPC.ENGINE_VERSION,
+    // The last agent sync file loaded (so a newer one can be offered).
+    syncFile: syncFile || previousPointer?.syncFile || null,
   };
   const ok = await dbWrite(() => rt.db.doc('config/dataset').set(pointer), 'save the data');
   if (!ok) {
@@ -148,14 +150,14 @@ async function undoDataset(pointer) {
   return dbWrite(() => rt.db.doc('config/dataset').set({
     assetId: backId, previousAssetId: pointer.assetId || null, isDemo: !backId || !!back?.isDemo, uploadedAt: new Date().toISOString(),
     uploadedBy: me.id || '', note: backId ? 'Restored the previous version' : 'Back to demo data',
-    summary: back ? PPC.summarizeDataset(back) : null, schema: PPC.DATASET_SCHEMA, engine: PPC.ENGINE_VERSION,
+    summary: back ? PPC.summarizeDataset(back) : null, schema: PPC.DATASET_SCHEMA, engine: PPC.ENGINE_VERSION, syncFile: pointer.syncFile || null,
   }), 'restore the previous data');
 }
 
 async function useDemoData(pointer) {
   const ok = await dbWrite(() => rt.db.doc('config/dataset').set({
     assetId: null, previousAssetId: pointer?.assetId || null, isDemo: true, uploadedAt: new Date().toISOString(),
-    uploadedBy: me.id || '', note: 'Switched to demo data', summary: null, schema: PPC.DATASET_SCHEMA, engine: PPC.ENGINE_VERSION,
+    uploadedBy: me.id || '', note: 'Switched to demo data', summary: null, schema: PPC.DATASET_SCHEMA, engine: PPC.ENGINE_VERSION, syncFile: pointer?.syncFile || null,
   }), 'switch to demo data');
   // The version before the current one drops out of the undo chain.
   const dropped = pointer?.previousAssetId;
