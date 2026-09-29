@@ -215,9 +215,14 @@ async function driveCall(tool, input) {
     }
   }
 }
+const FOLDER_MIME = 'application/vnd.google-apps.folder';
+const SHEET_MIME = 'application/vnd.google-apps.spreadsheet';
+// Only what the importer can read: uploaded files (CSV, Excel, JSON) and Google
+// Sheets (downloaded as CSV). Folders, Docs, Slides and shortcuts are left out.
+const importable = (f) => !!f?.id && (f.mimeType === SHEET_MIME || !String(f.mimeType || '').startsWith('application/vnd.google-apps.'));
 async function driveSearch(query) {
-  const p = await driveCall('search_files', { query, pageSize: 20, excludeContentSnippets: true });
-  return Array.isArray(p?.files) ? p.files : [];
+  const p = await driveCall('search_files', { query: `(${query}) and mimeType != '${FOLDER_MIME}'`, pageSize: 20, excludeContentSnippets: true });
+  return Array.isArray(p?.files) ? p.files.filter(importable) : [];
 }
 function base64ToBytes(b64) {
   const bin = atob(String(b64).replace(/\s+/g, ''));
@@ -227,7 +232,7 @@ function base64ToBytes(b64) {
 }
 async function driveDownload(file) {
   const input = { fileId: file.id };
-  if (file.mimeType === 'application/vnd.google-apps.spreadsheet') input.exportMimeType = 'text/csv';
+  if (file.mimeType === SHEET_MIME) input.exportMimeType = 'text/csv';
   const p = await driveCall('download_file_content', input);
   if (!p || typeof p.content !== 'string') throw Object.assign(new Error('Google Drive returned no file content.'), { code: 'tool_error', message: 'no file content returned' });
   return base64ToBytes(p.content);

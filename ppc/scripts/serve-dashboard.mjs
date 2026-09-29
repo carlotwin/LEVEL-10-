@@ -16,6 +16,14 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const ppc = path.resolve(here, '..');
 const arg = (name, dflt) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split('=')[1] ?? dflt;
 
+// Google-native entries like the ones a real Drive search returns: a folder
+// (the page's query excludes folders) and a Google Doc (the page leaves out
+// what it cannot import). Neither can be downloaded here.
+const DRIVE_NATIVE = [
+  { id: 'mock-folder', title: 'landing-pages archive', mimeType: 'application/vnd.google-apps.folder', modifiedTime: '2026-01-05T17:00:00.000Z' },
+  { id: 'mock-doc', title: 'landing-pages notes', mimeType: 'application/vnd.google-apps.document', modifiedTime: '2026-01-05T17:00:00.000Z' },
+];
+
 export function createDashboardServer({ driveDirs = [path.join(ppc, 'demo/csv'), path.join(ppc, '..', 'data/ppc/out')] } = {}) {
   let page = buildPage();
   const docs = new Map(); // path -> {data, version}
@@ -107,7 +115,10 @@ export function createDashboardServer({ driveDirs = [path.join(ppc, 'demo/csv'),
         const input = JSON.parse((await readBody(req)).toString() || '{}');
         const m = /title contains '((?:[^'\\]|\\.)*)'/.exec(input.query || '');
         const needle = (m ? m[1].replace(/\\(.)/g, '$1') : '').toLowerCase();
-        const files = driveFiles().filter((f) => f.title.toLowerCase().includes(needle)).map(({ full, ...f }) => f);
+        const excluded = [...(input.query || '').matchAll(/mimeType != '([^']*)'/g)].map((x) => x[1]);
+        const files = [...driveFiles(), ...DRIVE_NATIVE]
+          .filter((f) => f.title.toLowerCase().includes(needle) && !excluded.includes(f.mimeType))
+          .map(({ full, ...f }) => f);
         return send(res, 200, { files });
       }
       if (p === '/__mock/drive/download_file_content') {

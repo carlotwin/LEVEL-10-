@@ -215,6 +215,8 @@ test('Google Drive: find sync files and import one; connector errors explain the
   await admin.fill('#drive-search', 'landing-pages');
   await admin.click('#drive-search-go');
   await admin.waitForSelector('.list-row:has-text("landing-pages-DEMO.csv") button:has-text("Import")');
+  assert.equal(await admin.locator('.list-row:has-text("landing-pages archive")').count(), 0, 'folders are not offered');
+  assert.equal(await admin.locator('.list-row:has-text("landing-pages notes")').count(), 0, 'Google Docs are not offered');
   await admin.click('.list-row:has-text("landing-pages-DEMO.csv") button:has-text("Import")');
   await admin.waitForSelector('.file-result:has-text("Landing page list")', { timeout: 15000 });
   await admin.context().close();
